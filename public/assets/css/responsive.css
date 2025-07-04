@@ -1,0 +1,1739 @@
+/*
+ * EKSTENSI CSS RESPONSIF
+ * Menambahkan perbaikan desain responsif ke app.css
+ * File ini harus disertakan setelah app.css
+ */
+
+/* Penyesuaian responsif global */
+html {
+    overflow-x: hidden;
+}
+
+body {
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Responsivitas tabel yang lebih baik */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 100%;
+    padding: 0 !important; /* Remove padding that might cause misalignment */
+}
+
+/* Ensure tables take full width of their container */
+.table-responsive table {
+    width: 100% !important;
+    min-width: 100%;
+}
+
+/* Ensure card content is properly aligned */
+.content-data {
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Make sure data containers match cards width */
+.data {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Fix for DataTables alignment */
+div.dataTables_wrapper {
+    width: 100% !important;
+    margin: 0 auto;
+}
+
+/* Override any automatic width calculations from DataTables */
+table.dataTable {
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+/* Make sure tab-pane content is properly contained */
+.tab-pane {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Ensure card containers don't overflow */
+.card {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Fix for padding inconsistencies */
+.p-3 {
+    padding: 1rem !important;
+}
+
+/* Responsivitas form yang lebih baik */
+input, select, textarea {
+    max-width: 100%;
+}
+
+/* Tata letak kartu responsif */
+.info-data {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Kelas khusus untuk form filter */
+.filter-form {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin-top: 10px !important;
+}
+
+.filter-form select {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    max-width: none !important;
+}
+
+/* Membuat filter responsif pada layar sangat kecil */
+@media screen and (max-width: 576px) {
+    .card .form-group {
+        gap: 10px !important;
+    }
+
+    .card .form-group select {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 5px !important;
+    }
+
+    .filter-form {
+        flex-direction: column !important;
+    }
+}
+
+/* Sidebar responsif */
+@media screen and (max-width: 991px) {
+    #sidebar {
+        max-width: 60px;
+        z-index: 1001;
+    }
+
+    #content {
+        width: calc(100% - 60px);
+        left: 60px;
+    }
+
+    #sidebar .brand,
+    #sidebar .side-menu a {
+        padding: 0.8rem 0.6rem;
+    }
+
+    #sidebar:hover {
+        max-width: 260px;
+    }
+
+    #sidebar:hover + #content {
+        opacity: 0.7;
+    }
+
+    #sidebar .divider {
+        text-align: center;
+        margin: 10px 0;
+        font-size: 10px;
+    }
+
+    #sidebar .icon {
+        min-width: 40px;
+    }
+}
+
+/* Penyesuaian tata letak untuk perangkat mobile */
+@media screen and (max-width: 768px) {
+    #sidebar {
+        position: fixed;
+        transform: translateX(-100%);
+        max-width: 260px;
+        width: 260px;
+        transition: all 0.3s ease;
+        z-index: 1001;
+        box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    }
+
+    #sidebar.show {
+        transform: translateX(0);
+        max-width: 260px;
+        width: 260px;
+    }
+
+    #content {
+        width: 100%;
+        left: 0;
+    }
+
+    .navbar-mobile {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: var(--light);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    .navbar-mobile i {
+        font-size: 24px;
+        color: var(--dark);
+    }
+
+    /* Tata letak dashboard */
+    main {
+        padding: 20px 10px;
+    }
+
+    .title {
+        font-size: 22px;
+        margin-bottom: 10px;
+    }
+
+    /* Penyesuaian tabel untuk mobile */
+    table.dataTable {
+        width: 100% !important;
+    }
+
+    .table-responsive table {
+        min-width: 600px;
+    }
+
+    /* Penyesuaian formulir */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    /* Penyesuaian filter untuk mobile */
+    .filter form {
+        flex-direction: column;
+    }
+
+    .filter form > div {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Penyesuaian kartu */
+    .card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    /* Responsivitas kartu buku pada halaman detail kategori */
+    .detail-kategori-container {
+        flex-direction: column;
+    }
+
+    .detail-kategori-container .col-md-4,
+    .detail-kategori-container .col-md-8 {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .detail-kategori-container .buku-container {
+        justify-content: center;
+    }
+
+    .detail-kategori-container .buku-container .col-auto {
+        width: calc(50% - 20px) !important;
+        max-width: none !important;
+    }
+
+    .detail-kategori-container .col-auto .card-buku {
+        min-height: 26rem !important;
+        margin: 10px 5px !important;
+    }
+
+    .detail-kategori-container .card-img-top {
+        max-height: 150px !important;
+        object-fit: contain !important;
+    }
+
+    .detail-kategori-container .card-body {
+        padding: 15px 10px !important;
+    }
+
+    .detail-kategori-container .button-area {
+        display: flex;
+        flex-wrap: nowrap; /* Mencegah tombol membungkus ke baris baru */
+        justify-content: center;
+        gap: 5px;
+        overflow-x: auto; /* Menambahkan scroll horizontal jika diperlukan */
+        padding: 5px 0;
+    }
+
+    .detail-kategori-container .detail-buku p.card-text {
+        margin-bottom: 5px !important;
+        font-size: 0.85rem;
+    }
+
+    .detail-kategori-container .pagination-wrapper {
+        overflow-x: auto;
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    /* Perangkat sangat kecil */
+    .info-data {
+        grid-template-columns: 1fr;
+        grid-gap: 15px;
+    }
+
+    .breadcrumbs {
+        flex-wrap: wrap;
+        font-size: 12px;
+    }
+
+    /* Penyesuaian padding konten */
+    main {
+        padding: 15px 10px;
+    }
+
+    /* Penyesuaian footer */
+    footer.footer {
+        padding: 10px 0;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    footer.footer .row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    footer.footer .text-sm-end {
+        text-align: center;
+    }
+
+    /* Penyesuaian grup tombol */
+    .btn-group {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    /* Penyesuaian ukuran modal */
+    .modal-dialog {
+        max-width: 90%;
+        margin: 10px auto;
+    }
+
+    /* Penyesuaian tampilan detail */
+    .profile-page .profile-card {
+        margin-bottom: 20px;
+        padding: 0;
+    }
+
+    .profile-page .card-body {
+        padding: 15px 10px;
+    }
+
+    .profile-page .avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .profile-page .profile-display .form-control {
+        font-size: 13px;
+        padding: 6px 8px;
+    }
+
+    /* Grafik dashboard */
+    .chart {
+        height: auto !important;
+        min-height: 250px;
+        max-height: 300px;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        display: block !important;
+        position: relative !important;
+        padding: 0 !important;
+    }
+
+    .chart canvas {
+        min-width: 800px !important; /* Memastikan semua label waktu terlihat */
+    }
+}
+
+/* Perbaikan responsif konten tab */
+.tab-content {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Tata letak formulir */
+@media screen and (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-6,
+    .col-sm-6,
+    .col-lg-4,
+    .col-lg-8 {
+        width: 100%;
+        max-width: 100%;
+        flex: 0 0 100%;
+    }
+
+    /* Penyesuaian spasi */
+    .p-3 {
+        padding: 0.5rem !important;
+    }
+
+    /* Tata letak kartu dashboard */
+    .data .content-data {
+        padding: 15px;
+    }
+}
+
+/* Responsivitas Datatables */
+@media screen and (max-width: 768px) {
+    .dataTables_wrapper .dataTables_length,
+    .dataTables_wrapper .dataTables_filter,
+    .dataTables_wrapper .dataTables_info,
+    .dataTables_wrapper .dataTables_paginate {
+        float: none;
+        text-align: center;
+        margin: 10px 0;
+    }
+
+    /* Membuat tabel dapat di-scroll */
+    div.dataTables_wrapper {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    /* Paginasi lebih ringkas dengan tombol navigasi sejajar */
+    .pagination {
+        justify-content: center;
+        flex-wrap: nowrap;
+        display: inline-flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        width: 100%;
+        gap: 2px;
+        padding-bottom: 5px;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .pagination::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+    }
+
+    .pagination .page-link {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.875rem;
+        min-width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Perbaikan untuk form filter */
+@media screen and (max-width: 768px) {
+    /* Gaya default filter */
+    .filter .form-group {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+    }
+
+    .filter .form-control {
+        width: calc(50% - 10px) !important;
+        margin-bottom: 0;
+    }
+
+    .filter button,
+    .filter a.btn {
+        width: auto;
+        margin-top: 5px;
+    }    .card form.form-group {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        gap: 10px !important;
+        margin: 15px 10px !important; /* Menambahkan margin horizontal */
+        width: calc(100% - 20px) !important; /* Memperhitungkan margin horizontal */
+        padding: 0 5px !important; /* Menambahkan padding di dalam */
+    }
+
+    .card form.form-group select {
+        flex-basis: calc(50% - 10px) !important;
+        flex-grow: 1 !important;
+        padding-right: 25px !important; /* Ruang untuk panah dropdown */
+        max-width: none !important;
+    }
+}
+
+    /* Tab navigation */
+    .nav-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    .nav-tabs::-webkit-scrollbar {
+        display: none; /* Safari and Chrome */
+    }
+
+    .nav-tabs .nav-link {
+        white-space: nowrap;
+    }
+
+
+/* Landing page specific improvements */
+@media screen and (max-width: 768px) {
+    .navbar-fixed-top {
+        padding: 5px 0;
+    }
+
+    .navbar-brand {
+        font-size: 18px;
+    }
+
+    .navbar-header {
+        width: 100%;
+    }
+
+    /* Hide landing page toggle buttons */
+    .navbar-toggle,
+    button[data-toggle="collapse"],
+    .mobile-menu-toggle:not(.toggle-sidebar) {
+        display: none !important;
+    }
+
+    /* Ensure sidebar toggle is visible */
+    .bx.bx-menu.toggle-sidebar {
+        display: inline-block !important;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    .beranda-info h1 {
+        font-size: 24px;
+    }
+
+    .section-btn {
+        padding: 8px 16px;
+    }
+
+    .footer-thumb h2 {
+        font-size: 18px;
+    }
+}
+
+/* Profile page improvements */
+@media screen and (max-width: 768px) {
+    .profile-page .row {
+        margin: 0 !important;
+    }
+
+    .profile-page .row > div {
+        padding: 0 !important;
+        margin-bottom: 15px;
+    }
+
+    /* Profile card sizing and spacing */
+    .profile-page .profile-card {
+        margin-bottom: 15px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Avatar improvements */
+    .profile-page .avatar {
+        margin: 10px auto;
+        width: 120px;
+        height: 120px;
+        overflow: hidden;
+        border-radius: 50%;
+        border: 3px solid #f1f1f1;
+    }
+
+    .profile-page .avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Text alignment and spacing */
+    .profile-page .card-body.text-center h3 {
+        margin-top: 10px;
+        font-size: 18px;
+    }
+
+    .profile-page .badge {
+        display: inline-block;
+        margin: 5px 0;
+    }
+
+    /* Form display improvements */
+    .profile-page .form-group {
+        margin-bottom: 15px;
+    }
+
+    .profile-page label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .profile-page .form-control {
+        padding: 8px 10px;
+        height: auto;
+        font-size: 14px;
+        border-radius: 4px;
+    }
+
+    .profile-page textarea.form-control {
+        min-height: 80px;
+    }
+
+    /* Button improvements */
+    .profile-page .btn {
+        display: block;
+        width: 100%;
+        padding: 8px 15px;
+        margin-top: 5px;
+    }
+}
+
+/* CSS for mobile navigation */
+.toggle-sidebar {
+    display: inline-block !important;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1002;
+}
+
+/* Hide all other mobile menu toggles */
+.mobile-menu-toggle:not(.toggle-sidebar),
+.navbar-toggle,
+button[data-toggle="collapse"] {
+    display: none !important;
+}
+
+/* Improve charts responsiveness */
+.chart-container {
+    min-height: 300px;
+    width: 100%;
+    position: relative;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 !important;
+}
+
+/* Better mobile chart styling */
+@media screen and (max-width: 768px) {
+    .chart-container {
+        min-height: 250px;
+    }
+
+    /* Improve chart readability on mobile */
+    .content-data .chart {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 15px !important;
+        margin-bottom: 10px !important;
+        scrollbar-width: thin;
+    }
+
+    /* Ensure charts are fully visible with proper scrolling */
+    .chart canvas {
+        min-width: 800px !important; /* Ensure enough width to show all time labels */
+        height: auto !important;
+        max-height: 400px !important;
+    }
+}
+
+/* Improve modal responsiveness */
+@media screen and (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 0 auto;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-footer,
+    .modal-header {
+        padding: 10px;
+    }
+}
+
+/* Custom fixes for specific pages */
+/* Book cards */
+@media screen and (max-width: 768px) {
+    /* Center book cards container */
+    .row.d-flex.flex-wrap.justify-content-center {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+
+    /* Adjust card width for tablets */
+    .col-auto.my-2 {
+        width: calc(50% - 20px) !important;
+        padding: 0 10px !important;
+        display: flex !important;
+        justify-content: center !important;
+    }
+
+    /* Make cards more appealing on mobile */
+    .card.card-buku {
+        width: 100% !important;
+        max-width: 280px !important;
+        margin: 10px auto !important;
+        min-height: 26rem !important;
+    }
+
+    /* tombol download qr code */
+    .fa-download {
+        margin-left: 90px;
+    }
+}
+
+/* Extra small devices (phones) */
+@media screen and (max-width: 576px) {
+    /* Make cards full width on small phones */
+    .col-auto.my-2 {
+        width: 100% !important;
+        padding: 0 15px !important;
+    }
+
+    .card.card-buku {
+        max-width: 100% !important;
+        margin: 10px auto !important;
+    }
+
+    /* Improve image proportions */
+    .card.card-buku .card-img-top {
+        max-height: 160px !important;
+        object-fit: contain !important;
+    }
+
+    /* Menyesuaikan wadah tombol untuk tampilan teks di tengah */
+    .button-area.mt-3 {
+        flex-wrap: nowrap !important; /* Mencegah pindah baris */
+        justify-content: center !important;
+        gap: 5px !important;
+        overflow-x: auto !important; /* Scroll horizontal jika diperlukan */
+        padding: 5px 0 !important;
+    }
+
+    .button-area.mt-3 .btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        min-width: 70px !important;
+        text-align: center !important;
+        height: 31px;
+    }
+}
+
+/* Additional profile page fixes */
+.profile-page .section {
+    padding: 0.5rem;
+    margin-bottom: 20px; /* Tambahkan margin bawah */
+}
+
+.profile-page .page-title {
+    margin-bottom: 15px;
+}
+
+/* Fix khusus untuk halaman tambah kategori */
+.profile-page .page-title .row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.profile-page .breadcrumb {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+/* Fix for profile card corners and spacing */
+.profile-page .profile-card {
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    margin-bottom: 30px; /* Tambah margin bawah untuk dorong footer */
+}
+
+/* Fix profile edit buttons */
+.profile-page .btn i {
+    margin-right: 5px;
+}
+
+@media screen and (max-width: 480px) {
+    .profile-page .form-group {
+        margin-bottom: 10px;
+    }
+
+    .profile-page .row > .col-12 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Additional footer responsive improvements */
+@media screen and (max-width: 768px) {
+    footer.footer {
+        padding: 15px 10px;
+        margin-top: 20px;
+        position: relative;
+        bottom: 0;
+    }
+
+    footer.footer .row > div {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+    footer.footer .text-sm-end {
+        text-align: center;
+    }
+
+    footer.footer .container-fluid {
+        padding: 0 10px;
+    }
+
+    /* Layout structuring untuk tampilan mobile - Fix footer */
+    #content {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Main content mengisi ruang yang tersedia */
+    #content main,
+    #content .profile-page {
+        flex: 1 0 auto;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    footer.footer {
+        font-size: 11px;
+        line-height: 1.4;
+    }
+
+    footer.footer i {
+        font-size: 10px;
+    }
+}
+
+/* Filter Buku Horizontal Layout - Mobile Specific Styles */
+@media screen and (max-width: 768px) {
+    /* General styles for all filter forms */
+    form.form-group {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 15px !important;
+        margin: 15px !important;
+        width: calc(100% - 30px) !important;
+    }
+
+    form.form-group select {
+        min-width: 0 !important;
+        flex: 1 1 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Filter card specific styles */
+    .card .form-group {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        width: auto !important;
+        padding: 0 15px 15px 15px !important; /* Add padding to prevent elements from touching edges */
+        box-sizing: border-box !important;
+    }
+
+    .card .form-group select {
+        min-width: 120px !important;
+        margin: 0 !important;
+        padding-right: 30px !important; /* Add extra padding for dropdown arrow */
+    }
+}
+
+/* Filter responsive adjustments */
+@media screen and (max-width: 768px) {
+    form.form-group {
+        gap: 10px !important;
+    }
+
+    form.form-group select {
+        min-width: 0 !important;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    form.form-group {
+        flex-wrap: nowrap !important;
+        width: calc(100% - 20px) !important;
+        margin: 10px !important;
+    }
+
+    form.form-group select {
+        width: calc(50% - 5px) !important;
+    }
+}
+
+/* Tata letak filter buku horizontal */
+/* Gaya khusus untuk formulir filter pada halaman indeks buku - Hanya untuk mobile */
+@media screen and (max-width: 768px) {
+    .filter-form {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        gap: 15px !important;
+        margin: 15px !important;
+        align-items: center !important;
+    }
+
+    .filter-form select {
+        flex: 1 !important;
+        min-width: 120px !important;
+        max-width: none !important;
+        margin: 0 !important;
+    }
+}
+
+/* Membuat filter responsif pada layar sangat kecil */
+@media screen and (max-width: 576px) {
+    .card .form-group {
+        gap: 10px !important;
+    }
+
+    .card .form-group select {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Penanganan khusus untuk filter-form pada layar kecil */
+    .filter-form {
+        flex-direction: row !important;
+    }
+
+    .filter-form select {
+        width: 47% !important;
+        flex: 0 0 47% !important;
+    }
+}
+
+/* Perbaikan spasi halaman edit buku pada mobile */
+@media screen and (max-width: 768px) {
+    /* Membuat baris membungkus pada mobile */
+    .profile-page .row[style*="flex-wrap: nowrap"] {
+        flex-wrap: wrap !important;
+    }
+
+    /* Lebar yang sama untuk kolom */
+    .profile-page .row > .col-md-6 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    /* Spasi konsisten untuk grup formulir */
+    .profile-page .form-group {
+        margin-bottom: 15px !important;
+        padding: 0 10px !important;
+    }
+
+    /* Tidak ada margin berlebih antara kolom */
+    .profile-page .col-md-6:first-child {
+        margin-bottom: 0 !important;
+    }
+
+    /* css jarak kolom pengarang dan penerbit di tambah dan edit buku */
+    .profile-page .col-md-6:first-child .form-group:last-child {
+        margin-bottom: 0px !important;
+    }
+}
+
+/* Gaya responsif untuk tabel Daftar Peminjaman */
+/* Menerapkan gaya seperti papan peringkat ke semua elemen table-responsive */
+.table-responsive {
+    margin-top: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin; /* Firefox */
+    position: relative;
+    border: none !important;
+}
+
+/* Menyesuaikan gaya tabel dengan papan peringkat - Gaya desktop dipindahkan ke media query mobile */
+@media screen and (max-width: 767px) {
+    .table-responsive table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px; /* Lebar minimum untuk mencegah penyempitan */
+    }
+
+    /* Menyesuaikan gaya sel tabel dengan papan peringkat */
+    .table-responsive .table th,
+    .table-responsive .table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    /* Menyesuaikan gaya header tabel dengan papan peringkat */
+    .table-responsive .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+
+    /* Menyesuaikan efek hover baris tabel dengan papan peringkat */
+    .table-responsive .table tr:hover {
+        background-color: #f1f1f1;
+    }
+}
+
+/* Scrollbar kustom untuk browser Webkit */
+.table-responsive::-webkit-scrollbar {
+    height: 6px;
+    background-color: #f1f1f1;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background-color: #a0a0a0;
+}
+
+@media screen and (max-width: 767px) {
+    /* Meningkatkan responsivitas tabel dalam kartu peminjaman */
+    .table-responsive {
+        margin: 10px -15px; /* Menyesuaikan margin negatif untuk keluar dari padding induk */
+        padding: 0 15px;
+        width: calc(100% + 30px);
+        border: none;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Menghapus lebar tetap untuk memungkinkan tabel di-scroll dengan baik */
+    .table-responsive table {
+        min-width: 800px !important; /* Memastikan semua kolom ditampilkan dengan baik */
+        font-size: 13px;
+    }
+
+    /* Memperbaiki gaya tab di halaman peminjaman */
+    .nav-tabs .nav-link {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    /* Memperbaiki jarak container */
+    .content-data {
+        padding: 10px !important;
+        margin-bottom: 15px !important;
+        overflow: hidden; /* Menampung margin negatif */
+    }
+
+    /* Rata tengah header dan data tabel untuk tampilan mobile yang lebih baik */
+    .table-responsive .table th,
+    .table-responsive .table td {
+        padding: 10px 15px !important; /* Menyesuaikan padding dengan papan peringkat */
+        vertical-align: middle !important;
+        white-space: nowrap !important;
+    }
+
+    /* Memperbaiki tombol aksi dalam tabel agar sesuai dengan papan peringkat */
+    .table .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+        margin: 2px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Memberikan gaya tombol seperti pada papan peringkat */
+    .table .btn-info,
+    .table .btn-sm.btn-info {
+        background-color: #17a2b8;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .table .btn-info:hover {
+        background-color: #138496;
+    }
+
+    /* Memberikan gaya tombol sukses */
+    .table .btn-success,
+    .table .btn-sm.btn-success,
+    .table .btn-success-pengambilan,
+    .table .btn-success-peminjaman {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .table .btn-success:hover,
+    .table .btn-success-pengambilan:hover,
+    .table .btn-success-peminjaman:hover {
+        background-color: #218838;
+    }
+
+    /* Memberikan gaya tombol bahaya */
+    .table .btn-danger,
+    .table .btn-sm.btn-danger,
+    .table .delete-btn {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+    }
+
+    .table .btn-danger:hover,
+    .table .delete-btn:hover {
+        background-color: #c82333;
+    }
+
+    /* Memperbaiki kontrol datatable untuk mobile */
+    .dataTables_wrapper .dataTables_filter input {
+        width: 120px;
+        margin-left: 5px;
+    }
+
+    /* Memperbaiki kontrol paginasi pada mobile */
+    .dataTables_wrapper .dataTables_paginate {
+        display: flex !important;
+        justify-content: center !important;
+        width: 100% !important;
+        margin-top: 15px !important;
+        margin-bottom: 10px !important;
+        text-align: center !important;
+        position: relative !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .pagination {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
+        white-space: nowrap !important;
+        width: auto !important;
+        min-width: fit-content !important;
+    }
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        padding: 5px 8px !important;
+        font-size: 12px !important;
+        margin: 0 2px !important;
+        display: inline-flex !important;
+        float: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 30px !important;
+        height: 30px !important;
+    }
+
+    /* Pastikan tombol previous dan next selalu terlihat dan sejajar */
+    .dataTables_wrapper .dataTables_paginate .previous,
+    .dataTables_wrapper .dataTables_paginate .next {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+
+    /* Membuat kartu peminjaman lebih mudah dibaca */
+    #siswa-peminjaman,
+    #guru-peminjaman,
+    #staff-peminjaman {
+        padding: 5px 0;
+    }
+}
+
+/* Penyempurnaan lebih lanjut untuk layar yang sangat kecil */
+@media screen and (max-width: 575px) {
+    /* Memperbaiki gaya header */
+    .head h3 {
+        font-size: 16px !important;
+        margin-bottom: 10px !important;
+    }
+
+    /* Membuat filter lebih kompak */
+    .dataTables_length,
+    .dataTables_filter {
+        text-align: left !important;
+        width: 100% !important;
+        margin-bottom: 10px !important;
+    }
+}
+
+/* Perbaikan khusus mobile untuk tombol di header konten */
+@media screen and (max-width: 767px) {
+    .content-data .head .btn {
+        margin-bottom: 15px;
+    }
+
+    /* Perbaikan khusus untuk tata letak header halaman kategori pada mobile */
+    .content-data .head {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .content-data .head > div {
+        margin-top: 5px;
+        width: 100%;
+    }
+
+    /* Perbaikan khusus untuk tombol "Tambah Kategori" di halaman kategori */
+    .content-data .head .btn.btn-success {
+        margin-bottom: 25px;
+        margin-top: 10px;
+        display: flex;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    .content-data .head .btn.btn-success i {
+        margin-right: 8px;
+        font-size: 18px;
+    }
+
+    #content .content-data {
+        margin-bottom: 30px !important;
+    }
+}
+
+/* Gaya badge untuk status peminjaman yang cocok dengan papan peringkat - Hanya properti tambahan */
+/* Gaya ini melengkapi gaya badge default Bootstrap */
+.badge-dipinjam {
+    color: #ffc107 !important;
+    background-color: rgba(255, 193, 7, 0.1);
+}
+
+.badge-dikembalikan {
+    color: #28a745 !important;
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.badge-terlambat {
+    color: #dc3545 !important;
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.badge-dibatalkan {
+    color: #9A2A2A !important;
+    background-color: rgba(154, 42, 42, 0.1);
+}
+
+
+/* Gaya untuk kelompok badge */
+.badge-group {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+
+/* Gaya khusus untuk paginasi di halaman detail - Hanya untuk mobile */
+@media screen and (max-width: 767px) {
+    #dataTable_wrapper .dataTables_paginate {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-top: 15px;
+        text-align: center;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+
+    #dataTable_wrapper .dataTables_paginate::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+    }
+
+    #dataTable_wrapper .dataTables_paginate .pagination {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto;
+        padding: 0;
+        white-space: nowrap;
+        min-width: fit-content;
+    }
+
+    #dataTable_wrapper .dataTables_paginate .paginate_button {
+        float: none;
+        display: inline-flex;
+        min-width: 32px;
+        height: 32px;
+        align-items: center;
+        justify-content: center;
+        margin: 0 2px;
+    }
+
+    /* Tombol previous dan next sejajar */
+    #dataTable_wrapper .dataTables_paginate .previous,
+    #dataTable_wrapper .dataTables_paginate .next {
+        white-space: nowrap;
+        font-weight: bold;
+    }
+
+    #dataTable_wrapper .dataTables_info,
+    #dataTable_wrapper .dataTables_length {
+        text-align: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .badge {
+        font-size: 11px;
+        padding: 0.2em 0.5em;
+    }
+
+    /* Memastikan paginasi horizontal pada mobile */
+    #dataTable_wrapper .dataTables_paginate .pagination,
+    .pagination {
+        flex-wrap: nowrap;
+        display: flex;
+        overflow-x: auto;
+        max-width: 100%;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        margin: 0 auto;
+        justify-content: center;
+        align-items: center;
+        padding-bottom: 5px; /* Ruang untuk scrollbar */
+    }
+
+    #dataTable_wrapper .dataTables_paginate .pagination::-webkit-scrollbar,
+    .pagination::-webkit-scrollbar {
+        display: none; /* Chrome, Safari */
+    }
+
+    /* Style khusus untuk tombol previous/next agar selalu sejajar */
+    .page-item:first-child,
+    .page-item:last-child,
+    .paginate_button.previous,
+    .paginate_button.next {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+
+    /* Memastikan tampilan konsisten untuk tombol pagination */
+    .page-link,
+    .paginate_button {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
+
+/* Menimpa gaya inline untuk kartu buku di halaman detail kategori */
+@media screen and (max-width: 768px) {
+    /* Menimpa lebar tetap dan memastikan tampilan yang tepat */
+    .detail-kategori-container .buku-container .col-auto[style*="width:"],
+    .detail-kategori-container .buku-container .col-auto[style*="width"] {
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    /* Membuat teks kartu rata dengan benar */
+    .detail-kategori-container .card-buku .card-text[style*="text-align"] {
+        text-align: center !important;
+    }
+
+    /* Membuat tampilan tombol tetap horizontal pada mobile dengan teks di tengah */
+    .detail-kategori-container .button-area {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 5px !important;
+        flex-wrap: nowrap !important; /* Mencegah tombol membungkus ke baris baru */
+        width: 100% !important;
+        overflow-x: auto !important; /* Menambahkan scroll horizontal jika diperlukan */
+        padding: 5px 0 !important;
+    }
+
+    .detail-kategori-container .button-area .btn {
+        margin: 2px;
+        height: 31px;
+        display: flex;
+        align-items: center;
+        justify-content: center !important; /* Membuat teks berada di tengah tombol */
+        white-space: nowrap;
+        min-width: 70px; /* Lebar minimum untuk tombol */
+        padding: 0 12px;
+        text-align: center !important; /* Memastikan teks tetap di tengah */
+    }
+
+    .detail-kategori-container .badge {
+        display: inline-block !important;
+    }
+}
+
+/* Mobile-specific card styles for category detail page */
+
+/* Fix dynamic classes based on number of books */
+@media screen and (max-width: 768px) {
+    .detail-kategori-container .buku-container.single-card .col-auto,
+    .detail-kategori-container .buku-container.two-cards .col-auto,
+    .detail-kategori-container .buku-container.three-cards .col-auto {
+        width: auto !important;
+        max-width: none !important;
+    }
+
+    .detail-kategori-container .buku-container.single-card {
+        justify-content: center;
+    }
+}
+
+/* Make search form responsive in category detail page */
+@media screen and (max-width: 768px) {
+    .detail-kategori-container .navbar-search {
+        width: 100%;
+    }
+
+    .detail-kategori-container .navbar-search .input-group {
+        width: 100%;
+    }
+
+    .detail-kategori-container .navbar-search input[type="search"] {
+        width: 100%;
+    }
+}
+
+/* Fix for the badge showing book count in category detail */
+@media screen and (max-width: 768px) {
+    .detail-kategori-container .col-md-4 .profile-card .badge.badge-outline-primary[style*="display: block"] {
+        text-align: center !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        width: fit-content !important;
+        display: block !important;
+        max-width: 80% !important;
+        padding: 0.5rem !important;
+        font-size: 0.9rem !important;
+    }
+}
+
+/* Perbaikan tambahan untuk pagination pada layar sangat kecil */
+@media screen and (max-width: 576px) {
+    /* Pastikan tombol pagination selalu sejajar */
+    .pagination,
+    .dataTables_paginate .pagination,
+    #dataTable_wrapper .dataTables_paginate .pagination {
+        flex-wrap: nowrap !important;
+        display: flex !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        justify-content: flex-start !important; /* Mulai dari kiri untuk memastikan konsistensi */
+        -webkit-overflow-scrolling: touch !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* Tombol pagination lebih kompak */
+    .pagination .page-link,
+    .dataTables_paginate .paginate_button,
+    #dataTable_wrapper .dataTables_paginate .paginate_button {
+        padding: 0.3rem 0.5rem !important;
+        font-size: 0.8rem !important;
+        min-width: 28px !important;
+        height: 28px !important;
+        margin: 0 1px !important;
+    }
+
+    /* Hapus margin agar lebih kompak */
+    .pagination,
+    .dataTables_paginate,
+    #dataTable_wrapper .dataTables_paginate {
+        margin: 10px 0 !important;
+    }
+
+    /* Pastikan container pagination tidak membatasi lebar tombol */
+    .dataTables_wrapper .dataTables_paginate,
+    #dataTable_wrapper .dataTables_paginate {
+        padding: 0 !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+    }
+}
+
+/* Perbaikan khusus untuk grafik peminjaman buku */
+@media screen and (max-width: 768px) {
+    /* Perbaikan wadah grafik peminjaman */
+    .content-data {
+        padding: 15px 10px !important;
+        margin-bottom: 20px !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    /* Perbaikan tampilan untuk grafik peminjaman */
+    .content-data .chart {
+        margin-top: 15px;
+        padding: 0 !important;
+        overflow-y: hidden !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Memperbaiki tampilan grafik untuk menunjukkan semua label waktu */
+    .content-data .chart canvas {
+        min-width: 900px !important; /* Diperluas untuk memastikan semua label waktu terlihat */
+        height: 350px !important; /* Tinggi tetap untuk konsistensi */
+        margin-left: 0 !important;
+        padding-bottom: 30px !important; /* Padding untuk label waktu */
+    }
+
+    /* Mengoptimalkan tampilan ketika orientasi landscape */
+    @media (orientation: landscape) {
+        .content-data .chart canvas {
+            height: 300px !important;
+        }
+    }
+
+    /* Filter dropdown responsif untuk grafik */
+    .content-data select,
+    .content-data .filter-container select {
+        width: 100% !important;
+        max-width: 100% !important;
+        font-size: 14px;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Tambahkan teks petunjuk untuk scroll */
+    .content-data .chart::before {
+        content: "← Geser untuk melihat semua data →";
+        display: block;
+        text-align: center;
+        font-size: 12px;
+        color: #666;
+        padding: 5px 0;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+}
+
+/* Perbaikan chart untuk resolusi sangat kecil */
+@media screen and (max-width: 480px) {
+    /* Mengatur tinggi canvas untuk layar kecil */
+    .content-data .chart canvas {
+        height: 280px !important;
+        min-width: 800px !important; /* Pastikan cukup lebar untuk semua label */
+    }
+
+    /* Mengubah gaya teks petunjuk */
+    .content-data .chart::before {
+        font-size: 11px;
+        padding: 3px 0;
+        font-style: italic;
+    }
+
+    /* Mengubah gaya header grafik */
+    .content-data h3 {
+        font-size: 16px !important;
+    }
+
+    /* Menyesuaikan ukuran select filter */
+    .content-data select {
+        font-size: 13px !important;
+        padding: 6px 8px !important;
+    }
+}
+
+/* Scrollbar yang ramah touch untuk grafik pada mobile */
+@media screen and (max-width: 768px) {
+    /* Pastikan scrollbar terlihat untuk berikan petunjuk visual */
+    .chart::-webkit-scrollbar {
+        display: block !important;
+        height: 6px;
+        background-color: #f1f1f1;
+    }
+
+    .chart::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.3);
+        border-radius: 4px;
+    }
+
+    .chart::-webkit-scrollbar-thumb:hover {
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Tambahkan indikator scroll dengan gradien di kedua sisi */
+    .chart {
+        background:
+            linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 5%) 0 0,
+            linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 5%) 100% 0;
+        background-repeat: no-repeat;
+        background-size: 40px 100%, 40px 100%;
+        background-attachment: local, local;
+        background-position: left center, right center;
+    }
+
+    /* Tambahkan petunjuk "swipe" untuk pengguna baru */
+    .chart::after {
+        content: "";
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        width: 40px;
+        height: 40px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888888' width='24px' height='24px'%3E%3Cpath d='M0 0h24v24H0V0z' fill='none'/%3E%3Cpath d='M15.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM5 12c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3zm5.8-10l2.4-2.4.8.8c1.3 1.3 3 2.1 5.1 2.1V9c-1.5 0-2.7-.6-3.6-1.5l-1.9-1.9c-.5-.4-1-.6-1.6-.6-.6 0-1.1.2-1.4.6L7 8.1C6.4 8.8 6 9.8 6 11v5.8l2.8-2.8c.7-.7 1.6-1.1 2.7-1.1.3 0 .5 0 .8.1L10.9 15l-1.4-1.4v-.9l2.3-2.3c.4-.4.8-.6 1.4-.6 1.1 0 2.1.6 2.6 1.4l1.5 2.3zm7-3.9c-.9-1.1-1.4-2.5-1.4-4.1 0-.4-.3-.7-.7-.7H14v1.8c1.7.9 3 2.5 3.9 4.2 2.4-.7 4.1-2.9 4.1-5.5V5h-1.5c-.2 1.4-.7 2.7-1.6 3.8z'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.5;
+        pointer-events: none;
+        animation: fadeInOut 2s infinite;
+    }
+
+    @keyframes fadeInOut {
+        0%, 100% { opacity: 0; }
+        50% { opacity: 0.5; }
+    }
+}
+
+/* Perbaikan untuk sumbu dan label grafik */
+@media screen and (max-width: 768px) {
+    /* Atur CSS khusus untuk sumbu grafik jika ada */
+    .chart .chart-axis text,
+    .chart text {
+        font-size: 10px !important;
+    }
+
+    /* Memastikan area judul y-axis terlihat */
+    .chart .chart-y-axis-title,
+    .chart .y-axis-label {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+    }
+
+    /* Memastikan grafik memiliki batas minimum yang memungkinkan semua label terlihat */
+    .chart canvas {
+        min-width: 300px !important;
+    }
+
+    /* Pastikan konten tetap terlihat dengan baik */
+    .content-data {
+        overflow: hidden !important;
+    }
+
+    .content-data .chart {
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        margin-left: -5px;
+        margin-right: -5px;
+        padding-left: 5px;
+        padding-right: 5px;
+        width: calc(100% + 10px) !important;
+    }
+}
+
+/* Perbaikan untuk legenda grafik pada mobile */
+@media screen and (max-width: 768px) {
+    /* Pastikan legenda grafik terlihat jelas */
+    .chart-legend,
+    .chart-legend ul,
+    .chart canvas + div {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin-top: 15px !important;
+        width: 100% !important;
+        padding: 0 15px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Style untuk item legenda */
+    .chart-legend li,
+    .chart canvas + div span {
+        display: inline-flex !important;
+        align-items: center !important;
+        font-size: 12px !important;
+        margin: 0 10px 5px 0 !important;
+        white-space: nowrap !important;
+    }
+
+    /* Fix untuk label tanggal pada sumbu X */
+    .chart .x-axis-label,
+    .chart .y-axis-label {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+    }
+}

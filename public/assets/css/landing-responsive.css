@@ -1,0 +1,225 @@
+/*
+ * LANDING PAGE RESPONSIVE CSS
+ * This file contains responsive styles specifically for the landing page
+ */
+
+@media screen and (max-width: 1200px) {
+    .custom-navbar .navbar-nav.navbar-nav-first {
+        margin-left: 20px;
+    }
+
+    .custom-navbar .navbar-brand {
+        padding: 15px 20px;
+    }
+
+    #beranda .beranda-info {
+        padding: 0 20px;
+    }
+
+    #beranda h1 {
+        font-size: 32px;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .custom-navbar .navbar-nav.navbar-nav-first {
+        margin-left: 0px;
+    }
+
+    #beranda h1 {
+        font-size: 28px;
+    }
+
+    #beranda .beranda-image {
+        padding: 20px 0;
+    }
+
+    #beranda .beranda-image img {
+        max-width: 80%;
+    }
+
+    #tentang .col-md-5,
+    #tentang .col-md-7 {
+        width: 100%;
+        padding: 0 30px;
+    }
+
+    #tentang .col-md-5 img {
+        margin: 0 auto;
+        display: block;
+    }
+
+    #tentang .about-info {
+        padding-top: 20px;
+    }
+
+    .footer-thumb {
+        margin-bottom: 30px;
+    }
+}
+
+/* Tampilan untuk mobile */
+@media screen and (max-width: 768px) {
+    .navbar-default .navbar-collapse {
+        margin-top: 15px;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .navbar-default .navbar-nav li a {
+        padding: 10px 15px;
+    }
+
+    .navbar-brand {
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    #beranda {
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+
+    #beranda h1 {
+        font-size: 24px;
+        line-height: 1.5;
+    }
+
+    section {
+        padding: 40px 0;
+    }
+
+    #tentang .section-title {
+        padding-bottom: 20px;
+    }
+
+    .google-map iframe {
+        height: 300px;
+    }
+
+    /* Improve the contact form on mobile */
+    #kontak-form {
+        padding: 0 15px;
+    }
+
+    #kontak-form .col-md-6,
+    #kontak-form .col-md-12 {
+        padding: 0;
+        margin-bottom: 15px;
+    }
+
+    .footer-thumb.footer-info {
+        text-align: center;
+    }
+
+    .footer-bottom {
+        text-align: center;
+    }
+
+    .footer-bottom .col-md-6 {
+        margin-bottom: 15px;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    #beranda h1 {
+        font-size: 20px;
+    }
+
+    .section-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .beranda-info {
+        padding: 0 10px;
+    }
+
+    .section-title h2 {
+        font-size: 24px;
+    }
+
+    .navbar-brand {
+        font-size: 16px;
+    }
+
+    #beranda .beranda-image img {
+        max-width: 90%;
+        margin: 0 auto;
+        display: block;
+    }
+
+    /* Improve footer layout */
+    footer .row > div {
+        width: 100%;
+        margin-bottom: 30px;
+    }
+
+    .footer-thumb h2 {
+        font-size: 18px;
+    }
+
+    .navbar-toggle {
+        margin-right: 0;
+    }
+}
+
+/* Improve the mobile navigation for landing page */
+@media screen and (max-width: 768px) {
+    .custom-navbar {
+        padding: 5px 0;
+    }
+
+    .navbar-header {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .navbar-toggle {
+        display: block;
+        margin-top: 8px;
+    }
+
+    .collapse.navbar-collapse {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .custom-navbar .navbar-nav.navbar-nav-first {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .custom-navbar .navbar-nav li a {
+        display: block;
+        padding: 12px 15px;
+    }
+
+    .navbar-nav.navbar-right {
+        text-align: center;
+    }
+
+    .section-btn {
+        display: inline-block;
+        margin: 10px 0;
+        width: auto;
+    }
+}
+
+/* Splash screen improvements */
+.preloader {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+}
+
+/* Enhance Google Maps responsive display */
+.google-map iframe {
+    width: 100%;
+    border: 0;
+}

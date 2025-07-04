@@ -1,0 +1,160 @@
+/* Dashboard cards styling */
+.info-data .card {
+    padding: 20px;
+    border-radius: 10px;
+    background-color: var(--light);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.info-data .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.info-data .card .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.info-data .card .count {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 15px 0 5px;
+}
+
+.info-data .card .label {
+    display: block;
+    text-align: right;
+    font-size: 14px;
+    color: var(--primary);
+    text-decoration: none;
+    margin-top: 10px;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.info-data .card .label:hover {
+    color: var(--dark);
+}
+
+.info-data .card .icon {
+    font-size: 30px;
+    color: var(--primary);
+    background-color: rgba(var(--primary-rgb), 0.1);
+    padding: 8px;
+    border-radius: 50%;
+}
+
+/* Leaderboard Styling */
+.leaderboard {
+    margin-top: 20px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.leaderboard table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Minimum width to prevent squishing */
+}
+
+.leaderboard th,
+.leaderboard td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.leaderboard th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.leaderboard tr:hover {
+    background-color: #f1f1f1;
+}
+
+.leaderboard .btn-info {
+    background-color: #17a2b8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.leaderboard .btn-info:hover {
+    background-color: #138496;
+}
+
+/* Chart and Filter Styling */
+.filter-period {
+    display: flex;
+    align-items: center;
+}
+
+.filter-period select {
+    width: 120px;
+    padding: 6px 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    font-size: 14px;
+}
+
+/* Detail Link Container */
+.card .detail-link-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+/* Detail Link Style */
+.card .label.detail-link {
+    color: #6f737b;
+}
+
+/* Book Cover Thumbnail */
+.book-cover-thumbnail {
+    width: 40px;
+    height: 60px;
+    object-fit: cover;
+}
+
+/* Responsive Leaderboard */
+@media screen and (max-width: 768px) {
+    .leaderboard {
+        margin: 10px -15px; /* Negative margin to break out of parent padding */
+        padding: 0 15px;
+        width: calc(100% + 30px);
+    }
+
+    .content-data {
+        overflow: hidden; /* Contains the negative margin */
+    }
+
+    .leaderboard::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .leaderboard::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .leaderboard::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 2px;
+    }
+
+    .leaderboard table td,
+    .leaderboard table th {
+        white-space: nowrap;
+        padding: 10px 15px;
+    }
+}
