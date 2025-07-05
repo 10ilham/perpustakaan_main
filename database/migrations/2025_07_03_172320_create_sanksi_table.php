@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('sanksi', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('peminjaman_id');
-            $table->enum('jenis_sanksi', ['keterlambatan', 'rusak_parah', 'hilang']);
+            $table->enum('jenis_sanksi', ['keterlambatan', 'rusak_hilang']);
             $table->integer('hari_terlambat')->default(0);
-            $table->decimal('denda_keterlambatan', 10, 2)->default(0);
-            $table->decimal('denda_kerusakan', 10, 2)->default(0);
-            $table->decimal('total_denda', 10, 2)->default(0);
+            $table->integer('denda_keterlambatan')->default(0);
+            $table->integer('denda_kerusakan')->default(0);
+            $table->integer('total_denda')->default(0);
             $table->enum('status_bayar', ['belum_bayar', 'sudah_bayar'])->default('belum_bayar');
             $table->text('keterangan')->nullable();
             $table->timestamps();

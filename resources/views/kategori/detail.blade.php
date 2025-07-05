@@ -107,21 +107,17 @@
                                                                 {{ $item->judul }}
                                                             </a>
                                                         </h5>
-                                                        <p class="card-text m-0"
-                                                            style="text-align: justify; display: block; width: 100%;">Kode
+                                                        <p class="card-text m-0">Kode
                                                             Buku:
                                                             {{ $item->kode_buku }}</p>
-                                                        <p class="card-text m-0"
-                                                            style="text-align: justify; display: block; width: 100%;">
+                                                        <p class="card-text m-0">
                                                             Pengarang:
                                                             {{ $item->pengarang }}</p>
-                                                        <p class="card-text m-0"
-                                                            style="text-align: justify; display: block; width: 100%;">
+                                                        <p class="card-text m-0">
                                                             Kategori:
-                                                            {{ $kategori->nama_kategori }}
+                                                            {{ $item->kategori->pluck('nama_kategori')->implode(', ') }}
                                                         </p>
-                                                        <p class="card-text m-0"
-                                                            style="text-align: justify; display: block; width: 100%;">
+                                                        <p class="card-text m-0">
                                                             Status:
                                                             @if ($item->status === 'Tersedia')
                                                                 <span

@@ -2,9 +2,9 @@
 <div class="modal fade" id="sanksiModal" tabindex="-1" aria-labelledby="sanksiModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
+            <div class="modal-header bg-primary" style="color: white;">
                 <h5 class="modal-title" id="sanksiModalLabel">
-                    <i class="fas fa-book-open me-2"></i>Konfirmasi Pengembalian Buku
+                    <i class="fas fa-book-open me-2"></i> Konfirmasi Pengembalian Buku
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                     aria-label="Close"></button>
@@ -16,7 +16,7 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-header bg-light py-2">
                                 <h6 class="mb-0 text-primary">
-                                    <i class="fas fa-info-circle me-2"></i>Informasi Peminjaman
+                                    <i class="fas fa-info-circle me-2"></i> Informasi Peminjaman
                                 </h6>
                             </div>
                             <div class="card-body p-3">
@@ -25,15 +25,15 @@
                                     <div class="col-sm-8 col-12" id="modalBukuJudul"></div>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-sm-4 col-12"><strong>Peminjam:</strong></div>
+                                    <div class="col-sm-4 col-12"><strong>Nama Peminjam:</strong></div>
                                     <div class="col-sm-8 col-12" id="modalPeminjam"></div>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-sm-4 col-12"><strong>Tgl Pinjam:</strong></div>
+                                    <div class="col-sm-4 col-12"><strong>Tanggal Pinjam:</strong></div>
                                     <div class="col-sm-8 col-12" id="modalTanggalPinjam"></div>
                                 </div>
                                 <div class="row mb-2">
-                                    <div class="col-sm-4 col-12"><strong>Tgl Kembali:</strong></div>
+                                    <div class="col-sm-4 col-12"><strong>Tanggal Kembali:</strong></div>
                                     <div class="col-sm-8 col-12" id="modalTanggalKembali"></div>
                                 </div>
                                 <div class="row">
@@ -47,7 +47,7 @@
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-header bg-light py-2">
                                 <h6 class="mb-0 text-primary">
-                                    <i class="fas fa-clock me-2"></i>Status Keterlambatan
+                                    <i class="fas fa-clock"></i> Status Keterlambatan
                                 </h6>
                             </div>
                             <div class="card-body p-3">
@@ -63,7 +63,7 @@
                     <div class="card border-0 shadow-sm mb-3">
                         <div class="card-header bg-light py-2">
                             <h6 class="mb-0 text-primary">
-                                <i class="fas fa-book me-2"></i>Kondisi Buku
+                                <i class="fas fa-book me-2"></i> Kondisi Buku
                             </h6>
                         </div>
                         <div class="card-body p-3">
@@ -82,8 +82,8 @@
                                 </select>
                             </div>
                             <div class="alert alert-info border-0 shadow-sm">
-                                <h6 class="alert-heading">
-                                    <i class="fas fa-info-circle me-2"></i>Ketentuan Sanksi:
+                                <h6 class="alert-heading" style="font-size: 15px">
+                                    <i class="fas fa-info-circle"></i> Ketentuan Sanksi:
                                 </h6>
                                 <div class="row">
                                     <div class="col-lg-6 col-md-12">
@@ -110,7 +110,7 @@
                     <div class="card border-0 shadow-sm mb-3">
                         <div class="card-header bg-light py-2">
                             <h6 class="mb-0 text-primary">
-                                <i class="fas fa-calculator me-2"></i>Rincian Denda
+                                <i class="fas fa-calculator me-2"></i> Rincian Denda
                             </h6>
                         </div>
                         <div class="card-body p-3">
@@ -249,6 +249,7 @@
 
     #sanksiModal .text-primary {
         color: #007bff !important;
+        font-size: 18px;
     }
 
     #sanksiModal .bg-primary {
@@ -614,9 +615,10 @@
                 statusDiv.innerHTML = `
                 <div class="alert alert-warning border-0 shadow-sm">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
                         <div>
-                            <strong>Terlambat ${currentData.hari_terlambat} hari</strong><br>
+                            <strong>Terlambat ${currentData.hari_terlambat} hari</strong>
+                            <i class="fas fa-exclamation-triangle fa-lg text-warning"></i>
+                            <br>
                             <small>Denda keterlambatan: ${formatRupiah(currentData.hari_terlambat * currentData.denda_per_hari)}</small>
                         </div>
                     </div>
@@ -626,9 +628,11 @@
                 statusDiv.innerHTML = `
                 <div class="alert alert-success border-0 shadow-sm">
                     <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle fa-2x text-success me-3"></i>
+
                         <div>
-                            <strong>Tidak Terlambat</strong><br>
+                            <strong>Tidak Terlambat</strong>
+                            <i class="fas fa-check-circle fa-lg text-success"></i>
+                            <br>
                             <small>Pengembalian tepat waktu</small>
                         </div>
                     </div>

@@ -233,9 +233,12 @@
                                                         </span>
                                                     @endif
                                                 @elseif ($item->status == 'Terlambat')
-                                                    <span class="badge" style="color: #dc3545;">{{ $item->status }}
-                                                        ({{ $item->is_late ? $item->late_days : '?' }} hari)
-                                                    </span>
+                                                    @if ($item->is_late && $item->late_days > 0)
+                                                        <span class="badge" style="color: #dc3545;">Terlambat
+                                                            ({{ $item->late_days }} hari)</span>
+                                                    @else
+                                                        <span class="badge" style="color: #ffc107;">Dipinjam</span>
+                                                    @endif
                                                 @elseif ($item->status == 'Dibatalkan')
                                                     <span class="badge" style="color: #dc3545;">{{ $item->status }}
                                                     </span>

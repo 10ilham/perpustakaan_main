@@ -18,7 +18,7 @@
         </ul>
 
         <br>
-        <!-- Filter untuk Sanksi-->
+        <!-- Area Filter untuk Sanksi-->
 
         <div class="filter">
             <div class="card">
@@ -26,7 +26,7 @@
                     <h3>Filter Sanksi</h3>
                 </div>
                 <div class="form-group" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 10px;">
-                    {{--  Level admin --}}
+                    {{-- Filter Anggota - Hanya untuk Admin --}}
                     @if (auth()->user()->level == 'admin')
                         <select id="filterAnggota" class="form-control" style="max-width: 180px; height: 40px;">
                             <option value="">Semua Anggota</option>
@@ -39,7 +39,7 @@
                     <select id="filterSanksi" class="form-control" style="max-width: 180px; height: 40px;">
                         <option value="">Semua Sanksi</option>
                         <option value="keterlambatan">Keterlambatan</option>
-                        <option value="rusak_parah">Rusak Parah atau Hilang</option>
+                        <option value="rusak_hilang">Rusak/Hilang</option>
                     </select>
 
                     <select id="filterStatus" class="form-control" style="max-width: 180px; height: 40px;">
@@ -48,11 +48,12 @@
                         <option value="sudah_bayar">Sudah Bayar</option>
                     </select>
 
-                    <button type="button" class="btn btn-primary" style="padding: 5px 15px;" onclick="applyFilters()">
+                    <button type="submit" class="btn btn-primary" style="padding: 5px 15px;" onclick="applyFilters()">
                         <i class='bx bx-filter'></i> Filter
                     </button>
 
-                    <button type="button" class="btn btn-secondary" style="padding: 5px 15px;" onclick="resetFilters()">
+                    <button id="resetBtn" class="btn btn-secondary" style="padding: 5px 15px; display: none;"
+                        onclick="resetFilters()">
                         <i class='bx bx-reset'></i> Reset
                     </button>
                 </div>
@@ -69,15 +70,18 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Peminjam</th>
+                                <th>Nama Peminjam</th>
+                                @if (auth()->user()->level == 'admin')
+                                    <th>Level</th>
+                                @endif
                                 <th>Buku</th>
+                                <th>Tanggal Sanksi</th>
                                 <th>Jenis Sanksi</th>
                                 <th>Hari Terlambat</th>
                                 <th>Denda Keterlambatan</th>
                                 <th>Denda Kerusakan</th>
                                 <th>Total Denda</th>
                                 <th>Status Bayar</th>
-                                <th>Tanggal Sanksi</th>
                                 @if (auth()->user()->level == 'admin')
                                     <th>Aksi</th>
                                 @endif
@@ -89,11 +93,18 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>
                                         <strong>{{ $item->peminjaman->user->nama ?? $item->peminjaman->user->name }}</strong><br>
-                                        <small class="text-muted">{{ ucfirst($item->peminjaman->user->level) }}</small>
                                     </td>
+                                    @if (auth()->user()->level == 'admin')
+                                    <td>
+                                        <strong>{{ ucfirst($item->peminjaman->user->level) }}</strong>
+                                    </td>
+                                    @endif
                                     <td>
                                         <strong>{{ $item->peminjaman->buku->judul }}</strong><br>
-                                        <small class="text-muted">{{ $item->peminjaman->buku->kode_buku }}</small>
+                                        {{-- <small class="text-muted">{{ $item->peminjaman->buku->kode_buku }}</small> --}}
+                                    </td>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}
                                     </td>
                                     <td>
                                         @php
@@ -103,10 +114,16 @@
                                             <span
                                                 class="badge
                                                 @if ($jenis == 'keterlambatan') badge-warning
-                                                @elseif($jenis == 'rusak_parah') badge-danger
+                                                @elseif($jenis == 'rusak_hilang') badge-danger
                                                 @else badge-dark @endif
                                             ">
-                                                {{ ucfirst(str_replace('_', ' ', $jenis)) }}
+                                                @if ($jenis == 'keterlambatan')
+                                                    Keterlambatan
+                                                @elseif($jenis == 'rusak_hilang')
+                                                    Rusak/Hilang
+                                                @else
+                                                    {{ ucfirst(str_replace('_', ' ', $jenis)) }}
+                                                @endif
                                             </span>
                                         @endforeach
                                     </td>
@@ -144,9 +161,7 @@
                                             <span class="badge badge-danger">Belum Bayar</span>
                                         @endif
                                     </td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }}
-                                    </td>
+
                                     @if (auth()->user()->level == 'admin')
                                         <td>
                                             @if ($item->status_bayar == 'belum_bayar')
@@ -177,25 +192,35 @@
 
                 @if ($sanksi->count() > 0)
                     <div class="mt-3">
-                        <div class="row">
-                            <div class="col-md-6">
+                        <div class="row" id="dendaCards">
+                            <div class="col-md-4" id="cardBelumBayar">
                                 <div class="card">
                                     <div class="card-body">
                                         <h6>Total Denda yang Belum Dibayar</h6>
-                                        <h4 class="text-danger">
+                                        <h4 class="text-danger" id="totalBelumBayar">
                                             Rp
                                             {{ number_format($sanksi->where('status_bayar', 'belum_bayar')->sum('total_denda'), 0, ',', '.') }}
                                         </h4>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4" id="cardSudahBayar">
                                 <div class="card">
                                     <div class="card-body">
                                         <h6>Total Denda yang Sudah Dibayar</h6>
-                                        <h4 class="text-success">
+                                        <h4 class="text-success" id="totalSudahBayar">
                                             Rp
                                             {{ number_format($sanksi->where('status_bayar', 'sudah_bayar')->sum('total_denda'), 0, ',', '.') }}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4" id="cardTotalDenda">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6>Total Keseluruhan Denda</h6>
+                                        <h4 class="text-primary" id="totalKeseluruhan">
+                                            Rp {{ number_format($sanksi->sum('total_denda'), 0, ',', '.') }}
                                         </h4>
                                     </div>
                                 </div>
@@ -233,96 +258,257 @@
 @endsection
 
 @section('scripts')
+    <!-- DataTables Buttons Extension -->
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
+            // DataTable setup
             var table = $('#sanksiTable').DataTable({
-                "language": {
-                    "lengthMenu": "Tampilkan _MENU_ data per halaman",
-                    "zeroRecords": "Data tidak ditemukan",
-                    "info": "Menampilkan halaman _PAGE_ dari _PAGES_",
-                    "infoEmpty": "Tidak ada data tersedia",
-                    "infoFiltered": "(difilter dari _MAX_ total data)",
-                    "search": "Cari:",
-                    "paginate": {
-                        "first": "Pertama",
-                        "last": "Terakhir",
-                        "next": "Selanjutnya",
-                        "previous": "Sebelumnya"
+                responsive: true,
+                language: {
+                    lengthMenu: "Tampilkan _MENU_ data",
+                    zeroRecords: "Data tidak ditemukan",
+                    info: "Halaman _PAGE_ dari _PAGES_",
+                    infoEmpty: "Tidak ada data",
+                    infoFiltered: "(difilter dari _MAX_ data)",
+                    search: "Cari:",
+                    paginate: {
+                        first: "Pertama",
+                        last: "Terakhir",
+                        next: "Selanjutnya",
+                        previous: "Sebelumnya"
                     }
                 },
-                "pageLength": 10,
-                "lengthMenu": [
-                    [10, 25, 50, 100, -1],
-                    [10, 25, 50, 100, "Semua"]
+                pageLength: 10,
+                order: [
+                    @if (auth()->user()->level == 'admin')
+                        [4, "asc"] // Tanggal Sanksi di kolom ke-5 (index 4) untuk admin
+                    @else
+                        [3, "asc"] // Tanggal Sanksi di kolom ke-4 (index 3) untuk non-admin
+                    @endif
                 ],
-                "order": [
-                    [9, "desc"]
-                ], // Order by tanggal sanksi (column 9) descending
-                "columnDefs": [{
-                        "orderable": false,
-                        "targets": [
-                            @if (auth()->user()->level == 'admin')
-                                10
-                            @else
-                                -1
-                            @endif
-                        ]
-                    } // Disable sorting on action column
-                ]
+                columnDefs: [{
+                    orderable: false,
+                    targets: [
+                        @if (auth()->user()->level == 'admin')
+                            10
+                        @else
+                            -1
+                        @endif
+                    ]
+                }],
+                @if (auth()->user()->level == 'admin')
+                    dom: '<"export-buttons-container"B>lfrtip',
+                    buttons: [{
+                            extend: 'copy',
+                            text: '<i class="bx bx-copy"></i><span>Copy</span>',
+                            className: 'btn btn-outline-primary btn-sm export-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)' // Exclude action column
+                            }
+                        },
+                        {
+                            extend: 'csv',
+                            text: '<i class="bx bx-file"></i><span>CSV</span>',
+                            className: 'btn btn-outline-success btn-sm export-btn',
+                            filename: 'Data_Sanksi_Denda_' + new Date().toLocaleDateString('id-ID')
+                                .replace(/\//g, '-'),
+                            exportOptions: {
+                                columns: ':not(:last-child)' // Exclude action column
+                            }
+                        },
+                        {
+                            extend: 'excel',
+                            text: '<i class="bx bx-file-blank"></i><span>Excel</span>',
+                            className: 'btn btn-outline-success btn-sm export-btn',
+                            filename: 'Data_Sanksi_Denda_' + new Date().toLocaleDateString('id-ID')
+                                .replace(/\//g, '-'),
+                            title: 'Data Sanksi & Denda',
+                            exportOptions: {
+                                columns: ':not(:last-child)' // Exclude action column
+                            }
+                        },
+                        {
+                            text: '<i class="bx bxs-file-doc"></i><span>Word</span>',
+                            className: 'btn btn-outline-info btn-sm export-btn',
+                            action: function(e, dt, button, config) {
+                                // Custom Word export function
+                                var data = dt.buttons.exportData({
+                                    columns: ':not(:last-child)'
+                                });
+
+                                var wordTemplate = `
+                            <!DOCTYPE html>
+                            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+                            <head>
+                                <meta charset="utf-8">
+                                <title>Data Sanksi & Denda</title>
+                                <!--[if gte mso 9]>
+                                <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom><w:Orientation>Landscape</w:Orientation></w:WordDocument></xml>
+                                <![endif]-->
+                                <style>
+                                    @page { size: A4 landscape; margin: 0.5in; }
+                                    body { font-family: Arial, sans-serif; font-size: 10px; margin: 0; }
+                                    .header { text-align: center; margin-bottom: 15px; }
+                                    .header h2 { font-size: 14px; margin: 0 0 5px 0; }
+                                    .date { text-align: center; margin-bottom: 15px; color: #666; font-size: 9px; }
+                                    table { border-collapse: collapse; width: 100%; font-size: 8px; table-layout: fixed; }
+                                    th, td { border: 1px solid #ddd; padding: 4px; text-align: left; word-wrap: break-word; vertical-align: top; }
+                                    th { background-color: #f2f2f2; font-weight: bold; font-size: 9px; }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="header"><h2>Data Sanksi & Denda</h2></div>
+                                <div class="date"><p>Data per tanggal ${new Date().toLocaleDateString('id-ID')}</p></div>
+                                <table><thead><tr>${data.header.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                                <tbody>${data.body.map(row => `<tr>${row.map(cell => `<td>${cell.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()}</td>`).join('')}</tr>`).join('')}</tbody>
+                                </table>
+                            </body>
+                            </html>`;
+
+                                var blob = new Blob([wordTemplate], {
+                                    type: 'application/msword'
+                                });
+                                var url = URL.createObjectURL(blob);
+                                var a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'Data_Sanksi_Denda_' + new Date().toLocaleDateString(
+                                    'id-ID').replace(/\//g, '-') + '.doc';
+                                a.click();
+                                URL.revokeObjectURL(url);
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="bx bxs-file-pdf"></i><span>PDF</span>',
+                            className: 'btn btn-outline-danger btn-sm export-btn',
+                            filename: 'Data_Sanksi_Denda_' + new Date().toLocaleDateString('id-ID')
+                                .replace(/\//g, '-'),
+                            title: 'Data Sanksi & Denda',
+                            orientation: 'landscape',
+                            pageSize: 'A4',
+                            exportOptions: {
+                                columns: ':not(:last-child)' // Exclude action column
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="bx bx-printer"></i><span>Print</span>',
+                            className: 'btn btn-outline-warning btn-sm export-btn',
+                            title: 'Data Sanksi & Denda',
+                            exportOptions: {
+                                columns: ':not(:last-child)' // Exclude action column
+                            }
+                        }
+                    ]
+                @endif
             });
 
-            // Apply filters function - dipanggil ketika tombol Filter diklik
+            // Cek filter aktif
+            function hasFilter() {
+                var hasActive = false;
+                @if (auth()->user()->level == 'admin')
+                    if ($('#filterAnggota').val() !== '') hasActive = true;
+                @endif
+                if ($('#filterSanksi').val() !== '') hasActive = true;
+                if ($('#filterStatus').val() !== '') hasActive = true;
+                return hasActive;
+            }
+
+            // Update card total
+            function updateCards() {
+                var rows = table.rows({
+                    search: 'applied'
+                }).data();
+                var total = 0,
+                    belum = 0,
+                    sudah = 0;
+
+                rows.each(function(row) {
+                    @if (auth()->user()->level == 'admin')
+                        var dendaIndex = 9; // Total Denda di kolom ke-10 (index 9) untuk admin
+                        var statusIndex = 10; // Status Bayar di kolom ke-11 (index 10) untuk admin
+                    @else
+                        var dendaIndex = 8; // Total Denda di kolom ke-9 (index 8) untuk non-admin
+                        var statusIndex = 9; // Status Bayar di kolom ke-10 (index 9) untuk non-admin
+                    @endif
+
+                    var denda = parseInt($(row[dendaIndex]).text().replace(/[^\d]/g, '')) || 0;
+                    var status = $(row[statusIndex]).text();
+                    total += denda;
+                    if (status.includes('Belum')) belum += denda;
+                    if (status.includes('Sudah')) sudah += denda;
+                });
+
+                $('#totalKeseluruhan').text('Rp ' + total.toLocaleString('id-ID'));
+                $('#totalBelumBayar').text('Rp ' + belum.toLocaleString('id-ID'));
+                $('#totalSudahBayar').text('Rp ' + sudah.toLocaleString('id-ID'));
+
+                // Atur card layout
+                var filter = $('#filterStatus').val();
+                var $cards = $('#cardTotalDenda, #cardBelumBayar, #cardSudahBayar');
+                $cards.show().removeClass('col-md-6').addClass('col-md-4');
+
+                if (filter === 'belum_bayar') {
+                    $('#cardSudahBayar').hide();
+                    $('#cardTotalDenda, #cardBelumBayar').removeClass('col-md-4').addClass('col-md-6');
+                } else if (filter === 'sudah_bayar') {
+                    $('#cardBelumBayar').hide();
+                    $('#cardTotalDenda, #cardSudahBayar').removeClass('col-md-4').addClass('col-md-6');
+                }
+            }
+
+            // Apply filter
             window.applyFilters = function() {
                 @if (auth()->user()->level == 'admin')
-                    // Filter by Jenis Anggota (hanya untuk admin)
-                    var filterAnggota = $('#filterAnggota').val();
-                    if (filterAnggota === '') {
-                        table.column(1).search('');
-                    } else {
-                        table.column(1).search(filterAnggota, false, false);
-                    }
+                    table.column(1).search($('#filterAnggota').val());
+                    var jenisSanksiIndex = 5; // Jenis Sanksi di kolom ke-6 (index 5) untuk admin
+                    var statusBayarIndex = 10; // Status Bayar di kolom ke-11 (index 10) untuk admin
+                @else
+                    var jenisSanksiIndex = 4; // Jenis Sanksi di kolom ke-5 (index 4) untuk non-admin
+                    var statusBayarIndex = 9; // Status Bayar di kolom ke-10 (index 9) untuk non-admin
                 @endif
 
-                // Filter by Jenis Sanksi
-                var filterSanksi = $('#filterSanksi').val();
-                if (filterSanksi === '') {
-                    table.column(3).search('');
-                } else {
-                    var searchTerm = filterSanksi === 'keterlambatan' ? 'Keterlambatan' : 'Rusak parah';
-                    table.column(3).search(searchTerm, false, false);
-                }
+                var sanksi = $('#filterSanksi').val();
+                var status = $('#filterStatus').val();
 
-                // Filter by Status Bayar
-                var filterStatus = $('#filterStatus').val();
-                if (filterStatus === '') {
-                    table.column(8).search('');
-                } else {
-                    var searchTerm = filterStatus === 'belum_bayar' ? 'Belum Bayar' : 'Sudah Bayar';
-                    table.column(8).search(searchTerm, false, false);
-                }
+                table.column(jenisSanksiIndex).search(sanksi === 'keterlambatan' ? 'Keterlambatan' : sanksi ===
+                    'rusak_hilang' ? 'Rusak/Hilang' : '');
+                table.column(statusBayarIndex).search(status === 'belum_bayar' ? 'Belum Bayar' : status === 'sudah_bayar' ?
+                    'Sudah Bayar' : '');
 
-                // Apply all filters
                 table.draw();
+                setTimeout(updateCards, 50);
+
+                // Tampilkan tombol reset jika ada filter aktif
+                if (hasFilter()) {
+                    $('#resetBtn').show();
+                } else {
+                    $('#resetBtn').hide();
+                }
             };
 
-            // Reset filters function
+            // Reset filter
             window.resetFilters = function() {
                 @if (auth()->user()->level == 'admin')
                     $('#filterAnggota').val('');
                 @endif
-                $('#filterSanksi').val('');
-                $('#filterStatus').val('');
+                $('#filterSanksi, #filterStatus').val('');
                 table.search('').columns().search('').draw();
+                setTimeout(updateCards, 50);
+                $('#resetBtn').hide();
             };
 
-            // Show payment confirmation modal
-            window.showPaymentModal = function(sanksiId) {
-                // Set form action
-                $('#paymentForm').attr('action', '{{ route('sanksi.bayar', ':id') }}'.replace(':id',
-                    sanksiId));
-
-                // Show modal
+            // Modal pembayaran
+            window.showPaymentModal = function(id) {
+                $('#paymentForm').attr('action', '{{ route('sanksi.bayar', ':id') }}'.replace(':id', id));
                 $('#paymentModal').modal('show');
             };
         });
@@ -330,7 +516,11 @@
 @endsection
 
 @section('styles')
+    <!-- DataTables Buttons CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
+
     <style>
+        /* Tampilan untuk state kosong */
         .empty-state {
             padding: 40px 20px;
             text-align: center;
@@ -353,6 +543,7 @@
             font-size: 14px;
         }
 
+        /* Styling untuk badge */
         .badge {
             font-size: 0.75em;
             padding: 0.25em 0.5em;
@@ -379,7 +570,7 @@
             color: #fff;
         }
 
-        /* Filter styling - konsisten dengan halaman peminjaman */
+        /* Styling untuk area filter */
         .filter {
             margin-bottom: 20px;
         }
@@ -398,7 +589,7 @@
             margin-bottom: 0;
         }
 
-        /* Button styling untuk filter */
+        /* Styling untuk tombol filter */
         .filter .form-group .btn {
             height: 38px;
             display: flex;
@@ -434,7 +625,7 @@
             transform: translateY(-1px);
         }
 
-        /* Form control styling */
+        /* Styling untuk form control */
         .filter .form-control {
             height: 38px;
             border-radius: 6px;
@@ -447,7 +638,7 @@
             box-shadow: 0 0 0 0.2rem rgba(60, 145, 230, 0.25);
         }
 
-        /* DataTable custom styling */
+        /* Styling DataTable */
         .dataTables_wrapper .dataTables_length select,
         .dataTables_wrapper .dataTables_filter input {
             border-radius: 0.375rem;
@@ -460,7 +651,7 @@
             color: white !important;
         }
 
-        /* Modal Payment Styling */
+        /* Styling Modal Pembayaran */
         .modal-content {
             border-radius: 10px;
             border: none;
@@ -477,30 +668,6 @@
             color: #333;
         }
 
-        .payment-info .alert {
-            border-radius: 8px;
-            border: none;
-            background: #e8f4fd;
-            color: #0c5aa6;
-        }
-
-        .payment-details table td {
-            padding: 0.5rem 0;
-            vertical-align: top;
-        }
-
-        .payment-details table td:first-child {
-            width: 120px;
-            color: #666;
-        }
-
-        .confirmation-text {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            border-left: 4px solid #ffc107;
-        }
-
         .modal-footer {
             border-top: 1px solid #dee2e6;
             padding: 1rem 1.5rem;
@@ -509,6 +676,100 @@
         .modal-footer .btn {
             padding: 0.5rem 1.5rem;
             font-weight: 500;
+        }
+
+        /* Styling untuk DataTables Buttons */
+        .export-buttons-container {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .dt-buttons {
+            margin-bottom: 15px;
+        }
+
+        .export-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            font-size: 14px !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            min-width: 90px;
+            justify-content: center;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .export-btn i {
+            font-size: 16px;
+        }
+
+        .export-btn span {
+            font-weight: 500;
+        }
+
+        /* Custom colors for export buttons */
+        .btn-outline-primary {
+            color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #fff;
+        }
+
+        .btn-outline-success {
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+        .btn-outline-success:hover {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-outline-info {
+            color: #17a2b8;
+            border-color: #17a2b8;
+        }
+
+        .btn-outline-info:hover {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+            color: #fff;
+        }
+
+        .btn-outline-danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .btn-outline-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-outline-warning {
+            color: #ffc107;
+            border-color: #ffc107;
+        }
+
+        .btn-outline-warning:hover {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #212529;
         }
     </style>
 @endsection

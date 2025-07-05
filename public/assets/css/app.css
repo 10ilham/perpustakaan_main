@@ -823,8 +823,25 @@ footer.footer i {
     margin-bottom: 8px;
     margin-left: auto;
     margin-right: auto;
-    text-align: justify; /* Rata kiri-kanan */
+    text-align: left; /* Rata kiri untuk menghindari spasi berlebihan */
     max-width: 100%; /* Maksimal lebar teks */
+    word-wrap: break-word; /* Pecah kata panjang jika diperlukan */
+    line-height: 1.4; /* Tinggi baris yang lebih baik */
+    word-spacing: normal; /* Spasi kata normal */
+    letter-spacing: normal; /* Spasi huruf normal */
+}
+
+/* Detail buku dalam card */
+.detail-buku {
+    text-align: left;
+    width: 100%;
+}
+
+.detail-buku .card-text {
+    word-spacing: normal;
+    letter-spacing: normal;
+    text-align: left;
+    white-space: normal;
 }
 
 /* Container untuk card buku */
@@ -1910,3 +1927,162 @@ option .icon {
     display: block;
     color: #333;
 }
+
+/* Start Css untuk Halaman detail peminjaman */
+/* Style untuk penalty rules */
+.penalty-info h5 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.penalty-rules {
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border-left: 4px solid #007bff;
+}
+
+.rule-item {
+    margin: 8px 0;
+    padding: 5px 0;
+    font-size: 14px;
+    color: #495057;
+}
+
+.rule-item strong {
+    color: #212529;
+}
+
+/* Style untuk sanksi info */
+.sanksi-info h5 {
+    color: #dc3545;
+    margin-bottom: 15px;
+}
+
+.sanksi-card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 4px solid #dc3545;
+}
+
+.sanksi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.sanksi-title {
+    display: flex;
+    flex-direction: column;
+}
+
+.sanksi-title strong {
+    color: #495057;
+    font-size: 16px;
+}
+
+.sanksi-date {
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.sanksi-status .badge {
+    font-size: 0.75em;
+    padding: 0.4em 0.6em;
+}
+
+.sanksi-details {
+    margin-top: 10px;
+}
+
+.sanksi-item {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: flex-start;
+}
+/* Khusus untuk sanksi item keterangan - layout vertikal */
+.sanksi-item-keterangan {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+}
+
+.sanksi-item-keterangan .sanksi-label {
+    margin-bottom: 5px;
+    margin-right: 0;
+    min-width: auto;
+}
+
+.sanksi-label {
+    font-weight: 500;
+    color: #495057;
+    min-width: 50px;
+    margin-right: 4px;
+}
+
+.sanksi-value {
+    flex: 1;
+    color: #212529;
+}
+
+.sanksi-value .badge {
+    font-size: 0.7em;
+    margin-right: 5px;
+    margin-bottom: 2px;
+}
+
+.sanksi-keterangan {
+    background-color: #ffffff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+    font-style: normal;
+    color: #6c757d;
+}
+/* Badge styles */
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge-dark {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+/* Responsive sanksi info */
+@media (max-width: 768px) {
+    .sanksi-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .sanksi-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sanksi-label {
+        min-width: auto;
+        margin-bottom: 5px;
+        margin-right: 0;
+    }
+}
+/* End Css untuk Halaman detail peminjaman */

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // Schema::table('users', function (Blueprint $table) {
-        //     $table->timestamp('email_verified_at')->nullable();
+        //     $table->timestamp('email_verified_at')->nullable()->after('level');
         //     $table->text('email_verification_token')->nullable();
         // });
     }

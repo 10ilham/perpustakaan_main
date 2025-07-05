@@ -310,10 +310,14 @@
                                                                         style="color: #28a745; font-weight: bold">{{ $item->status }}</span>
                                                                 @endif
                                                             @elseif ($item->status == 'Terlambat')
-                                                                <span class="badge"
-                                                                    style="color: #dc3545; font-weight: bold">{{ $item->status }}
-                                                                    ({{ $item->is_late ? $item->late_days : '?' }}
-                                                                    hari)</span>
+                                                                @if ($item->is_late && $item->late_days > 0)
+                                                                    <span class="badge"
+                                                                        style="color: #dc3545; font-weight: bold">Terlambat
+                                                                        ({{ $item->late_days }} hari)</span>
+                                                                @else
+                                                                    <span class="badge"
+                                                                        style="color: #ffc107; font-weight: bold">Dipinjam</span>
+                                                                @endif
                                                             @elseif ($item->status == 'Dibatalkan')
                                                                 <span class="badge"
                                                                     style="color: #dc3545; font-weight: bold">{{ $item->status }}
@@ -465,10 +469,14 @@
                                                                         style="color: #28a745; font-weight: bold">{{ $item->status }}</span>
                                                                 @endif
                                                             @elseif ($item->status == 'Terlambat')
-                                                                <span class="badge"
-                                                                    style="color: #dc3545; font-weight: bold">{{ $item->status }}
-                                                                    ({{ $item->is_late ? $item->late_days : '?' }}
-                                                                    hari)</span>
+                                                                @if ($item->is_late && $item->late_days > 0)
+                                                                    <span class="badge"
+                                                                        style="color: #dc3545; font-weight: bold">Terlambat
+                                                                        ({{ $item->late_days }} hari)</span>
+                                                                @else
+                                                                    <span class="badge"
+                                                                        style="color: #ffc107; font-weight: bold">Dipinjam</span>
+                                                                @endif
                                                             @elseif ($item->status == 'Dibatalkan')
                                                                 <span class="badge"
                                                                     style="color: #dc3545; font-weight: bold">{{ $item->status }}
@@ -617,10 +625,14 @@
                                                                         style="color: #28a745; font-weight: bold">{{ $item->status }}</span>
                                                                 @endif
                                                             @elseif ($item->status == 'Terlambat')
-                                                                <span class="badge"
-                                                                    style="color: #dc3545; font-weight: bold">{{ $item->status }}
-                                                                    ({{ $item->is_late ? $item->late_days : '?' }}
-                                                                    hari)</span>
+                                                                @if ($item->is_late && $item->late_days > 0)
+                                                                    <span class="badge"
+                                                                        style="color: #dc3545; font-weight: bold">Terlambat
+                                                                        ({{ $item->late_days }} hari)</span>
+                                                                @else
+                                                                    <span class="badge"
+                                                                        style="color: #ffc107; font-weight: bold">Dipinjam</span>
+                                                                @endif
                                                             @elseif ($item->status == 'Dibatalkan')
                                                                 <span class="badge"
                                                                     style="color: #dc3545; font-weight: bold">{{ $item->status }}
@@ -812,9 +824,14 @@
                                                             style="color: #28a745; font-weight: bold">{{ $item->status }}</span>
                                                     @endif
                                                 @elseif ($item->status == 'Terlambat')
-                                                    <span class="badge"
-                                                        style="color: #dc3545; font-weight: bold">{{ $item->status }}
-                                                        ({{ $item->is_late ? $item->late_days : '?' }} hari)</span>
+                                                    @if ($item->is_late && $item->late_days > 0)
+                                                        <span class="badge"
+                                                            style="color: #dc3545; font-weight: bold">Terlambat
+                                                            ({{ $item->late_days }})</span>
+                                                    @else
+                                                        <span class="badge"
+                                                            style="color: #ffc107; font-weight: bold">Dipinjam</span>
+                                                    @endif
                                                 @elseif ($item->status == 'Dibatalkan')
                                                     <span class="badge"
                                                         style="color: #dc3545; font-weight: bold">{{ $item->status }}

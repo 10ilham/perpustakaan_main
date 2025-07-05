@@ -50,19 +50,19 @@
                                                 <h5 class="card-title text-center">
                                                     {{ $buku->judul }}
                                                 </h5>
-                                                <p class="card-text m-0" style="text-align: justify;">Kode Buku:
+                                                <p class="card-text m-0">Kode Buku:
                                                     {{ $buku->kode_buku }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Pengarang:
+                                                <p class="card-text m-0">Pengarang:
                                                     {{ $buku->pengarang }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Kategori:
-                                                    {{ $buku->kategori->pluck('nama')->implode(', ') }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Penerbit:
+                                                <p class="card-text m-0">Kategori:
+                                                    {{ $buku->kategori->pluck('nama_kategori')->implode(', ') }}</p>
+                                                <p class="card-text m-0">Penerbit:
                                                     {{ $buku->penerbit }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Tahun Terbit:
+                                                <p class="card-text m-0">Tahun Terbit:
                                                     {{ $buku->tahun_terbit }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Stok:
+                                                <p class="card-text m-0">Stok:
                                                     {{ $buku->stok_buku }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Status:
+                                                <p class="card-text m-0">Status:
                                                     @if ($buku->status === 'Tersedia')
                                                         <span style="color: green;">{{ $buku->status }}</span>
                                                     @elseif ($buku->status === 'Habis')

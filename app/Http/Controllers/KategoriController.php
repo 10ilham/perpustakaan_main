@@ -22,7 +22,7 @@ class KategoriController extends Controller
 
         // Ambil buku yang terkait dengan pagination dan pencarian
         $search = request('search');
-        $query = $kategori->buku();
+        $query = $kategori->buku(); // mengambil data kategori untuk setiap buku
 
         // Filter berdasarkan pencarian jika ada
         if ($search) {

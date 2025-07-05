@@ -50,18 +50,22 @@
                                                 <h5 class="card-title text-center">
                                                     {{ $peminjaman->buku->judul }}
                                                 </h5>
-                                                <p class="card-text m-0" style="text-align: justify;">Kode Buku:
+                                                <p class="card-text m-0">Kode Buku:
                                                     {{ $peminjaman->buku->kode_buku }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Pengarang:
+                                                <p class="card-text m-0">Pengarang:
                                                     {{ $peminjaman->buku->pengarang }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Kategori:
+                                                <p class="card-text m-0">Kategori:
                                                     {{ $peminjaman->buku->kategori->pluck('nama_kategori')->implode(', ') }}
                                                 </p>
-                                                <p class="card-text m-0" style="text-align: justify;">Penerbit:
+                                                <p class="card-text m-0">Penerbit:
                                                     {{ $peminjaman->buku->penerbit }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Tahun Terbit:
+                                                <p class="card-text m-0">Tahun Terbit:
                                                     {{ $peminjaman->buku->tahun_terbit }}</p>
-                                                <p class="card-text m-0" style="text-align: justify;">Stok:
+                                                <p class="card-text m-0">Harga Buku:
+                                                    <span class="text-primary">Rp
+                                                        {{ number_format($peminjaman->buku->harga_buku, 0, ',', '.') }}</span>
+                                                </p>
+                                                <p class="card-text m-0">Stok:
                                                     {{ $peminjaman->buku->stok_buku }}</p>
                                             </div>
                                         </div>
@@ -80,23 +84,26 @@
 
                             <!-- Status Peminjaman -->
                             <div class="status-badge mb-4">
-                                @if (($peminjaman->status == 'Dipinjam' || $peminjaman->status == 'Terlambat') && $peminjaman->is_late)
+                                @if (
+                                    ($peminjaman->status == 'Dipinjam' || $peminjaman->status == 'Terlambat') &&
+                                        $peminjaman->is_late &&
+                                        $peminjaman->late_days > 0)
                                     <div class="status-box status-late">
                                         <div class="icon">
                                             <i class="bx bx-error-circle"></i>
                                         </div>
                                         <div class="info">
-                                            <h4>Terlambat ({{ $peminjaman->late_days }})</h4>
+                                            <h4>Terlambat ({{ $peminjaman->late_days }} hari)</h4>
                                             <p>Buku belum dikembalikan dan sudah melewati batas waktu.</p>
                                         </div>
                                     </div>
-                                @elseif ($peminjaman->status == 'Dipinjam')
+                                @elseif ($peminjaman->status == 'Dipinjam' || ($peminjaman->status == 'Terlambat' && !$peminjaman->is_late))
                                     <div class="status-box status-borrowed">
                                         <div class="icon">
                                             <i class="bx bx-time"></i>
                                         </div>
                                         <div class="info">
-                                            <h4>{{ $peminjaman->status }}</h4>
+                                            <h4>Dipinjam</h4>
                                             <p>Buku sedang dipinjam.</p>
                                         </div>
                                     </div>
@@ -202,7 +209,8 @@
 
                             <!-- Informasi Ketentuan Denda -->
                             <div class="penalty-info mt-4">
-                                <h5><i class='bx bx-info-circle'></i> Ketentuan Denda Peminjaman</h5>
+                                <h5 style="font-size: 16px"><i class='bx bx-info-circle'></i> Ketentuan Denda Peminjaman
+                                </h5>
                                 <div class="penalty-rules">
                                     <div class="rule-item">
                                         <strong>Tidak Terlambat + Tidak Rusak:</strong> Tidak ada denda
@@ -220,10 +228,11 @@
                                 </div>
                             </div>
 
-                            <!-- Informasi Sanksi & Denda -->
+                            <!-- Informasi Sanksi -->
                             @if ($peminjaman->sanksi->isNotEmpty())
-                                <div class="sanksi-info mt-4">
-                                    <h5><i class='bx bx-receipt'></i> Informasi Sanksi & Denda</h5>
+                                <div class="sanksi-info mt-4" style="margin-top: 20px">
+                                    <h5 style="font-size: 16px"><i class='bx bx-receipt'></i> Informasi Sanksi
+                                    </h5>
                                     @foreach ($peminjaman->sanksi as $sanksi)
                                         <div class="sanksi-card">
                                             <div class="sanksi-header">
@@ -254,10 +263,16 @@
                                                                     <span
                                                                         class="badge
                                                                         @if ($jenis == 'keterlambatan') badge-warning
-                                                                        @elseif($jenis == 'rusak_parah') badge-danger
+                                                                        @elseif($jenis == 'rusak_hilang') badge-danger
                                                                         @else badge-dark @endif
                                                                     ">
-                                                                        {{ ucfirst(str_replace('_', ' ', $jenis)) }}
+                                                                        @if ($jenis == 'keterlambatan')
+                                                                            Keterlambatan
+                                                                        @elseif($jenis == 'rusak_hilang')
+                                                                            Rusak/Hilang
+                                                                        @else
+                                                                            {{ ucfirst(str_replace('_', ' ', $jenis)) }}
+                                                                        @endif
                                                                     </span>
                                                                 @endforeach
                                                             </div>
@@ -308,9 +323,10 @@
                                                 </div>
 
                                                 @if ($sanksi->keterangan)
-                                                    <div class="sanksi-item mt-2">
+                                                    <div class="sanksi-item sanksi-item-keterangan">
                                                         <span class="sanksi-label">Keterangan:</span>
-                                                        <div class="sanksi-keterangan">{{ $sanksi->keterangan }}</div>
+                                                        <div class="sanksi-keterangan">{{ $sanksi->keterangan }}
+                                                        </div>
                                                     </div>
                                                 @endif
                                             </div>
@@ -320,7 +336,7 @@
                             @endif
 
                             <div class="form-group text-end" style="margin-top: auto;">
-                                <div class="d-flex justify-content-between">
+                                <div class="d-flex justify-content-between" style="margin-top: 10px">
                                     @if (isset($ref) && $ref == 'anggota' && isset($anggota_id))
                                         <a href="{{ route('anggota.detail', $anggota_id) }}" class="btn btn-secondary">
                                             <i class="bx bx-arrow-back"></i> Kembali
@@ -401,165 +417,6 @@
 
     <!-- Include Modal Sanksi -->
     @include('components.modal-sanksi')
-
-    <style>
-        /* Style untuk card buku */
-
-
-        /* Style untuk penalty rules */
-        .penalty-info h5 {
-            color: #007bff;
-            margin-bottom: 10px;
-        }
-
-        .penalty-rules {
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
-        }
-
-        .rule-item {
-            margin: 8px 0;
-            padding: 5px 0;
-            font-size: 14px;
-            color: #495057;
-        }
-
-        .rule-item strong {
-            color: #212529;
-        }
-
-        /* Style untuk sanksi info */
-        .sanksi-info h5 {
-            color: #dc3545;
-            margin-bottom: 15px;
-        }
-
-        .sanksi-card {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #dc3545;
-        }
-
-        .sanksi-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .sanksi-title {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sanksi-title strong {
-            color: #495057;
-            font-size: 16px;
-        }
-
-        .sanksi-date {
-            color: #6c757d;
-            font-size: 12px;
-            margin-top: 2px;
-        }
-
-        .sanksi-status .badge {
-            font-size: 0.75em;
-            padding: 0.4em 0.6em;
-        }
-
-        .sanksi-details {
-            margin-top: 10px;
-        }
-
-        .sanksi-item {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .sanksi-label {
-            font-weight: 500;
-            color: #495057;
-            min-width: 140px;
-            margin-right: 10px;
-        }
-
-        .sanksi-value {
-            flex: 1;
-            color: #212529;
-        }
-
-        .sanksi-value .badge {
-            font-size: 0.7em;
-            margin-right: 5px;
-            margin-bottom: 2px;
-        }
-
-        .sanksi-keterangan {
-            background-color: #ffffff;
-            padding: 8px 12px;
-            border-radius: 4px;
-            border: 1px solid #e9ecef;
-            font-style: italic;
-            color: #6c757d;
-        }
-
-        /* Badge styles */
-        .badge {
-            font-size: 0.75em;
-            padding: 0.25em 0.5em;
-            border-radius: 0.25rem;
-            font-weight: 500;
-        }
-
-        .badge-warning {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .badge-danger {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .badge-dark {
-            background-color: #343a40;
-            color: #fff;
-        }
-
-        .badge-success {
-            background-color: #28a745;
-            color: #fff;
-        }
-
-        /* Responsive sanksi info */
-        @media (max-width: 768px) {
-            .sanksi-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .sanksi-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .sanksi-label {
-                min-width: auto;
-                margin-bottom: 5px;
-                margin-right: 0;
-            }
-        }
-    </style>
 @endsection
 
 @section('scripts')

@@ -74,7 +74,7 @@
 
         <li class="{{ request()->is('sanksi*') ? 'active' : '' }}">
             <a href="{{ route('sanksi.index') }}" class="{{ request()->routeIs('sanksi.index') ? 'active' : '' }}">
-                <i class='bx bxs-error icon'></i> Sanksi & Denda
+                <i class='bx bxs-error icon'></i> Sanksi
             </a>
         </li>
 

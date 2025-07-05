@@ -325,23 +325,66 @@ class PeminjamanController extends Controller
             $terlambat = $terlambatQuery->count();
         }
 
+        // Tambahkan informasi keterlambatan untuk setiap peminjaman di index
+        foreach ($peminjaman as $item) {
+            $tanggalBatasKembali = Carbon::parse($item->tanggal_kembali)->endOfDay();
+            $sekarang = Carbon::now();
+
+            // Logika sederhana: hanya terlambat jika sudah lewat akhir hari batas DAN belum dikembalikan
+            $isTerlambat = ($item->status === 'Dipinjam' && $sekarang->greaterThan($tanggalBatasKembali)) ||
+                ($item->status === 'Terlambat' && $sekarang->greaterThan($tanggalBatasKembali)) ||
+                $item->is_terlambat; // Untuk buku yang sudah dikembalikan
+
+            $item->is_late = $isTerlambat;
+
+            // Hitung hari terlambat dengan konsisten
+            if ($isTerlambat && ($item->status === 'Dipinjam' || $item->status === 'Terlambat')) {
+                // Untuk buku yang belum dikembalikan
+                $hariTerlambat = $this->hitungHariTerlambat($item);
+                $item->late_days = $hariTerlambat > 0 ? $hariTerlambat : 0;
+            } elseif ($item->is_terlambat && $item->jumlah_hari_terlambat) {
+                // Untuk buku yang sudah dikembalikan dengan keterlambatan
+                $item->late_days = $item->jumlah_hari_terlambat;
+            } else {
+                $item->late_days = 0;
+            }
+        }
+
         return view('peminjaman.index', compact('peminjaman', 'totalPeminjaman', 'dipinjam', 'dikembalikan', 'terlambat', 'startDate', 'endDate', 'status'));
     }
 
     // Method untuk memperbarui status peminjaman yang terlambat
     private function updateLateStatus()
     {
-        // Update status menjadi 'Terlambat' untuk peminjaman yang melewati batas
-        PeminjamanModel::where('status', 'Dipinjam')
-            ->where('tanggal_kembali', '<', Carbon::now()->format('Y-m-d'))
-            ->update(['status' => 'Terlambat']);
+        // Update status menjadi 'Terlambat' untuk peminjaman yang sudah melewati akhir hari batas
+        // Hanya terlambat jika sudah melewati jam 23:59:59 dari tanggal_kembali
+        $sekarang = Carbon::now();
+
+        // Ambil semua peminjaman dengan status 'Dipinjam'
+        $peminjamanDipinjam = PeminjamanModel::where('status', 'Dipinjam')->get();
+
+        foreach ($peminjamanDipinjam as $peminjaman) {
+            $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+
+            // Hanya update status jika sudah melewati akhir hari batas
+            if ($sekarang->greaterThan($tanggalBatasKembali)) {
+                $peminjaman->status = 'Terlambat';
+                $peminjaman->save();
+            }
+        }
 
         // Otomatis ubah status menjadi 'Dibatalkan' untuk peminjaman yang belum diambil (status Diproses) saat melewati Batas Waktu Pengembalian
-        PeminjamanModel::where('status', 'Diproses')
-            ->where('tanggal_kembali', '<', Carbon::now()->format('Y-m-d'))
-            ->update([
-                'status' => 'Dibatalkan',
-            ]);
+        $peminjamanDiproses = PeminjamanModel::where('status', 'Diproses')->get();
+
+        foreach ($peminjamanDiproses as $peminjaman) {
+            $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+
+            // Hanya update status jika sudah melewati akhir hari batas
+            if ($sekarang->greaterThan($tanggalBatasKembali)) {
+                $peminjaman->status = 'Dibatalkan';
+                $peminjaman->save();
+            }
+        }
 
         // Kembalikan stok buku untuk peminjaman yang dibatalkan
         $dibatalkanBaru = PeminjamanModel::where('status', 'Dibatalkan')
@@ -519,23 +562,27 @@ class PeminjamanController extends Controller
         $peminjaman = PeminjamanModel::with(['user', 'buku', 'sanksi'])->findOrFail($id);
 
         // Tambahkan informasi keterlambatan ke data peminjaman
-        $isTerlambat = $peminjaman->status === 'Terlambat' ||
-            $peminjaman->is_terlambat ||
-            $this->cekKeterlambatan($peminjaman);
+        // Cek apakah benar-benar terlambat (sudah lewat akhir hari batas)
+        $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+        $sekarang = Carbon::now();
+
+        // Logika sederhana: hanya terlambat jika sudah lewat akhir hari batas DAN belum dikembalikan
+        $isTerlambat = ($peminjaman->status === 'Dipinjam' && $sekarang->greaterThan($tanggalBatasKembali)) ||
+            ($peminjaman->status === 'Terlambat' && $sekarang->greaterThan($tanggalBatasKembali)) ||
+            $peminjaman->is_terlambat; // Untuk buku yang sudah dikembalikan
 
         $peminjaman->is_late = $isTerlambat;
 
         // Hitung hari terlambat dengan konsisten
-        if ($isTerlambat) {
-            // Gunakan jumlah_hari_terlambat jika sudah ada (buku sudah dikembalikan)
-            if ($peminjaman->jumlah_hari_terlambat) {
-                $peminjaman->late_days = $peminjaman->jumlah_hari_terlambat . ' hari';
-            } else {
-                // Jika belum dikembalikan, hitung dengan metode yang ada
-                $peminjaman->late_days = $this->hitungHariTerlambat($peminjaman);
-            }
+        if ($isTerlambat && ($peminjaman->status === 'Dipinjam' || $peminjaman->status === 'Terlambat')) {
+            // Untuk buku yang belum dikembalikan
+            $hariTerlambat = $this->hitungHariTerlambat($peminjaman);
+            $peminjaman->late_days = $hariTerlambat > 0 ? $hariTerlambat : 0;
+        } elseif ($peminjaman->is_terlambat && $peminjaman->jumlah_hari_terlambat) {
+            // Untuk buku yang sudah dikembalikan dengan keterlambatan
+            $peminjaman->late_days = $peminjaman->jumlah_hari_terlambat;
         } else {
-            $peminjaman->late_days = '0 hari';
+            $peminjaman->late_days = 0;
         }
 
         // Menentukan apakah menampilkan tombol konfirmasi pengembalian
@@ -550,16 +597,29 @@ class PeminjamanController extends Controller
     // Memeriksa apakah peminjaman terlambat dikembalikan
     public function cekKeterlambatan($peminjaman)
     {
-        return $peminjaman->status == 'Dipinjam' && now()->greaterThan(Carbon::parse($peminjaman->tanggal_kembali)->endOfDay());
+        // Hanya terlambat jika sudah melewati akhir hari tanggal batas kembali
+        // Jika hari ini adalah tanggal batas kembali, masih belum terlambat sampai jam 23:59:59
+        $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+        $sekarang = Carbon::now();
+
+        return $peminjaman->status == 'Dipinjam' && $sekarang->greaterThan($tanggalBatasKembali);
     }
 
     // Menghitung jumlah hari keterlambatan
     public function hitungHariTerlambat($peminjaman)
     {
-        $tanggalKembali = Carbon::parse($peminjaman->tanggal_kembali)->startOfDay();
-        $sekarang = Carbon::now()->startOfDay();
+        $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+        $sekarang = Carbon::now();
 
-        return $sekarang->diffInDays($tanggalKembali) . ' hari';
+        // Hanya hitung keterlambatan jika sudah melewati akhir hari batas
+        if ($sekarang->greaterThan($tanggalBatasKembali)) {
+            // Hitung selisih hari dari hari berikutnya setelah batas kembali
+            $hariTerlambat = Carbon::parse($peminjaman->tanggal_kembali)->addDay()->startOfDay()
+                ->diffInDays($sekarang->startOfDay()) + 1;
+            return $hariTerlambat;
+        }
+
+        return 0;
     }
 
     // Proses pengembalian buku (untuk Admin)

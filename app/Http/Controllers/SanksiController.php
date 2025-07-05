@@ -92,12 +92,12 @@ class SanksiController extends Controller
                     $jenisSanksi[] = 'keterlambatan';
                 } else if ($request->kondisi_buku === 'rusak_hilang') {
                     // Terlambat + rusak/hilang = hanya denda kerusakan (hapus keterlambatan)
-                    $jenisSanksi[] = 'rusak_parah';
+                    $jenisSanksi[] = 'rusak_hilang';
                 }
             } else {
                 if ($request->kondisi_buku === 'rusak_hilang') {
                     // Tidak terlambat + rusak/hilang = denda kerusakan
-                    $jenisSanksi[] = 'rusak_parah';
+                    $jenisSanksi[] = 'rusak_hilang';
                 }
                 // Tidak terlambat + tidak rusak = tidak ada sanksi
             }
@@ -150,7 +150,7 @@ class SanksiController extends Controller
     public function index()
     {
         $query = SanksiModel::with(['peminjaman.buku', 'peminjaman.user'])
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'asc');
 
         // Jika bukan admin, hanya tampilkan sanksi user yang sedang login
         if (Auth::user()->level !== 'admin') {

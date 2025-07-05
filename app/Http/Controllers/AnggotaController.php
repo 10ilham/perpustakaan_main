@@ -11,6 +11,7 @@ use App\Models\StaffModel;
 use App\Models\PeminjamanModel;
 use App\Models\BukuModel;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class AnggotaController extends Controller
 {
@@ -60,6 +61,31 @@ class AnggotaController extends Controller
             ->with(['buku'])
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Tambahkan informasi keterlambatan untuk setiap peminjaman seperti di PeminjamanController
+        foreach ($peminjaman as $item) {
+            $tanggalBatasKembali = Carbon::parse($item->tanggal_kembali)->endOfDay();
+            $sekarang = Carbon::now();
+
+            // Logika sederhana: hanya terlambat jika sudah lewat akhir hari batas DAN belum dikembalikan
+            $isTerlambat = ($item->status === 'Dipinjam' && $sekarang->greaterThan($tanggalBatasKembali)) ||
+                ($item->status === 'Terlambat' && $sekarang->greaterThan($tanggalBatasKembali)) ||
+                $item->is_terlambat; // Untuk buku yang sudah dikembalikan
+
+            $item->is_late = $isTerlambat;
+
+            // Hitung hari terlambat dengan konsisten
+            if ($isTerlambat && ($item->status === 'Dipinjam' || $item->status === 'Terlambat')) {
+                // Untuk buku yang belum dikembalikan, hitung dengan method yang sama seperti PeminjamanController
+                $hariTerlambat = $this->hitungHariTerlambat($item);
+                $item->late_days = $hariTerlambat > 0 ? $hariTerlambat : 0;
+            } elseif ($item->is_terlambat && $item->jumlah_hari_terlambat) {
+                // Untuk buku yang sudah dikembalikan dengan keterlambatan
+                $item->late_days = $item->jumlah_hari_terlambat;
+            } else {
+                $item->late_days = 0;
+            }
+        }
 
         return view('anggota.detail', compact('user', 'profileData', 'peminjaman', 'ref'));
     }
@@ -591,5 +617,22 @@ class AnggotaController extends Controller
             'total' => $totalPeminjaman,                    // Total semua peminjaman user (tidak termasuk 'Diproses')
             'totalInChart' => $totalInChart,                // Total peminjaman dalam periode chart
         ]);
+    }
+
+    // Menghitung jumlah hari keterlambatan (sama seperti di PeminjamanController)
+    private function hitungHariTerlambat($peminjaman)
+    {
+        $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+        $sekarang = Carbon::now();
+
+        // Hanya hitung keterlambatan jika sudah melewati akhir hari batas
+        if ($sekarang->greaterThan($tanggalBatasKembali)) {
+            // Hitung selisih hari dari hari berikutnya setelah batas kembali
+            $hariTerlambat = Carbon::parse($peminjaman->tanggal_kembali)->addDay()->startOfDay()
+                ->diffInDays($sekarang->startOfDay()) + 1;
+            return $hariTerlambat;
+        }
+
+        return 0;
     }
 }

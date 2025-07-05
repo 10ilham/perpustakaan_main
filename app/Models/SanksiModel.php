@@ -19,12 +19,6 @@ class SanksiModel extends Model
         'keterangan'
     ];
 
-    protected $casts = [
-        'denda_keterlambatan' => 'integer',
-        'denda_kerusakan' => 'integer',
-        'total_denda' => 'integer',
-    ];
-
     public function peminjaman()
     {
         return $this->belongsTo(PeminjamanModel::class, 'peminjaman_id');

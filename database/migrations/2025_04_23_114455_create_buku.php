@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('penerbit', 50);
             $table->string('tahun_terbit', 4);
             $table->text('deskripsi');
+            $table->integer('harga_buku')->default(0);
             $table->text('foto')->nullable();
             $table->unsignedInteger('total_buku')->default(0); //unsignedInteger yaitu hanya menerima nilai positif atau 0
             $table->unsignedInteger('stok_buku')->default(0);
