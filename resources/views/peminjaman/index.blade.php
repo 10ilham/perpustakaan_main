@@ -188,12 +188,13 @@
                                 value="{{ request('end_date') }}" style="width: 150px;">
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="padding: 5px 15px;">
+                        <button type="submit" class="btn-download btn-filter" style="padding: 5px 15px;">
                             <i class='bx bx-filter'></i> Filter
                         </button>
 
                         @if (request('user_type') || request('status') || request('start_date') || request('end_date'))
-                            <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary" style="padding: 5px 15px;">
+                            <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary"
+                                style="padding: 5px 15px;">
                                 <i class='bx bx-reset'></i> Reset
                             </a>
                         @endif
@@ -750,7 +751,7 @@
                                 value="{{ request('end_date') }}" style="width: 150px;">
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="padding: 5px 15px;">
+                        <button type="submit" class="btn-download btn-filter" style="padding: 5px 15px;">
                             <i class='bx bx-filter'></i> Filter
                         </button>
 
@@ -922,33 +923,6 @@
 @endsection
 
 @section('scripts')
-    <!-- Additional library for Word export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-
     <!-- File JavaScript peminjaman -->
     <script src="{{ asset('assets/js/peminjaman/peminjaman.js') }}"></script>
-
-    <style>
-        .penalty-rules {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 5px;
-            border-left: 4px solid #007bff;
-        }
-
-        .rule-item {
-            margin: 5px 0;
-            padding: 5px 0;
-            font-size: 14px;
-            color: #495057;
-        }
-
-        .rule-item strong {
-            color: #212529;
-        }
-    </style>
 @endsection

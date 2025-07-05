@@ -240,6 +240,6 @@
 @endsection
 
 @section('scripts')
-    <!-- JavaScript khusus untuk manajemen buku -->
+    <!-- JavaScript khusus untuk buku -->
     <script src="{{ asset('assets/js/buku/buku.js') }}"></script>
 @endsection

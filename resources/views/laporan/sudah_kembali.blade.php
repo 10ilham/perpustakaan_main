@@ -71,7 +71,8 @@
                             <button type="submit" class="btn-download btn-filter">
                                 <i class='bx bx-search'></i> Filter
                             </button>
-                            <a href="{{ route('laporan.sudah_kembali') }}" class="btn-download btn-reset">
+                            <a id="resetBtn" href="{{ route('laporan.sudah_kembali') }}" class="btn-download btn-reset"
+                                style="display: none;">
                                 <i class='bx bx-refresh'></i> Reset
                             </a>
                         </div>
@@ -103,7 +104,8 @@
                             <button type="submit" class="btn-download btn-filter">
                                 <i class='bx bx-search'></i> Filter
                             </button>
-                            <a href="{{ route('laporan.sudah_kembali') }}" class="btn-download btn-reset">
+                            <a id="resetBtnNonAdmin" href="{{ route('laporan.sudah_kembali') }}"
+                                class="btn-download btn-reset" style="display: none;">
                                 <i class='bx bx-refresh'></i> Reset
                             </a>
                         </div>
@@ -148,7 +150,7 @@
                                 <tr>
                                     <th>No</th>
                                     @if (auth()->user()->level == 'admin')
-                                        <th>Peminjam</th>
+                                        <th>Nama Peminjam</th>
                                         <th>Email</th>
                                         <th>Level</th>
                                     @endif
@@ -236,8 +238,7 @@
 
 
 @section('scripts')
-    <!-- Additional library for Word export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script> {{-- Javascript mengatur inputan tanggal --}}
+    {{-- Javascript mengatur inputan tanggal --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var tanggalMulaiInput = document.getElementById('tanggal_mulai');
@@ -264,6 +265,48 @@
             });
         });
     </script>
+
+    <!-- Script untuk mengontrol tombol reset -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi untuk mengecek apakah ada filter yang aktif di URL
+            function hasActiveFilter() {
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // Cek parameter GET di URL
+                if (urlParams.get('tanggal_mulai')) return true;
+                if (urlParams.get('tanggal_selesai')) return true;
+                if (urlParams.get('status')) return true;
+
+                @if (auth()->user()->level == 'admin')
+                    if (urlParams.get('level')) return true;
+                @endif
+
+                return false;
+            }
+
+            // Fungsi untuk toggle tombol reset
+            function toggleResetButton() {
+                @if (auth()->user()->level == 'admin')
+                    var resetBtn = document.getElementById('resetBtn');
+                @else
+                    var resetBtn = document.getElementById('resetBtnNonAdmin');
+                @endif
+
+                if (resetBtn) {
+                    if (hasActiveFilter()) {
+                        resetBtn.style.display = 'inline-flex';
+                    } else {
+                        resetBtn.style.display = 'none';
+                    }
+                }
+            }
+
+            // Jalankan saat halaman dimuat
+            toggleResetButton();
+        });
+    </script>
+
     <script>
         $(document).ready(function() {
             // Initialize DataTable with export buttons
@@ -311,62 +354,65 @@
                 order: [
                     [0, 'asc']
                 ], // Sort by the first column (No) in ascending order
-                dom: '<"export-buttons-container"B>lfrtip',
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/2.0.2/i18n/id.json'
-                },
-                buttons: [{
-                        extend: 'copy',
-                        text: '<i class="bx bx-copy"></i><span>Copy</span>',
-                        className: 'btn btn-outline-primary btn-sm export-btn',
-                        exportOptions: {
-                            columns: ':not(:last-child)'
-                        }
+                // Tombol export hanya untuk admin
+                @if (auth()->user()->level == 'admin')
+                    dom: '<"export-buttons-container"B>lfrtip',
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.0.2/i18n/id.json'
                     },
-                    {
-                        extend: 'csv',
-                        text: '<i class="bx bx-file"></i><span>CSV</span>',
-                        className: 'btn btn-outline-success btn-sm export-btn',
-                        filename: 'Laporan_Sudah_Dikembalikan_{{ date('d-m-Y') }}',
-                        exportOptions: {
-                            columns: ':not(:last-child)'
+                    buttons: [{
+                            extend: 'copy',
+                            text: '<i class="bx bx-copy"></i><span>Copy</span>',
+                            className: 'btn btn-outline-primary btn-sm export-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'csv',
+                            text: '<i class="bx bx-file"></i><span>CSV</span>',
+                            className: 'btn btn-outline-success btn-sm export-btn',
+                            filename: 'Laporan_Sudah_Dikembalikan_{{ date('d-m-Y') }}',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'excel',
+                            text: '<i class="bx bx-file-blank"></i><span>Excel</span>',
+                            className: 'btn btn-outline-success btn-sm export-btn',
+                            filename: 'Laporan_Sudah_Dikembalikan_{{ date('d-m-Y') }}',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            text: '<i class="bx bxs-file-doc"></i><span>Word</span>',
+                            className: 'btn btn-outline-info btn-sm export-btn',
+                            action: function(e, dt, button, config) {
+                                exportToWord(dt);
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="bx bxs-file-pdf"></i><span>PDF</span>',
+                            className: 'btn btn-outline-danger btn-sm export-btn',
+                            filename: 'Laporan_Sudah_Dikembalikan_{{ date('d-m-Y') }}',
+                            orientation: 'landscape',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="bx bx-printer"></i><span>Print</span>',
+                            className: 'btn btn-outline-warning btn-sm export-btn',
+                            exportOptions: {
+                                columns: ':not(:last-child)'
+                            }
                         }
-                    },
-                    {
-                        extend: 'excel',
-                        text: '<i class="bx bx-file-blank"></i><span>Excel</span>',
-                        className: 'btn btn-outline-success btn-sm export-btn',
-                        filename: 'Laporan_Sudah_Dikembalikan_{{ date('d-m-Y') }}',
-                        exportOptions: {
-                            columns: ':not(:last-child)'
-                        }
-                    },
-                    {
-                        text: '<i class="bx bxs-file-doc"></i><span>Word</span>',
-                        className: 'btn btn-outline-info btn-sm export-btn',
-                        action: function(e, dt, button, config) {
-                            exportToWord(dt);
-                        }
-                    },
-                    {
-                        extend: 'pdf',
-                        text: '<i class="bx bxs-file-pdf"></i><span>PDF</span>',
-                        className: 'btn btn-outline-danger btn-sm export-btn',
-                        filename: 'Laporan_Sudah_Dikembalikan_{{ date('d-m-Y') }}',
-                        orientation: 'landscape',
-                        exportOptions: {
-                            columns: ':not(:last-child)'
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        text: '<i class="bx bx-printer"></i><span>Print</span>',
-                        className: 'btn btn-outline-warning btn-sm export-btn',
-                        exportOptions: {
-                            columns: ':not(:last-child)'
-                        }
-                    }
-                ],
+                    ],
+                @endif
                 columnDefs: responsivePriorities
             });
 

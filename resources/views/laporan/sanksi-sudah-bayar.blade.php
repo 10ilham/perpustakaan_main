@@ -73,9 +73,17 @@
                         <button type="submit" class="btn-download btn-filter">
                             <i class='bx bx-search'></i> Filter
                         </button>
-                        <a href="{{ route('laporan.sanksi.sudah_bayar') }}" class="btn-download btn-reset">
-                            <i class='bx bx-refresh'></i> Reset
-                        </a>
+                        @if (auth()->user()->level == 'admin')
+                            <a id="resetBtn" href="{{ route('laporan.sanksi.sudah_bayar') }}"
+                                class="btn-download btn-reset" style="display: none;">
+                                <i class='bx bx-refresh'></i> Reset
+                            </a>
+                        @else
+                            <a id="resetBtnNonAdmin" href="{{ route('laporan.sanksi.sudah_bayar') }}"
+                                class="btn-download btn-reset" style="display: none;">
+                                <i class='bx bx-refresh'></i> Reset
+                            </a>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -106,47 +114,61 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th>No</th>
-                                    <th>Tanggal Sanksi</th>
-                                    <th>Nama Peminjam</th>
-                                    <th>Level</th>
-                                    <th>Judul Buku</th>
-                                    <th>Jenis Sanksi</th>
-                                    <th>Hari Terlambat</th>
-                                    <th>Denda Keterlambatan</th>
-                                    <th>Denda Kerusakan</th>
-                                    <th>Total Denda</th>
-                                    <th>Keterangan</th>
+                                    @if (auth()->user()->level == 'admin')
+                                        <th>Tanggal Sanksi</th>
+                                        <th>Nama Peminjam</th>
+                                        <th>Level</th>
+                                        <th>Judul Buku</th>
+                                        <th>Jenis Sanksi</th>
+                                        <th>Hari Terlambat</th>
+                                        <th>Denda Keterlambatan</th>
+                                        <th>Denda Kerusakan</th>
+                                        <th>Total Denda</th>
+                                        <th>Keterangan</th>
+                                    @else
+                                        <th>Tanggal Sanksi</th>
+                                        <th>Judul Buku</th>
+                                        <th>Jenis Sanksi</th>
+                                        <th>Hari Terlambat</th>
+                                        <th>Denda Keterlambatan</th>
+                                        <th>Denda Kerusakan</th>
+                                        <th>Total Denda</th>
+                                        <th>Keterangan</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($sanksi as $index => $item)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td>{{ $item->created_at->format('d/m/Y H:i') }}</td>
-                                        <td>{{ $item->peminjaman->user->nama }}</td>
-                                        <td>
-                                            @if ($item->peminjaman->user->level === 'siswa')
-                                                <span class="badge" style="color: #007bff; font-weight: bold">Siswa</span>
-                                            @elseif ($item->peminjaman->user->level === 'guru')
-                                                <span class="badge" style="color: #28a745; font-weight: bold">Guru</span>
-                                            @else
-                                                <span class="badge" style="color: #ffc107; font-weight: bold">Staff</span>
-                                            @endif
-                                        </td>
+                                        @if (auth()->user()->level == 'admin')
+                                            <td>{{ $item->created_at->format('d/m/Y') }}</td>
+                                            <td>{{ $item->peminjaman->user->nama }}</td>
+                                            <td>{{ ucfirst($item->peminjaman->user->level) }}</td>
+                                        @else
+                                            <td>{{ $item->created_at->format('d/m/Y') }}</td>
+                                        @endif
                                         <td>{{ $item->peminjaman->buku->judul }}</td>
                                         <td>
                                             @php
                                                 $jenisSanksi = explode(',', $item->jenis_sanksi);
-                                                $displayJenis = [];
-                                                foreach ($jenisSanksi as $jenis) {
-                                                    if ($jenis === 'keterlambatan') {
-                                                        $displayJenis[] = 'Keterlambatan';
-                                                    } elseif ($jenis === 'rusak_parah') {
-                                                        $displayJenis[] = 'Rusak Parah/Hilang';
-                                                    }
-                                                }
                                             @endphp
-                                            {{ implode(', ', $displayJenis) }}
+                                            @foreach ($jenisSanksi as $jenis)
+                                                <span
+                                                    class="badge
+                                                @if ($jenis == 'keterlambatan') badge-warning
+                                                @elseif($jenis == 'rusak_hilang') badge-danger
+                                                @else badge-dark @endif
+                                            ">
+                                                    @if ($jenis == 'keterlambatan')
+                                                        Keterlambatan
+                                                    @elseif($jenis == 'rusak_hilang')
+                                                        Rusak/Hilang
+                                                    @else
+                                                        {{ ucfirst(str_replace('_', ' ', $jenis)) }}
+                                                    @endif
+                                                </span>
+                                            @endforeach
                                         </td>
                                         <td>{{ $item->hari_terlambat }} hari</td>
                                         <td>Rp {{ number_format($item->denda_keterlambatan, 0, ',', '.') }}</td>
@@ -157,25 +179,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- Export buttons -->
-                    <div class="mt-3 text-center">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="export-buttons">
-                                    <button type="button" class="btn-download" onclick="exportToPDF()">
-                                        <i class='bx bxs-file-pdf'></i> Export PDF
-                                    </button>
-                                    <button type="button" class="btn-download" onclick="exportToExcel()">
-                                        <i class='bx bxs-file'></i> Export Excel
-                                    </button>
-                                    <button type="button" class="btn-download" onclick="printTable()">
-                                        <i class='bx bxs-printer'></i> Print
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 @else
                     <div class="empty-state"
@@ -199,104 +202,316 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Script untuk mengontrol tombol reset -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fungsi untuk mengecek apakah ada filter yang aktif di URL
+            function hasActiveFilter() {
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // Cek parameter GET di URL
+                if (urlParams.get('tanggal_mulai')) return true;
+                if (urlParams.get('tanggal_akhir')) return true;
+                if (urlParams.get('jenis_sanksi')) return true;
+
+                @if (auth()->user()->level == 'admin')
+                    if (urlParams.get('level')) return true;
+                @endif
+
+                return false;
+            }
+
+            // Fungsi untuk toggle tombol reset
+            function toggleResetButton() {
+                @if (auth()->user()->level == 'admin')
+                    var resetBtn = document.getElementById('resetBtn');
+                @else
+                    var resetBtn = document.getElementById('resetBtnNonAdmin');
+                @endif
+
+                if (resetBtn) {
+                    if (hasActiveFilter()) {
+                        resetBtn.style.display = 'inline-flex';
+                    } else {
+                        resetBtn.style.display = 'none';
+                    }
+                }
+            }
+
+            // Jalankan saat halaman dimuat
+            toggleResetButton();
+        });
+    </script>
 
     <script>
-        // Export to PDF
-        function exportToPDF() {
-            const {
-                jsPDF
-            } = window.jspdf;
-            const doc = new jsPDF('landscape');
+        $(document).ready(function() {
+            // Initialize DataTable with export buttons
+            var isAdmin = {{ auth()->user()->level == 'admin' ? 'true' : 'false' }};
 
-            // Add title
-            doc.setFontSize(16);
-            doc.text('Laporan Sanksi Sudah Bayar', 20, 20);
+            // Configure responsive priorities based on user level
+            var responsivePriorities = isAdmin ? [{
+                    responsivePriority: 1,
+                    targets: [0, 2, 4, 9]
+                }, // No, Nama, Buku, Total Denda
+                {
+                    responsivePriorities: 2,
+                    targets: [10]
+                }, // Keterangan
+                {
+                    orderable: false,
+                    targets: [-1]
+                } // Kolom terakhir tidak dapat diurutkan
+            ] : [{
+                    responsivePriority: 1,
+                    targets: [0, 2, 6]
+                }, // No, Buku, Total Denda
+                {
+                    responsivePriority: 2,
+                    targets: [7]
+                }, // Keterangan
+                {
+                    orderable: false,
+                    targets: [-1]
+                } // Kolom terakhir tidak dapat diurutkan
+            ];
 
-            // Add timestamp
-            doc.setFontSize(10);
-            doc.text(`Dicetak pada: ${new Date().toLocaleString('id-ID')}`, 20, 30);
-
-            // Prepare table data
-            const tableData = [];
-            const table = document.getElementById('dataTableExport');
-            const rows = table.querySelectorAll('tbody tr');
-
-            rows.forEach((row, index) => {
-                const cells = row.querySelectorAll('td');
-                const rowData = [];
-                cells.forEach((cell, cellIndex) => {
-                    if (cellIndex < 11) { // Limit columns to fit in PDF
-                        rowData.push(cell.textContent.trim());
-                    }
-                });
-                tableData.push(rowData);
-            });
-
-            // Add table
-            doc.autoTable({
-                head: [
-                    ['No', 'Tanggal', 'Nama', 'Level', 'Buku', 'Jenis Sanksi', 'Hari Terlambat',
-                        'Denda Keterlambatan', 'Denda Kerusakan', 'Total Denda', 'Keterangan'
-                    ]
-                ],
-                body: tableData,
-                startY: 40,
-                styles: {
-                    fontSize: 8,
-                    cellPadding: 2
-                }
-            });
-
-            // Save the PDF
-            doc.save('laporan-sanksi-sudah-bayar.pdf');
-        }
-
-        // Export to Excel
-        function exportToExcel() {
-            const table = document.getElementById('dataTableExport');
-            const workbook = XLSX.utils.table_to_book(table, {
-                sheet: 'Sanksi Sudah Bayar'
-            });
-            XLSX.writeFile(workbook, 'laporan-sanksi-sudah-bayar.xlsx');
-        }
-
-        // Print table
-        function printTable() {
-            const printWindow = window.open('', '', 'width=800,height=600');
-            const table = document.getElementById('dataTableExport').outerHTML;
-
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Laporan Sanksi Sudah Bayar</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 20px; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background-color: #f2f2f2; }
-                        .badge { padding: 2px 6px; border-radius: 3px; font-size: 12px; }
-                        h1 { color: #333; }
-                        .timestamp { color: #666; font-size: 12px; }
-                        @media print {
-                            body { margin: 0; }
-                            .no-print { display: none; }
+            $('#dataTableExport').DataTable({
+                responsive: true,
+                order: [
+                    [0, 'asc']
+                ], // Sort by the first column (No) in ascending order
+                // Tombol export hanya untuk admin
+                @if (auth()->user()->level == 'admin')
+                    dom: '<"export-buttons-container"B>lfrtip',
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.0.2/i18n/id.json'
+                    },
+                    buttons: [{
+                            extend: 'copy',
+                            text: '<i class="bx bx-copy"></i><span>Copy</span>',
+                            className: 'btn btn-outline-primary btn-sm export-btn',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'csv',
+                            text: '<i class="bx bx-file"></i><span>CSV</span>',
+                            className: 'btn btn-outline-success btn-sm export-btn',
+                            filename: 'Laporan_Sanksi_Sudah_Bayar_{{ date('d-m-Y') }}',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'excel',
+                            text: '<i class="bx bx-file-blank"></i><span>Excel</span>',
+                            className: 'btn btn-outline-success btn-sm export-btn',
+                            filename: 'Laporan_Sanksi_Sudah_Bayar_{{ date('d-m-Y') }}',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            text: '<i class="bx bxs-file-doc"></i><span>Word</span>',
+                            className: 'btn btn-outline-info btn-sm export-btn',
+                            action: function(e, dt, button, config) {
+                                exportToWord(dt);
+                            }
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="bx bxs-file-pdf"></i><span>PDF</span>',
+                            className: 'btn btn-outline-danger btn-sm export-btn',
+                            filename: 'Laporan_Sanksi_Sudah_Bayar_{{ date('d-m-Y') }}',
+                            orientation: 'landscape',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            text: '<i class="bx bx-printer"></i><span>Print</span>',
+                            className: 'btn btn-outline-warning btn-sm export-btn',
+                            exportOptions: {
+                                columns: ':visible'
+                            }
                         }
-                    </style>
-                </head>
-                <body>
-                    <h1>Laporan Sanksi Sudah Bayar</h1>
-                    <p class="timestamp">Dicetak pada: ${new Date().toLocaleString('id-ID')}</p>
-                    ${table}
-                </body>
-                </html>
-            `);
+                    ],
+                @endif
+                columnDefs: responsivePriorities
+            });
 
-            printWindow.document.close();
-            printWindow.print();
-        }
+            // Function to export table data to Word format
+            function exportToWord(dt) {
+                // Get table data
+                const data = dt.buttons.exportData({
+                    columns: ':visible'
+                });
+
+                // Different styles based on user level
+                var columnClasses, documentTitle;
+
+                if (isAdmin) {
+                    columnClasses = ['col-no', 'col-tanggal', 'col-nama', 'col-level', 'col-buku',
+                        'col-jenis', 'col-hari', 'col-denda-keterlambatan', 'col-denda-kerusakan',
+                        'col-total', 'col-keterangan'
+                    ];
+                    documentTitle = 'Laporan Sanksi Sudah Bayar';
+                } else {
+                    columnClasses = ['col-no', 'col-tanggal', 'col-buku', 'col-jenis', 'col-hari',
+                        'col-denda-keterlambatan', 'col-denda-kerusakan', 'col-total', 'col-keterangan'
+                    ];
+                    documentTitle = 'Sanksi Sudah Bayar Anda';
+                }
+
+                // Create HTML content for Word document
+                let htmlContent = `
+                    <html xmlns:o="urn:schemas-microsoft-com:office:office"
+                          xmlns:w="urn:schemas-microsoft-com:office:word"
+                          xmlns="http://www.w3.org/TR/REC-html40">
+                    <head>
+                        <meta charset="utf-8">
+                        <title>${documentTitle}</title>
+                        <!--[if gte mso 9]>
+                        <xml>
+                            <w:WordDocument>
+                                <w:View>Print</w:View>
+                                <w:Zoom>90</w:Zoom>
+                                <w:Orientation>Landscape</w:Orientation>
+                            </w:WordDocument>
+                        </xml>
+                        <![endif]-->
+                        <style>
+                            @page {
+                                size: A4 landscape;
+                                margin: 0.5in;
+                            }
+                            body {
+                                font-family: Arial, sans-serif;
+                                font-size: 10px;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            .header {
+                                text-align: center;
+                                margin-bottom: 15px;
+                            }
+                            .header h2 {
+                                font-size: 14px;
+                                margin: 0 0 5px 0;
+                            }
+                            .date {
+                                text-align: center;
+                                margin-bottom: 15px;
+                                color: #666;
+                                font-size: 9px;
+                            }
+                            table {
+                                border-collapse: collapse;
+                                width: 100%;
+                                font-size: 8px;
+                                table-layout: fixed;
+                            }
+                            th, td {
+                                border: 1px solid #ddd;
+                                padding: 4px;
+                                text-align: left;
+                                word-wrap: break-word;
+                                overflow-wrap: break-word;
+                                vertical-align: top;
+                            }
+                            th {
+                                background-color: #f2f2f2;
+                                font-weight: bold;
+                                font-size: 9px;
+                            }`;
+
+                // Add different column widths based on user level
+                if (isAdmin) {
+                    htmlContent += `
+                            /* Admin view column widths */
+                            .col-no { width: 4%; }
+                            .col-tanggal { width: 12%; }
+                            .col-nama { width: 15%; }
+                            .col-level { width: 7%; }
+                            .col-buku { width: 15%; }
+                            .col-jenis { width: 12%; }
+                            .col-hari { width: 8%; }
+                            .col-denda-keterlambatan { width: 10%; }
+                            .col-denda-kerusakan { width: 10%; }
+                            .col-total { width: 10%; }
+                            .col-keterangan { width: 7%; }`;
+                } else {
+                    htmlContent += `
+                            /* Non-admin view column widths */
+                            .col-no { width: 6%; }
+                            .col-tanggal { width: 15%; }
+                            .col-buku { width: 20%; }
+                            .col-jenis { width: 15%; }
+                            .col-hari { width: 10%; }
+                            .col-denda-keterlambatan { width: 12%; }
+                            .col-denda-kerusakan { width: 12%; }
+                            .col-total { width: 12%; }
+                            .col-keterangan { width: 8%; }`;
+                }
+
+                htmlContent += `
+                            .text-center { text-align: center; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h2>${documentTitle}</h2>
+                        </div>
+                        <div class="date">
+                            <p>Data per tanggal {{ date('d/m/Y') }}</p>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>`;
+
+                // Add headers with specific classes
+                data.header.forEach(function(header, index) {
+                    const className = columnClasses[index] || '';
+                    htmlContent += `<th class="${className}">${header}</th>`;
+                });
+
+                htmlContent += `
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                // Add data rows
+                data.body.forEach(function(row) {
+                    htmlContent += '<tr>';
+                    row.forEach(function(cell, index) {
+                        // Clean cell data (remove HTML tags and extra spaces)
+                        let cleanCell = cell.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+                        const className = columnClasses[index] || '';
+                        htmlContent += `<td class="${className}">${cleanCell}</td>`;
+                    });
+                    htmlContent += '</tr>';
+                });
+
+                htmlContent += `
+                            </tbody>
+                        </table>
+                    </body>
+                    </html>`;
+
+                // Create blob and download
+                const blob = new Blob([htmlContent], {
+                    type: 'application/msword'
+                });
+
+                const fileName = isAdmin ?
+                    'Laporan_Sanksi_Sudah_Bayar_{{ date('d-m-Y') }}.doc' :
+                    'Sanksi_Sudah_Bayar_{{ date('d-m-Y') }}.doc';
+
+                // Use FileSaver.js to download the file
+                saveAs(blob, fileName);
+            }
+        });
     </script>
 @endsection

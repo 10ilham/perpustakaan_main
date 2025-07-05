@@ -67,10 +67,10 @@
                             <div style="text-align: center;">
                                 @if ($level->level == 'siswa')
                                     <i class='bx bxs-user'
-                                        style="font-size: 3rem; color: #007bff; margin-bottom: 1rem;"></i>
+                                        style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;"></i>
                                 @elseif($level->level == 'guru')
                                     <i class='bx bxs-user-badge'
-                                        style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;"></i>
+                                        style="font-size: 3rem; color: #007bff; margin-bottom: 1rem;"></i>
                                 @else
                                     <i class='bx bxs-user-detail'
                                         style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>

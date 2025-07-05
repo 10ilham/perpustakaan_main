@@ -223,35 +223,30 @@
         }
 
         .btn-download {
-            display: inline-flex !important;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px 18px !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-            border-radius: 8px !important;
-            border: none !important;
-            transition: all 0.3s ease !important;
-            text-decoration: none !important;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 8px;
+            border: none;
+            transition: all 0.3s ease;
+            text-decoration: none;
             min-width: 100px;
             height: 42px;
             white-space: nowrap;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1) !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
             cursor: pointer;
-            color: white !important;
-            background: var(--blue) !important;
+            color: white;
+            background: var(--blue);
         }
 
         .btn-download:hover {
             transform: translateY(-2px) !important;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
             opacity: 0.9;
-        }
-
-        .btn-download i {
-            font-size: 16px !important;
-            margin-right: 6px !important;
         }
 
         /* Specific Button Colors */

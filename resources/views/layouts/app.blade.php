@@ -69,6 +69,8 @@
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
     <!-- Additional library for Word export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <!-- Library untuk export excel pada halaman buku -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
     <!-- Custom JS - should be loaded after all other libraries but before page-specific scripts -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
 

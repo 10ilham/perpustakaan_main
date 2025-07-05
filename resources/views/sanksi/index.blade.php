@@ -48,7 +48,8 @@
                         <option value="sudah_bayar">Sudah Bayar</option>
                     </select>
 
-                    <button type="submit" class="btn btn-primary" style="padding: 5px 15px;" onclick="applyFilters()">
+                    <button type="submit" class="btn-download btn-filter" style="padding: 5px 15px;"
+                        onclick="applyFilters()">
                         <i class='bx bx-filter'></i> Filter
                     </button>
 
@@ -95,9 +96,9 @@
                                         <strong>{{ $item->peminjaman->user->nama ?? $item->peminjaman->user->name }}</strong><br>
                                     </td>
                                     @if (auth()->user()->level == 'admin')
-                                    <td>
-                                        <strong>{{ ucfirst($item->peminjaman->user->level) }}</strong>
-                                    </td>
+                                        <td>
+                                            <strong>{{ ucfirst($item->peminjaman->user->level) }}</strong>
+                                        </td>
                                     @endif
                                     <td>
                                         <strong>{{ $item->peminjaman->buku->judul }}</strong><br>
@@ -129,7 +130,7 @@
                                     </td>
                                     <td>
                                         @if ($item->hari_terlambat > 0)
-                                            <span class="badge badge-warning">{{ $item->hari_terlambat }} hari</span>
+                                            <span>{{ $item->hari_terlambat }} hari</span>
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
@@ -258,15 +259,6 @@
 @endsection
 
 @section('scripts')
-    <!-- DataTables Buttons Extension -->
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
-
     <script>
         $(document).ready(function() {
             // DataTable setup
@@ -481,7 +473,8 @@
 
                 table.column(jenisSanksiIndex).search(sanksi === 'keterlambatan' ? 'Keterlambatan' : sanksi ===
                     'rusak_hilang' ? 'Rusak/Hilang' : '');
-                table.column(statusBayarIndex).search(status === 'belum_bayar' ? 'Belum Bayar' : status === 'sudah_bayar' ?
+                table.column(statusBayarIndex).search(status === 'belum_bayar' ? 'Belum Bayar' : status ===
+                    'sudah_bayar' ?
                     'Sudah Bayar' : '');
 
                 table.draw();
@@ -513,263 +506,4 @@
             };
         });
     </script>
-@endsection
-
-@section('styles')
-    <!-- DataTables Buttons CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.2/css/buttons.dataTables.min.css">
-
-    <style>
-        /* Tampilan untuk state kosong */
-        .empty-state {
-            padding: 40px 20px;
-            text-align: center;
-            color: #6c757d;
-        }
-
-        .empty-state i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 8px;
-            color: #495057;
-        }
-
-        .empty-state p {
-            margin-bottom: 0;
-            font-size: 14px;
-        }
-
-        /* Styling untuk badge */
-        .badge {
-            font-size: 0.75em;
-            padding: 0.25em 0.5em;
-            border-radius: 0.25rem;
-        }
-
-        .badge-warning {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .badge-danger {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .badge-dark {
-            background-color: #343a40;
-            color: #fff;
-        }
-
-        .badge-success {
-            background-color: #28a745;
-            color: #fff;
-        }
-
-        /* Styling untuk area filter */
-        .filter {
-            margin-bottom: 20px;
-        }
-
-        .filter .card {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
-            padding: 20px;
-        }
-
-        .filter .head h3 {
-            color: #333;
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 0;
-        }
-
-        /* Styling untuk tombol filter */
-        .filter .form-group .btn {
-            height: 38px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .filter .form-group .btn-primary {
-            background: #3c91e6;
-            border: 1px solid #3c91e6;
-            color: white;
-        }
-
-        .filter .form-group .btn-primary:hover {
-            background: #2980d1;
-            border-color: #2980d1;
-            transform: translateY(-1px);
-        }
-
-        .filter .form-group .btn-secondary {
-            background: #6c757d;
-            border: 1px solid #6c757d;
-            color: white;
-        }
-
-        .filter .form-group .btn-secondary:hover {
-            background: #5a6268;
-            border-color: #5a6268;
-            transform: translateY(-1px);
-        }
-
-        /* Styling untuk form control */
-        .filter .form-control {
-            height: 38px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 14px;
-        }
-
-        .filter .form-control:focus {
-            border-color: #3c91e6;
-            box-shadow: 0 0 0 0.2rem rgba(60, 145, 230, 0.25);
-        }
-
-        /* Styling DataTable */
-        .dataTables_wrapper .dataTables_length select,
-        .dataTables_wrapper .dataTables_filter input {
-            border-radius: 0.375rem;
-            border: 1px solid #ced4da;
-        }
-
-        .dataTables_wrapper .dataTables_paginate .paginate_button.current {
-            background: #0d6efd !important;
-            border-color: #0d6efd !important;
-            color: white !important;
-        }
-
-        /* Styling Modal Pembayaran */
-        .modal-content {
-            border-radius: 10px;
-            border: none;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #dee2e6;
-            padding: 1.5rem;
-        }
-
-        .modal-title {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .modal-footer {
-            border-top: 1px solid #dee2e6;
-            padding: 1rem 1.5rem;
-        }
-
-        .modal-footer .btn {
-            padding: 0.5rem 1.5rem;
-            font-weight: 500;
-        }
-
-        /* Styling untuk DataTables Buttons */
-        .export-buttons-container {
-            margin-bottom: 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .dt-buttons {
-            margin-bottom: 15px;
-        }
-
-        .export-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 12px !important;
-            border-radius: 6px !important;
-            font-size: 14px !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            min-width: 90px;
-            justify-content: center;
-        }
-
-        .export-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .export-btn i {
-            font-size: 16px;
-        }
-
-        .export-btn span {
-            font-weight: 500;
-        }
-
-        /* Custom colors for export buttons */
-        .btn-outline-primary {
-            color: #007bff;
-            border-color: #007bff;
-        }
-
-        .btn-outline-primary:hover {
-            background-color: #007bff;
-            border-color: #007bff;
-            color: #fff;
-        }
-
-        .btn-outline-success {
-            color: #28a745;
-            border-color: #28a745;
-        }
-
-        .btn-outline-success:hover {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: #fff;
-        }
-
-        .btn-outline-info {
-            color: #17a2b8;
-            border-color: #17a2b8;
-        }
-
-        .btn-outline-info:hover {
-            background-color: #17a2b8;
-            border-color: #17a2b8;
-            color: #fff;
-        }
-
-        .btn-outline-danger {
-            color: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .btn-outline-danger:hover {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: #fff;
-        }
-
-        .btn-outline-warning {
-            color: #ffc107;
-            border-color: #ffc107;
-        }
-
-        .btn-outline-warning:hover {
-            background-color: #ffc107;
-            border-color: #ffc107;
-            color: #212529;
-        }
-    </style>
 @endsection
