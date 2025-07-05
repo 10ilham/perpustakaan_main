@@ -32,8 +32,34 @@ function initPeminjamanIndex() {
             };
 
             // Panggil fungsi untuk menampilkan modal sanksi
-            showSanksiModal(peminjamanData);
+            if (typeof window.showSanksiModal === 'function') {
+                window.showSanksiModal(peminjamanData);
+            } else {
+                console.error('showSanksiModal function not found');
+            }
         });
+    });
+
+    // Event delegation untuk tombol yang dimuat dinamis (DataTable)
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.btn-success-peminjaman')) {
+            const button = e.target.closest('.btn-success-peminjaman');
+            
+            const peminjamanData = {
+                peminjaman_id: button.getAttribute('data-peminjaman-id'),
+                judul_buku: button.getAttribute('data-judul-buku'),
+                nama_peminjam: button.getAttribute('data-nama-peminjam'),
+                tanggal_pinjam: button.getAttribute('data-tanggal-pinjam'),
+                tanggal_kembali: button.getAttribute('data-tanggal-kembali'),
+                harga_buku: parseInt(button.getAttribute('data-harga-buku')) || 0
+            };
+
+            if (typeof window.showSanksiModal === 'function') {
+                window.showSanksiModal(peminjamanData);
+            } else {
+                console.error('showSanksiModal function not found');
+            }
+        }
     });
 
     // Handler untuk tombol hapus
@@ -488,8 +514,8 @@ function initPeminjamanDetail() {
     if (btnKonfirmasi) {
         btnKonfirmasi.addEventListener('click', function() {
             // Gunakan data yang sudah disediakan oleh halaman detail
-            if (typeof window.peminjamanDetailData !== 'undefined' && typeof showSanksiModal === 'function') {
-                showSanksiModal(window.peminjamanDetailData);
+            if (typeof window.peminjamanDetailData !== 'undefined' && typeof window.showSanksiModal === 'function') {
+                window.showSanksiModal(window.peminjamanDetailData);
             } else {
                 console.error('Data peminjaman atau fungsi showSanksiModal tidak ditemukan');
             }
@@ -783,111 +809,6 @@ function initPeminjamanManual() {
         $('#submitBtn').prop('disabled', true).html(
             '<i class="bx bx-loader bx-spin"></i> Menyimpan...');
     });
-}
-
-// ============================================================================
-// FUNGSI MODAL SANKSI (untuk halaman index dan detail)
-// ============================================================================
-
-/**
- * Fungsi untuk menampilkan modal sanksi pengembalian buku
- * Digunakan di: halaman index dan detail untuk konfirmasi pengembalian
- */
-function showSanksiModal(peminjamanData) {
-    // Pastikan modal sanksi ada
-    const sanksiModal = document.getElementById('sanksiModal');
-    if (!sanksiModal) {
-        console.error('Modal sanksi tidak ditemukan');
-        return;
-    }
-
-    // Hitung sanksi
-    const sanksi = calculateSanksi(peminjamanData.tanggal_kembali, peminjamanData.harga_buku);
-
-    // Update isi modal
-    document.getElementById('sanksiJudulBuku').textContent = peminjamanData.judul_buku;
-    document.getElementById('sanksiNamaPeminjam').textContent = peminjamanData.nama_peminjam;
-    document.getElementById('sanksiTanggalPinjam').textContent = formatTanggal(peminjamanData.tanggal_pinjam);
-    document.getElementById('sanksiTanggalKembali').textContent = formatTanggal(peminjamanData.tanggal_kembali);
-    document.getElementById('sanksiJumlahDenda').textContent = formatRupiah(sanksi.totalDenda);
-    document.getElementById('sanksiKeterangan').textContent = sanksi.keterangan;
-
-    // Update form action
-    const sanksiForm = document.getElementById('sanksiForm');
-    if (sanksiForm) {
-        sanksiForm.action = `/peminjaman/kembalikan/${peminjamanData.peminjaman_id}`;
-    }
-
-    // Tampilkan modal
-    if (typeof bootstrap !== 'undefined') {
-        const modal = new bootstrap.Modal(sanksiModal);
-        modal.show();
-    } else if (typeof $ !== 'undefined') {
-        $('#sanksiModal').modal('show');
-    }
-}
-
-/**
- * Fungsi untuk menghitung sanksi berdasarkan keterlambatan
- * Digunakan oleh: showSanksiModal
- */
-function calculateSanksi(tanggalKembali, hargaBuku = 0) {
-    const today = new Date();
-    const dueDate = new Date(tanggalKembali);
-
-    // Hitung hari keterlambatan
-    const timeDiff = today.getTime() - dueDate.getTime();
-    const daysDiff = Math.max(0, Math.ceil(timeDiff / (1000 * 3600 * 24)));
-
-    let totalDenda = 0;
-    let keterangan = '';
-
-    if (daysDiff > 0) {
-        // Terlambat
-        totalDenda = daysDiff * 1000; // Rp 1.000 per hari
-        keterangan = `Denda keterlambatan ${daysDiff} hari (Rp 1.000/hari)`;
-
-        // Jika buku rusak/hilang, ganti dengan harga buku
-        if (hargaBuku > 0) {
-            totalDenda = hargaBuku;
-            keterangan = `Buku rusak/hilang - denda sesuai harga buku`;
-        }
-    } else {
-        // Tidak terlambat
-        if (hargaBuku > 0) {
-            totalDenda = hargaBuku;
-            keterangan = `Buku rusak/hilang - denda sesuai harga buku`;
-        } else {
-            keterangan = `Tidak ada denda - dikembalikan tepat waktu`;
-        }
-    }
-
-    return {
-        hariTerlambat: daysDiff,
-        totalDenda: totalDenda,
-        keterangan: keterangan
-    };
-}
-
-/**
- * Fungsi helper untuk format tanggal Indonesia
- * Digunakan oleh: showSanksiModal
- */
-function formatTanggal(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-}
-
-/**
- * Fungsi helper untuk format rupiah
- * Digunakan oleh: showSanksiModal
- */
-function formatRupiah(amount) {
-    return 'Rp ' + Math.floor(amount).toLocaleString('id-ID');
 }
 
 // ============================================================================

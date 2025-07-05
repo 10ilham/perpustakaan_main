@@ -193,8 +193,7 @@
                         </button>
 
                         @if (request('user_type') || request('status') || request('start_date') || request('end_date'))
-                            <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary"
-                                style="padding: 5px 15px;">
+                            <a href="{{ route('peminjaman.index') }}" class="btn btn-secondary" style="padding: 5px 15px;">
                                 <i class='bx bx-reset'></i> Reset
                             </a>
                         @endif
@@ -925,4 +924,21 @@
 @section('scripts')
     <!-- File JavaScript peminjaman -->
     <script src="{{ asset('assets/js/peminjaman/peminjaman.js') }}"></script>
+
+    <!-- Script sederhana untuk mobile -->
+    <script>
+        // Mobile touch enhancement
+        if (window.innerWidth <= 768) {
+            document.addEventListener('DOMContentLoaded', function() {
+                // Re-attach handlers setelah DataTable dimuat
+                setTimeout(function() {
+                    document.querySelectorAll('.btn-success-peminjaman').forEach(function(btn) {
+                        btn.style.touchAction = 'manipulation';
+                        btn.style.minHeight = '44px';
+                        btn.style.minWidth = '44px';
+                    });
+                }, 2000);
+            });
+        }
+    </script>
 @endsection

@@ -157,6 +157,16 @@
     color: #155724;
 }
 
+/* Mobile-specific enhancements untuk tombol konfirmasi */
+@media (max-width: 768px) {
+    .btn-success-peminjaman {
+        min-height: 44px !important;
+        min-width: 44px !important;
+        touch-action: manipulation !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+}
+
 /* Large Screen (Desktop) */
 @media (min-width: 1200px) {
     #sanksiModal .modal-dialog {
