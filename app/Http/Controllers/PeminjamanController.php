@@ -118,9 +118,9 @@ class PeminjamanController extends Controller
                 });
 
                 // Exclude Diproses dan Dibatalkan dari total kecuali jika filter status adalah salah satu dari keduanya
-                if ($status != 'Diproses' && $status != 'Dibatalkan') {
-                    $totalQuery = $totalQuery->whereNotIn('status', ['Diproses', 'Dibatalkan']);
-                }
+                // if ($status != 'Diproses' && $status != 'Dibatalkan') {
+                //     $totalQuery = $totalQuery->whereNotIn('status', ['Diproses', 'Dibatalkan']);
+                // }
 
                 $dipinjamQuery = PeminjamanModel::whereHas('user', function ($query) use ($userType) {
                     $query->where('level', $userType);
@@ -204,9 +204,9 @@ class PeminjamanController extends Controller
                 $totalQuery = PeminjamanModel::query();
 
                 // Exclude Diproses dari total kecuali jika filter status adalah Diproses
-                if ($status != 'Diproses' && $status != 'Dibatalkan') {
-                    $totalQuery = $totalQuery->whereNotIn('status', ['Diproses', 'Dibatalkan']);
-                }
+                // if ($status != 'Diproses' && $status != 'Dibatalkan') {
+                //     $totalQuery = $totalQuery->whereNotIn('status', ['Diproses', 'Dibatalkan']);
+                // }
                 $dipinjamQuery = PeminjamanModel::whereIn('status', ['Dipinjam', 'Terlambat']);
                 $dikembalikanQuery = PeminjamanModel::where('status', 'Dikembalikan');
                 $terlambatQuery = PeminjamanModel::where(function ($query) {
@@ -282,9 +282,9 @@ class PeminjamanController extends Controller
             $totalQuery = PeminjamanModel::where('user_id', Auth::id());
 
             // Exclude Diproses dari total kecuali jika filter status adalah Diproses
-            if ($status != 'Diproses' && $status != 'Dibatalkan') {
-                $totalQuery = $totalQuery->whereNotIn('status', ['Diproses', 'Dibatalkan']);
-            }
+            // if ($status != 'Diproses' && $status != 'Dibatalkan') {
+            //     $totalQuery = $totalQuery->whereNotIn('status', ['Diproses', 'Dibatalkan']);
+            // }
             $dipinjamQuery = PeminjamanModel::where('user_id', Auth::id())->whereIn('status', ['Dipinjam', 'Terlambat']);
             $dikembalikanQuery = PeminjamanModel::where('user_id', Auth::id())->where('status', 'Dikembalikan');
             $terlambatQuery = PeminjamanModel::where('user_id', Auth::id())->where(function ($query) {
