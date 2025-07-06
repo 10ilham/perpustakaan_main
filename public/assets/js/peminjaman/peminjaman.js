@@ -78,6 +78,13 @@ function initPeminjamanIndex() {
         });
     });
 
+    // Set form action when opening modal
+    $('#pengambilanModal').on('show.bs.modal', function(e) {
+        var button = $(e.relatedTarget);
+        var actionUrl = button.data('action');
+        $(this).find('#pengambilan-form').attr('action', actionUrl);
+    });
+
     // Handler untuk date inputs - Filter tanggal
     const startDate = document.getElementById('start_date');
     const endDate = document.getElementById('end_date');

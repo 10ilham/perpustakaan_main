@@ -89,7 +89,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($sanksi as $index => $item)
+                            @foreach ($sanksi as $index => $item)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
@@ -176,17 +176,7 @@
                                         </td>
                                     @endif
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="{{ auth()->user()->level == 'admin' ? '11' : '10' }}" class="text-center">
-                                        <div class="empty-state">
-                                            <i class="bx bx-info-circle"></i>
-                                            <h3>Tidak ada data sanksi</h3>
-                                            <p>Belum ada sanksi atau denda yang tercatat</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>

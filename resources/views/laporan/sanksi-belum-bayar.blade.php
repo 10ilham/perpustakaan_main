@@ -100,9 +100,15 @@
                         <h3>Sanksi Belum Bayar Anda</h3>
                     @endif
                     <div class="menu">
-                        <span style="color: var(--dark-grey); font-size: 14px;">
-                            <i class='bx bx-info-circle'></i> Gunakan tombol export di bawah tabel untuk mengunduh data
-                        </span>
+                        @if (auth()->user()->level == 'admin')
+                            <span style="color: var(--dark-grey); font-size: 14px;">
+                                <i class='bx bx-info-circle'></i> Gunakan tombol export di bawah tabel untuk mengunduh data
+                            </span>
+                        @else
+                            <span style="color: var(--dark-grey); font-size: 14px;">
+                                <i class='bx bx-info-circle'></i>Data sanksi yang belum dibayar akan ditampilkan di sini
+                            </span>
+                        @endif
                     </div>
                 </div>
 

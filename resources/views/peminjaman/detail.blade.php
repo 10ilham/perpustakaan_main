@@ -389,27 +389,27 @@
                 </div>
             </div>
         </section>
+    </div>
 
-        <!-- Modal Konfirmasi Pengambilan -->
-        <div class="modal fade bootstrap-modal" id="pengambilanModal" aria-labelledby="pengambilanModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="pengambilanModalLabel">Konfirmasi Pengambilan Buku</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Apakah Anda yakin ingin mengkonfirmasi pengambilan buku ini?</p>
-                        <p>Tanggal pinjam akan diatur ke tanggal hari ini.</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <form id="pengambilan-form" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-success">Konfirmasi Pengambilan</button>
-                        </form>
-                    </div>
+    <!-- Modal Konfirmasi Pengambilan -->
+    <div class="modal fade bootstrap-modal" id="pengambilanModal" aria-labelledby="pengambilanModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pengambilanModalLabel">Konfirmasi Pengambilan Buku</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tanggal pinjam akan diatur ke tanggal hari ini.</p>
+                    <p>Apakah Anda yakin ingin mengkonfirmasi pengambilan buku ini?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <form id="pengambilan-form" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-success">Konfirmasi Pengambilan</button>
+                    </form>
                 </div>
             </div>
         </div>
