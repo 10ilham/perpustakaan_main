@@ -48,33 +48,67 @@ class PengembalianBukuNotification extends Notification implements ShouldQueue
         // Menggunakan StandardMailMessage standar Laravel yang lebih sederhana
         $mail = new MailMessage;
 
-        // Setting warna tombol ke hijau
-        $mail->level = 'success';
+        // Hitung hari terlambat
+        $today = \Carbon\Carbon::today();
+        $tanggalKembali = \Carbon\Carbon::parse($this->peminjaman->tanggal_kembali);
+        $hariTerlambat = $tanggalKembali->diffInDays($today, false);
 
-        $mail->subject('Pengingat: Batas Waktu Pengembalian Buku Hari Ini');
+        // Tentukan jenis notifikasi
+        $isTerlambat = $hariTerlambat > 0;
 
-        // Menambahkan logo langsung dalam email sebagai HTML string
+        // Setting warna tombol berdasarkan status
+        $mail->level = $isTerlambat ? 'error' : 'success';
+
+        // Subject email berdasarkan status
+        if ($isTerlambat) {
+            $mail->subject("⚠️ TERLAMBAT: Pengembalian Buku ({$hariTerlambat} hari)");
+        } else {
+            $mail->subject('🔔 Pengingat: Batas Waktu Pengembalian Buku Hari Ini');
+        }
+
+        // Greeting
         $mail->greeting('Halo ' . $notifiable->nama . ',');
 
-        // Menggunakan URL logo
+        // Menambahkan logo langsung dalam email sebagai HTML string
         $logoUrl = url('https://belajar.mtsn6pasuruan.com/__statics/img/logo.png');
-
-        // Membuat HTML untuk menampilkan logo
         $logoHtml = '<div style="text-align: center; margin-bottom: 20px;">
             <img src="' . $logoUrl . '"
                 alt="Logo Perpustakaan"
                 style="max-width: 150px; max-height: 150px;">
         </div>';
-
         $mail->line(new HtmlString($logoHtml));
 
-        // Tambahkan informasi peminjaman buku
-        $mail->line('Kami ingin mengingatkan bahwa Anda memiliki buku yang harus dikembalikan hari ini:');
-        $mail->line(new HtmlString('<strong>Judul Buku:</strong> ' . $this->peminjaman->buku->judul));
-        $mail->line(new HtmlString('<strong>No. Peminjaman:</strong> ' . $this->peminjaman->no_peminjaman));
-        $mail->line(new HtmlString('<strong>Tanggal Peminjaman:</strong> ' . \Carbon\Carbon::parse($this->peminjaman->tanggal_pinjam)->translatedFormat('d F Y'))); //translatedFormat untuk ubah format eng to indonesia
-        $mail->line(new HtmlString('<strong>Batas Waktu Pengembalian:</strong> ' . \Carbon\Carbon::parse($this->peminjaman->tanggal_kembali)->translatedFormat('d F Y')));
-        $mail->line('Mohon segera kembalikan buku tersebut sebagai bentuk tanggung jawab terhadap fasilitas perpustakaan bersama.');
+        // Pesan utama berdasarkan status
+        if ($isTerlambat) {
+            $mail->line(new HtmlString('<div style="background-color: #fee; border: 1px solid #fcc; padding: 15px; border-radius: 5px; margin: 10px 0;">'));
+            $mail->line(new HtmlString('<strong style="color: #d00;">⚠️ PERHATIAN: Buku Anda sudah terlambat ' . $hariTerlambat . ' hari!</strong>'));
+            $mail->line(new HtmlString('</div>'));
+            $mail->line('Mohon segera kembalikan buku berikut untuk menghindari sanksi lebih lanjut:');
+        } else {
+            $mail->line(new HtmlString('<div style="background-color: #eff; border: 1px solid #cdf; padding: 15px; border-radius: 5px; margin: 10px 0;">'));
+            $mail->line(new HtmlString('<strong style="color: #06c;">🔔 Pengingat: Buku harus dikembalikan hari ini!</strong>'));
+            $mail->line(new HtmlString('</div>'));
+            $mail->line('Kami mengingatkan bahwa Anda memiliki buku yang harus dikembalikan hari ini:');
+        }
+
+        // Informasi peminjaman buku
+        $mail->line(new HtmlString('<div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">'));
+        $mail->line(new HtmlString('<strong>📚 Judul Buku:</strong> ' . $this->peminjaman->buku->judul));
+        $mail->line(new HtmlString('<strong>🔢 No. Peminjaman:</strong> ' . $this->peminjaman->no_peminjaman));
+        $mail->line(new HtmlString('<strong>📅 Tanggal Peminjaman:</strong> ' . \Carbon\Carbon::parse($this->peminjaman->tanggal_pinjam)->translatedFormat('d F Y')));
+        $mail->line(new HtmlString('<strong>⏰ Batas Waktu Pengembalian:</strong> ' . \Carbon\Carbon::parse($this->peminjaman->tanggal_kembali)->translatedFormat('d F Y')));
+
+        if ($isTerlambat) {
+            $mail->line(new HtmlString('<strong style="color: #d00;">⚠️ Status:</strong> <span style="color: #d00;">Terlambat ' . $hariTerlambat . ' hari</span>'));
+        }
+        $mail->line(new HtmlString('</div>'));
+
+        // Pesan penutup berdasarkan status
+        if ($isTerlambat) {
+            $mail->line('Segera kembalikan buku untuk menghindari sanksi tambahan. Keterlambatan dapat dikenakan denda sesuai peraturan perpustakaan.');
+        } else {
+            $mail->line('Mohon segera kembalikan buku tersebut sebagai bentuk tanggung jawab terhadap fasilitas perpustakaan bersama.');
+        }
 
         // Tambahkan tombol action
         $mail->action('Lihat Detail Peminjaman', url('/peminjaman'));

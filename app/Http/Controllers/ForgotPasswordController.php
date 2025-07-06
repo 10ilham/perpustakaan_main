@@ -5,26 +5,22 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 use App\Mail\ResetPasswordMail;
 
 class ForgotPasswordController extends Controller
 {
     /**
-     * Memproses permintaan reset password
+     * Proses permintaan reset password
      */
     public function sendResetLinkEmail(Request $request)
     {
         // Validasi input email
-        $request->validate(
-            [
-                'email' => 'required|email',
-            ]
-        );
+        $request->validate(['email' => 'required|email']);
 
-        // Cari user berdasarkan email
+        // Cari user berdasarkan email - ELOQUENT
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
@@ -34,8 +30,8 @@ class ForgotPasswordController extends Controller
         // Generate token unik
         $token = Str::random(64);
 
-        // Simpan token di database
-        DB::table('password_reset_tokens')->updateOrInsert(
+        // Simpan atau update token di tabel password_resets standar Laravel
+        DB::table('password_resets')->updateOrInsert(
             ['email' => $user->email],
             [
                 'email' => $user->email,
@@ -48,22 +44,21 @@ class ForgotPasswordController extends Controller
         $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
         // Kirim email
-        try {
-            Mail::to($user->email)->send(new ResetPasswordMail([
-                'email' => $user->email,
-                'token' => $token,
-                'name' => $user->nama,
-                'resetUrl' => $resetUrl
-            ]));
+        Mail::to($user->email)->send(new ResetPasswordMail([
+            'email' => $user->email,
+            'token' => $token,
+            'name' => $user->nama,
+            'resetUrl' => $resetUrl
+        ]));
 
-            return redirect()->route('login')->with('success', 'Link reset password telah dikirim ke email Anda. Silakan cek email Anda.');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal mengirim email reset password: ' . $e->getMessage());
-        }
+        return redirect()->route('login')->with(
+            'success',
+            'Link reset password telah dikirim ke email Anda. Silakan cek email Anda.'
+        );
     }
 
     /**
-     * Menampilkan form reset password dengan token
+     * Tampilkan form reset password dengan token
      */
     public function showResetForm(Request $request, $token)
     {
@@ -71,7 +66,7 @@ class ForgotPasswordController extends Controller
     }
 
     /**
-     * Memproses reset password
+     * Proses reset password
      */
     public function reset(Request $request)
     {
@@ -90,26 +85,26 @@ class ForgotPasswordController extends Controller
             'password.confirmed' => 'Konfirmasi password tidak cocok',
         ]);
 
-        // Cek token valid
-        $updatePassword = DB::table('password_reset_tokens')
-            ->where([
-                'email' => $request->email,
-                'token' => $request->token
-            ])
-            ->first();
+        // Cek token valid di tabel password_resets standar Laravel
+        $passwordReset = DB::table('password_resets')->where([
+            'email' => $request->email,
+            'token' => $request->token
+        ])->first();
 
-        if (!$updatePassword) {
+        if (!$passwordReset) {
             return back()->withInput()->with('error', 'Token tidak valid atau sudah kadaluarsa!');
         }
 
-        // Update password user
+        // Update password user - ELOQUENT
         $user = User::where('email', $request->email)->first();
-        $user->password = bcrypt($request->password);
-        $user->save();
+        $user->update(['password' => bcrypt($request->password)]);
 
         // Hapus token setelah berhasil reset password
-        DB::table('password_reset_tokens')->where(['email' => $request->email])->delete();
+        DB::table('password_resets')->where('email', $request->email)->delete();
 
-        return redirect()->route('login')->with('success', 'Password berhasil diubah. Silakan login dengan password baru Anda.');
+        return redirect()->route('login')->with(
+            'success',
+            'Password berhasil diubah. Silakan login dengan password baru Anda.'
+        );
     }
 }

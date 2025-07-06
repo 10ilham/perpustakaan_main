@@ -21,10 +21,6 @@ allDropdown.forEach(item=> {
 	})
 })
 
-
-
-
-
 // SIDEBAR COLLAPSE
 const toggleSidebar = document.querySelector('nav .toggle-sidebar');
 const allSideDivider = document.querySelectorAll('#sidebar .divider');
@@ -65,8 +61,6 @@ toggleSidebar.addEventListener('click', function () {
 })
 
 
-
-
 sidebar.addEventListener('mouseleave', function () {
 	if(this.classList.contains('hide')) {
 		allDropdown.forEach(item=> {
@@ -94,7 +88,6 @@ sidebar.addEventListener('mouseenter', function () {
 		})
 	}
 })
-
 
 
 

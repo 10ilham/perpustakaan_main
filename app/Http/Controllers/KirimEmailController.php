@@ -8,13 +8,20 @@ use Illuminate\Support\Facades\Mail;
 
 class KirimEmailController extends Controller
 {
+    /**
+     * Tampilkan halaman kontak
+     */
     public function index()
     {
         return view('layouts.emails.kontak');
     }
 
+    /**
+     * Kirim email dari form kontak
+     */
     public function kirim(Request $request)
     {
+        // Siapkan data email
         $details = [
             'nama' => $request->nama,
             'email' => $request->email,
@@ -23,11 +30,9 @@ class KirimEmailController extends Controller
             'komentar' => $request->komentar
         ];
 
-        // Kirim email menggunakan MailSend
-        Mail::to('munawar@pnc.ac.id')->send(new MailSendLandingPage($details));
-        // Mail::to($request->email)->send(new MailSendLandingPage($details));
+        // Kirim email ke admin
+        Mail::to(env('MAIL_FROM_ADDRESS'))->send(new MailSendLandingPage($details));
 
-        // Redirect kembali dengan pesan sukses
         return back()->with('success', 'Pesan Anda telah berhasil dikirim!');
     }
 }

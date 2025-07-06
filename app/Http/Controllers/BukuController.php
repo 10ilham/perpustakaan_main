@@ -11,68 +11,60 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class BukuController extends Controller
 {
-    //Menampilkan data buku
+    /**
+     * Tampilkan daftar buku dengan filter dan pencarian - ELOQUENT
+     */
     public function index(Request $request)
     {
-        // Ambil parameter filter dan pencarian
-        $kategoriId = $request->get('kategori');
-        $status = $request->get('status');
-        $search = $request->get('search');
-
-        // Base query untuk ngeloading data kategori
+        // Query dasar dengan relasi kategori - ELOQUENT
         $query = BukuModel::with('kategori');
 
-        // Terapkan filter kategori jika ada
-        if ($kategoriId) {
-            $query->whereHas('kategori', function ($q) use ($kategoriId) {
-                $q->where('kategori.id', $kategoriId);
-            });
+        // Filter berdasarkan kategori - ELOQUENT
+        if ($request->filled('kategori')) {
+            $query->whereHas('kategori', fn($q) => $q->where('kategori.id', $request->kategori));
         }
 
-        // Terapkan filter status jika ada
-        if ($status) {
-            $query->where('status', $status);
+        // Filter berdasarkan status - ELOQUENT
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
         }
 
-        // Terapkan pencarian judul jika ada
-        if ($search) {
-            $query->where('judul', 'like', '%' . $search . '%');
+        // Filter berdasarkan pencarian judul - ELOQUENT
+        if ($request->filled('search')) {
+            $query->where('judul', 'like', '%' . $request->search . '%');
         }
 
-        // Clone query untuk perhitungan statistik, total buku, buku tersedia, dan buku habis
+        // Hitung statistik menggunakan clone query - ELOQUENT
         $totalQuery = clone $query;
+        $totalBuku = $totalQuery->count();
+        $tersedia = (clone $totalQuery)->where('status', 'Tersedia')->count();
+        $habis = (clone $totalQuery)->where('status', 'Habis')->count();
 
-        // Dapatkan hasil buku dengan pagination, maksimal menampilkan 8 buku per halaman
+        // Ambil data dengan pagination - ELOQUENT
         $buku = $query->paginate(8)->appends($request->all());
 
-        // Ambil semua kategori untuk dropdown filter
+        // Ambil semua kategori untuk dropdown - ELOQUENT
         $kategori = KategoriModel::all();
-
-        // Hitung jumlah total buku dengan filter yang sama
-        $totalBuku = $totalQuery->count();
-
-        // Hitung jumlah buku tersedia dengan filter yang sama
-        $tersediaQuery = clone $totalQuery;
-        $tersedia = $tersediaQuery->where('status', 'Tersedia')->count();
-
-        // Hitung jumlah buku habis dengan filter yang sama
-        $habisQuery = clone $totalQuery;
-        $habis = $habisQuery->where('status', 'Habis')->count();
 
         return view('buku.index', compact('buku', 'kategori', 'totalBuku', 'tersedia', 'habis'));
     }
 
-    //Menampilkan form tambah buku
+    /**
+     * Tampilkan form tambah buku
+     */
     public function tambah()
     {
+        // Ambil semua kategori untuk dropdown - ELOQUENT
         $kategori = KategoriModel::all();
         return view('buku.tambah', compact('kategori'));
     }
 
-    //Menyimpan data buku
+    /**
+     * Simpan buku baru - ELOQUENT
+     */
     public function simpan(Request $request)
     {
-        $messages = [
+       $messages = [
             'kode_buku.required' => 'Kode buku harus diisi.',
             'kode_buku.max' => 'Kode buku tidak boleh lebih dari :max karakter.',
             'kode_buku.unique' => 'Kode buku sudah ada.',
@@ -126,50 +118,39 @@ class BukuController extends Controller
             'kategori_id' => 'required|min:1',
         ], $messages);
 
-        // Ambil data admin yang sedang login, untuk mengisi id_admin
-        $adminModel = AdminModel::where('user_id', Auth::id())->first();
+        // Ambil admin yang sedang login - ELOQUENT
+        $admin = AdminModel::where('user_id', Auth::id())->first();
 
-        // Bersihkan format harga buku dari prefix Rp dan pemisah ribuan
-        $harga_buku_bersih = preg_replace('/[^0-9]/', '', $request->harga_buku);
-        $harga_buku_bersih = intval($harga_buku_bersih);
+        // Bersihkan format harga
+        $harga_buku_bersih = (int) preg_replace('/[^0-9]/', '', $request->harga_buku);
 
-        $buku = new BukuModel();
-        $buku->kode_buku = $request->kode_buku;
-        $buku->judul = $request->judul;
-        $buku->pengarang = $request->pengarang;
-        $buku->penerbit = $request->penerbit;
-        $buku->tahun_terbit = $request->tahun_terbit;
-        $buku->deskripsi = $request->deskripsi;
-        $buku->total_buku = $request->total_buku;
-        $buku->stok_buku = $request->total_buku; // Stok awal sama dengan total buku
-        $buku->harga_buku = $harga_buku_bersih;
+        // Buat buku baru - ELOQUENT
+        $buku = BukuModel::create([
+            'kode_buku' => $request->kode_buku,
+            'judul' => $request->judul,
+            'pengarang' => $request->pengarang,
+            'penerbit' => $request->penerbit,
+            'tahun_terbit' => $request->tahun_terbit,
+            'deskripsi' => $request->deskripsi,
+            'total_buku' => $request->total_buku,
+            'stok_buku' => $request->total_buku,
+            'harga_buku' => $harga_buku_bersih,
+            'id_admin' => $admin?->id,
+            'status' => $request->total_buku > 0 ? 'Tersedia' : 'Habis',
+        ]);
 
-        // Set id_admin berdasarkan admin yang sedang login
-        if ($adminModel) {
-            $buku->id_admin = $adminModel->id;
-        }
-
-        // Set status berdasarkan stok, jika <= 0, set status "Habis" jika >=0, set status "Tersedia"
-        if ($buku->stok_buku <= 0) {
-            $buku->status = 'Habis';
-        } else {
-            $buku->status = 'Tersedia';
-        }
-
-        // Simpan buku terlebih dahulu untuk mendapatkan ID
-        $buku->save();
-
-        // Setelah save, baru upload foto (sehingga ID buku tersedia)
+        // Handle upload foto
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $nama_file = $buku->id . '_' . $foto->getClientOriginalName(); // Sekarang ID buku sudah tersedia
+            $nama_file = $buku->id . '_' . $foto->getClientOriginalName();
             $foto->move(public_path('assets/img/buku/'), $nama_file);
-            $buku->foto = $nama_file;
-            // Update kembali data buku untuk menyimpan nama file foto
-            $buku->save();
+
+            // Update foto buku - ELOQUENT
+            $buku->update(['foto' => $nama_file]);
         }
 
-        if ($request->has('kategori_id')) {
+        // Attach kategori buku - ELOQUENT
+        if ($request->filled('kategori_id')) {
             $buku->kategori()->attach($request->kategori_id);
         }
 

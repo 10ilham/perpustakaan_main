@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="table-responsive p-3">
-                    <table id="dataTable" class="table align-items-center table-flush table-hover">
+                    <table id="dataTableKategori" class="table align-items-center table-flush table-hover">
                         <thead class="thead-light">
                             <tr>
                                 <th>No</th>
@@ -104,4 +104,12 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        // Set level user untuk JavaScript
+        window.userLevel = '{{ auth()->user()->level }}';
+    </script>
+    <script src="{{ asset('assets/js/kategori/kategori.js') }}"></script>
 @endsection

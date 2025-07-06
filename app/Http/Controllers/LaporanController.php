@@ -6,55 +6,43 @@ use Illuminate\Http\Request;
 use App\Models\PeminjamanModel;
 use App\Models\SanksiModel;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
 {
+    /**
+     * Halaman utama laporan dengan statistik umum
+     */
     public function index()
     {
-        // === STATISTIK UMUM ===
-        // Hitung total peminjaman (tidak termasuk buku yang masih diproses atau dibatalkan)
-        $totalPeminjaman = PeminjamanModel::where('status', '!=', 'Diproses')
-            ->where('status', '!=', 'Dibatalkan')
-            ->count();
-
-        // Hitung buku yang saat ini masih dipinjam atau terlambat dikembalikan
+        // Hitung statistik umum menggunakan ELOQUENT
+        $totalPeminjaman = PeminjamanModel::whereNotIn('status', ['Diproses', 'Dibatalkan'])->count();
         $belumKembali = PeminjamanModel::whereIn('status', ['Dipinjam', 'Terlambat'])->count();
-
-        // Hitung total buku yang sudah dikembalikan
         $sudahKembali = PeminjamanModel::where('status', 'Dikembalikan')->count();
 
-        // === HITUNG KETERLAMBATAN ===
-        // Bagian 1: Buku yang masih dipinjam tapi sudah lewat tanggal kembali
-        // (tanggal kembali lebih kecil dari hari ini = harusnya sudah dikembalikan)
+        // Hitung keterlambatan menggunakan ELOQUENT
         $terlambatMasihPinjam = PeminjamanModel::whereIn('status', ['Dipinjam', 'Terlambat'])
             ->where('tanggal_kembali', '<', now()->toDateString())
             ->count();
 
-        // Bagian 2: Buku yang sudah dikembalikan tapi terlambat
-        // (tanggal pengembalian lebih besar dari tanggal kembali yang seharusnya)
         $terlambatSudahKembali = PeminjamanModel::where('status', 'Dikembalikan')
-            ->whereRaw('DATE(tanggal_pengembalian) > DATE(tanggal_kembali)')
+            ->whereRaw('tanggal_pengembalian > tanggal_kembali')
             ->count();
 
         $terlambat = $terlambatMasihPinjam + $terlambatSudahKembali;
 
-        // === STATISTIK BERDASARKAN JENIS PENGGUNA ===
-        // Ambil data level pengguna (siswa, guru, staff) beserta jumlahnya - exclude admin
-        $statistikLevel = User::select('level', DB::raw('count(*) as total_user'))
-            ->where('level', '!=', 'admin') // Exclude admin from statistics
+        // Statistik berdasarkan level pengguna menggunakan ELOQUENT
+        $statistikLevel = User::where('level', '!=', 'admin')
             ->groupBy('level')
+            ->selectRaw('level, count(*) as total_user')
             ->get()
             ->map(function ($user) {
-                // Untuk setiap jenis pengguna, hitung total buku yang pernah dipinjam
+                // Hitung total peminjaman per level - ELOQUENT
                 $user->total_peminjaman = PeminjamanModel::whereHas('user', function ($q) use ($user) {
                     $q->where('level', $user->level);
-                })->where('status', '!=', 'Diproses')
-                    ->where('status', '!=', 'Dibatalkan')
-                    ->count();
+                })->whereNotIn('status', ['Diproses', 'Dibatalkan'])->count();
 
-                // Untuk setiap jenis pengguna, hitung buku yang sedang dipinjam saat ini
+                // Hitung sedang dipinjam per level - ELOQUENT
                 $user->sedang_pinjam = PeminjamanModel::whereHas('user', function ($q) use ($user) {
                     $q->where('level', $user->level);
                 })->whereIn('status', ['Dipinjam', 'Terlambat'])->count();
@@ -72,49 +60,45 @@ class LaporanController extends Controller
     }
 
     /**
-     * Menampilkan daftar buku yang belum dikembalikan
-     *
-     * Fungsi ini menampilkan daftar buku yang masih dipinjam atau terlambat
-     * dengan berbagai filter berdasarkan tanggal dan jenis pengguna
+     * Laporan buku yang belum dikembalikan
      */
     public function belumKembali(Request $request)
     {
-        // Dapatkan semua peminjaman dengan status 'Dipinjam' atau 'Terlambat'
-        $query = PeminjamanModel::with(['user', 'buku'])  // Load relasi user dan buku
+        // Query dasar dengan relasi - ELOQUENT
+        $query = PeminjamanModel::with(['user', 'buku'])
             ->whereIn('status', ['Dipinjam', 'Terlambat']);
 
-        // Filter data untuk non-admin: hanya tampilkan data peminjaman mereka sendiri
+        // Filter untuk non-admin - ELOQUENT
         if (Auth::user()->level !== 'admin') {
             $query->where('user_id', Auth::id());
         }
 
-        // Filter berdasarkan tanggal jika ada
-        if ($request->has('tanggal_mulai') && $request->tanggal_mulai) {
+        // Filter berdasarkan tanggal - ELOQUENT
+        if ($request->filled('tanggal_mulai')) {
             $query->whereDate('tanggal_pinjam', '>=', $request->tanggal_mulai);
         }
 
-        if ($request->has('tanggal_selesai') && $request->tanggal_selesai) {
+        if ($request->filled('tanggal_selesai')) {
             $query->whereDate('tanggal_pinjam', '<=', $request->tanggal_selesai);
         }
 
-        // Filter berdasarkan level user jika ada (hanya untuk admin)
-        if (Auth::user()->level === 'admin' && $request->has('level') && $request->level) {
+        // Filter berdasarkan level (admin only) - ELOQUENT
+        if (Auth::user()->level === 'admin' && $request->filled('level')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('level', $request->level);
             });
         }
 
-        // Filter berdasarkan status sedang dipinjam (tetapi masih belum terlambat) atau terlambat jika ada
-        if ($request->has('status') && $request->status) {
+        // Filter berdasarkan status keterlambatan - ELOQUENT
+        if ($request->filled('status')) {
             if ($request->status === 'belum_terlambat') {
-                // Ambil peminjaman yang masih aktif (Dipinjam dan belum terlambat)
                 $query->where('status', 'Dipinjam')->where('tanggal_kembali', '>=', now());
             } elseif ($request->status === 'terlambat') {
-                // Ambil peminjaman yang terlambat
                 $query->where('status', 'Terlambat');
             }
         }
 
+        // Ambil data dan tambahkan informasi keterlambatan - ELOQUENT
         $peminjamanBelumKembali = $query->orderBy('tanggal_kembali', 'asc')
             ->get()
             ->map(function ($peminjaman) {
@@ -136,61 +120,50 @@ class LaporanController extends Controller
                 return $peminjaman;
             });
 
-        // Data untuk filter (hanya untuk admin)
         $levels = ['siswa', 'guru', 'staff'];
-
         return view('laporan.belum_kembali', compact('peminjamanBelumKembali', 'levels'));
     }
 
     /**
-     * Menampilkan daftar buku yang sudah dikembalikan
-     *
-     * Fungsi ini menampilkan daftar buku yang sudah dikembalikan
-     * dengan berbagai filter berdasarkan tanggal dan jenis pengguna
+     * Laporan buku yang sudah dikembalikan
      */
     public function sudahKembali(Request $request)
     {
-        // Dapatkan semua peminjaman dengan status 'Dikembalikan'
-        $query = PeminjamanModel::with(['user', 'buku'])  // Load relasi user dan buku
+        // Query dasar dengan relasi - ELOQUENT
+        $query = PeminjamanModel::with(['user', 'buku'])
             ->where('status', 'Dikembalikan');
 
-        // Filter data untuk non-admin: hanya tampilkan data peminjaman mereka sendiri
+        // Filter untuk non-admin - ELOQUENT
         if (Auth::user()->level !== 'admin') {
             $query->where('user_id', Auth::id());
         }
 
-        // Filter berdasarkan tanggal jika ada
-        if ($request->has('tanggal_mulai') && $request->tanggal_mulai) {
+        // Filter berdasarkan tanggal pengembalian - ELOQUENT
+        if ($request->filled('tanggal_mulai')) {
             $query->whereDate('tanggal_pengembalian', '>=', $request->tanggal_mulai);
         }
 
-        if ($request->has('tanggal_selesai') && $request->tanggal_selesai) {
+        if ($request->filled('tanggal_selesai')) {
             $query->whereDate('tanggal_pengembalian', '<=', $request->tanggal_selesai);
         }
 
-        // Filter berdasarkan level user jika ada (hanya untuk admin)
-        if (Auth::user()->level === 'admin' && $request->has('level') && $request->level) {
+        // Filter berdasarkan level (admin only) - ELOQUENT
+        if (Auth::user()->level === 'admin' && $request->filled('level')) {
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('level', $request->level);
             });
         }
 
-        // Filter berdasarkan status pengembalian (tepat waktu atau terlambat) jika ada
-        if ($request->has('status') && $request->status) {
+        // Filter berdasarkan status pengembalian - ELOQUENT
+        if ($request->filled('status')) {
             if ($request->status === 'tepat_waktu') {
-                // Ambil peminjaman yang dikembalikan tepat waktu atau lebih awal
-                // (tanggal_pengembalian <= tanggal_kembali)
                 $query->whereRaw('tanggal_pengembalian <= tanggal_kembali');
             } elseif ($request->status === 'terlambat') {
-                // Ambil peminjaman yang dikembalikan terlambat
-                // (tanggal_pengembalian > tanggal_kembali)
                 $query->whereRaw('tanggal_pengembalian > tanggal_kembali');
             }
         }
 
         $peminjamanSudahKembali = $query->orderBy('tanggal_pengembalian', 'desc')->get();
-
-        // Data untuk filter (hanya untuk admin)
         $levels = ['siswa', 'guru', 'staff'];
 
         return view('laporan.sudah_kembali', compact('peminjamanSudahKembali', 'levels'));
@@ -451,10 +424,10 @@ class LaporanController extends Controller
         $dateRange = $this->getDateRange($period);
 
         // === DATA DIAGRAM BERDASARKAN JENIS PENGGUNA ===
-        // Ambil data peminjaman berdasarkan level pengguna (kecuali admin karena admin tidak meminjam buku)
-        $levelData = User::select('level', DB::raw('count(*) as total_user'))
-            ->where('level', '!=', 'admin')  // Kecualikan level admin
-            ->groupBy('level')               // Kelompokkan berdasarkan level
+        // ELOQUENT - Ambil data peminjaman berdasarkan level pengguna
+        $levelData = User::selectRaw('level, count(*) as total_user')
+            ->where('level', '!=', 'admin')
+            ->groupBy('level')
             ->get()
             ->map(function ($user) use ($dateRange, $period) {
                 // Untuk konsistensi antar grafik, kita perlu menangani periode yang berbeda secara berbeda
@@ -570,7 +543,7 @@ class LaporanController extends Controller
     public function sanksi(Request $request)
     {
         $query = SanksiModel::with(['peminjaman.buku', 'peminjaman.user'])
-            ->whereHas('peminjaman.user', function($q) {
+            ->whereHas('peminjaman.user', function ($q) {
                 $q->where('level', '!=', 'admin'); // Exclude admin from sanksi reports
             });
 
@@ -594,32 +567,31 @@ class LaporanController extends Controller
         $sanksi = $query->orderBy('created_at', 'desc')->get();
 
         // Statistik sanksi (exclude admin)
-        $totalSanksi = SanksiModel::whereHas('peminjaman.user', function($q) {
+        $totalSanksi = SanksiModel::whereHas('peminjaman.user', function ($q) {
             $q->where('level', '!=', 'admin');
         })->count();
         $belumBayar = SanksiModel::where('status_bayar', 'belum_bayar')
-            ->whereHas('peminjaman.user', function($q) {
+            ->whereHas('peminjaman.user', function ($q) {
                 $q->where('level', '!=', 'admin');
             })->count();
         $sudahBayar = SanksiModel::where('status_bayar', 'sudah_bayar')
-            ->whereHas('peminjaman.user', function($q) {
+            ->whereHas('peminjaman.user', function ($q) {
                 $q->where('level', '!=', 'admin');
             })->count();
-        $totalDenda = SanksiModel::whereHas('peminjaman.user', function($q) {
+        $totalDenda = SanksiModel::whereHas('peminjaman.user', function ($q) {
             $q->where('level', '!=', 'admin');
         })->sum('total_denda');
 
-        // Statistik berdasarkan level (exclude admin since they don't make loans)
-        $statistikLevel = User::select('level',
-            DB::raw('COUNT(DISTINCT sanksi.id) as total_sanksi'),
-            DB::raw('COUNT(CASE WHEN sanksi.status_bayar = "belum_bayar" THEN 1 END) as belum_bayar'),
-            DB::raw('COUNT(CASE WHEN sanksi.status_bayar = "sudah_bayar" THEN 1 END) as sudah_bayar')
-        )
-        ->leftJoin('peminjaman', 'users.id', '=', 'peminjaman.user_id')
-        ->leftJoin('sanksi', 'peminjaman.id', '=', 'sanksi.peminjaman_id')
-        ->where('level', '!=', 'admin') // Exclude admin from statistics
-        ->groupBy('level')
-        ->get();
+        // ELOQUENT - Statistik berdasarkan level
+        $statistikLevel = User::selectRaw('level, 
+            COUNT(DISTINCT sanksi.id) as total_sanksi,
+            COUNT(CASE WHEN sanksi.status_bayar = "belum_bayar" THEN 1 END) as belum_bayar,
+            COUNT(CASE WHEN sanksi.status_bayar = "sudah_bayar" THEN 1 END) as sudah_bayar')
+            ->leftJoin('peminjaman', 'users.id', '=', 'peminjaman.user_id')
+            ->leftJoin('sanksi', 'peminjaman.id', '=', 'sanksi.peminjaman_id')
+            ->where('level', '!=', 'admin')
+            ->groupBy('level')
+            ->get();
 
         return view('laporan.sanksi', compact('sanksi', 'totalSanksi', 'belumBayar', 'sudahBayar', 'totalDenda', 'statistikLevel'));
     }
@@ -628,13 +600,13 @@ class LaporanController extends Controller
     {
         $query = SanksiModel::with(['peminjaman.buku', 'peminjaman.user'])
             ->where('status_bayar', 'belum_bayar')
-            ->whereHas('peminjaman.user', function($q) {
+            ->whereHas('peminjaman.user', function ($q) {
                 $q->where('level', '!=', 'admin'); // Exclude admin from sanksi reports
             });
 
         // Filter data untuk non-admin: hanya tampilkan sanksi mereka sendiri
         if (Auth::user()->level !== 'admin') {
-            $query->whereHas('peminjaman', function($q) {
+            $query->whereHas('peminjaman', function ($q) {
                 $q->where('user_id', Auth::id());
             });
         }
@@ -649,7 +621,7 @@ class LaporanController extends Controller
         }
 
         if ($request->filled('level')) {
-            $query->whereHas('peminjaman.user', function($q) use ($request) {
+            $query->whereHas('peminjaman.user', function ($q) use ($request) {
                 $q->where('level', $request->level);
             });
         }
@@ -663,13 +635,13 @@ class LaporanController extends Controller
         // Statistik
         $totalSanksi = $sanksi->count();
         $totalDenda = $sanksi->sum('total_denda');
-        $siswaCount = $sanksi->filter(function($item) {
+        $siswaCount = $sanksi->filter(function ($item) {
             return $item->peminjaman->user->level === 'siswa';
         })->count();
-        $guruCount = $sanksi->filter(function($item) {
+        $guruCount = $sanksi->filter(function ($item) {
             return $item->peminjaman->user->level === 'guru';
         })->count();
-        $staffCount = $sanksi->filter(function($item) {
+        $staffCount = $sanksi->filter(function ($item) {
             return $item->peminjaman->user->level === 'staff';
         })->count();
 
@@ -680,13 +652,13 @@ class LaporanController extends Controller
     {
         $query = SanksiModel::with(['peminjaman.buku', 'peminjaman.user'])
             ->where('status_bayar', 'sudah_bayar')
-            ->whereHas('peminjaman.user', function($q) {
+            ->whereHas('peminjaman.user', function ($q) {
                 $q->where('level', '!=', 'admin');
             });
 
         // Filter data untuk non-admin: hanya tampilkan sanksi mereka sendiri
         if (Auth::user()->level !== 'admin') {
-            $query->whereHas('peminjaman', function($q) {
+            $query->whereHas('peminjaman', function ($q) {
                 $q->where('user_id', Auth::id());
             });
         }
@@ -701,7 +673,7 @@ class LaporanController extends Controller
         }
 
         if ($request->filled('level')) {
-            $query->whereHas('peminjaman.user', function($q) use ($request) {
+            $query->whereHas('peminjaman.user', function ($q) use ($request) {
                 $q->where('level', $request->level);
             });
         }
@@ -714,13 +686,13 @@ class LaporanController extends Controller
 
         $totalSanksi = $sanksi->count();
         $totalDenda = $sanksi->sum('total_denda');
-        $siswaCount = $sanksi->filter(function($item) {
+        $siswaCount = $sanksi->filter(function ($item) {
             return $item->peminjaman->user->level === 'siswa';
         })->count();
-        $guruCount = $sanksi->filter(function($item) {
+        $guruCount = $sanksi->filter(function ($item) {
             return $item->peminjaman->user->level === 'guru';
         })->count();
-        $staffCount = $sanksi->filter(function($item) {
+        $staffCount = $sanksi->filter(function ($item) {
             return $item->peminjaman->user->level === 'staff';
         })->count();
 

@@ -15,9 +15,8 @@ use App\Notifications\PeminjamanManualNotification;
 
 class PeminjamanController extends Controller
 {
-    // Menampilkan daftar peminjaman
     /**
-     * Helper method untuk menerapkan filter tanggal pada query peminjaman
+     * ELOQUENT - Helper method untuk menerapkan filter tanggal pada query peminjaman
      */
     private function applyDateFilter($query, $startDate, $endDate, $status = null)
     {
@@ -31,11 +30,11 @@ class PeminjamanController extends Controller
             return $query->whereDate('tanggal_pinjam', '>=', $startDateFormatted)
                 ->whereDate('tanggal_pinjam', '<=', $endDateFormatted);
         } elseif ($startDate) {
-            // Jika hanya ada startDate (endDate telah dihapus)
+            // Jika hanya ada startDate
             $startDateFormatted = Carbon::parse($startDate)->startOfDay()->format('Y-m-d');
             return $query->whereDate('tanggal_pinjam', '>=', $startDateFormatted);
         } elseif ($endDate) {
-            // Jika hanya ada endDate (startDate telah dihapus)
+            // Jika hanya ada endDate
             $endDateFormatted = Carbon::parse($endDate)->endOfDay()->format('Y-m-d');
             return $query->whereDate('tanggal_pinjam', '<=', $endDateFormatted);
         }
@@ -43,6 +42,7 @@ class PeminjamanController extends Controller
         return $query;
     }
 
+    // ELOQUENT - Menampilkan daftar peminjaman dengan filter
     public function index(Request $request)
     {
         // Perbarui status terlambat terlebih dahulu
@@ -70,12 +70,12 @@ class PeminjamanController extends Controller
             $endDate = null;
         }
 
-        // Base query untuk statistik dan daftar peminjaman
+        // ELOQUENT - Base query untuk statistik dan daftar peminjaman
         $baseQuery = PeminjamanModel::with(['user', 'buku']);
 
         if ($userLevel == 'admin') {
             if ($userType) {
-                // Jika ada filter, tambahkan where clause
+                // ELOQUENT - Jika ada filter, tambahkan where clause
                 $peminjaman = $baseQuery->whereHas('user', function ($query) use ($userType) {
                     $query->where('level', $userType);
                 });
@@ -93,12 +93,12 @@ class PeminjamanController extends Controller
                                 });
                         });
                     } elseif ($status == 'Diproses') {
-                        // Untuk status Diproses, khusus menghitung peminjaman dengan status Diproses
+                        // ELOQUENT - Untuk status Diproses
                         $peminjaman = PeminjamanModel::whereHas('user', function ($query) use ($userType) {
                             $query->where('level', $userType);
                         })->where('status', 'Diproses');
                     } elseif ($status == 'Dibatalkan') {
-                        // Untuk status Dibatalkan, khusus menghitung peminjaman yang dibatalkan
+                        // ELOQUENT - Untuk status Dibatalkan
                         $peminjaman = PeminjamanModel::whereHas('user', function ($query) use ($userType) {
                             $query->where('level', $userType);
                         })->where('status', 'Dibatalkan');
@@ -112,7 +112,7 @@ class PeminjamanController extends Controller
                 $peminjaman = $this->applyDateFilter($peminjaman, $startDate, $endDate, $status);
                 $peminjaman = $peminjaman->orderBy('created_at', 'desc')->get();
 
-                // Query untuk statistik berdasarkan filter
+                // ELOQUENT - Query untuk statistik berdasarkan filter
                 $totalQuery = PeminjamanModel::whereHas('user', function ($query) use ($userType) {
                     $query->where('level', $userType);
                 });
@@ -881,6 +881,27 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk fitur ini.');
         }
 
+        $messages = [
+            'buku_id.required' => 'Buku harus dipilih.',
+            'buku_id.exists' => 'Buku tidak ditemukan.',
+
+            'user_level.required' => 'Level anggota harus dipilih.',
+            'user_level.in' => 'Level anggota tidak valid.',
+
+            'user_id.required' => 'Anggota harus dipilih.',
+            'user_id.exists' => 'Anggota tidak ditemukan.',
+
+            'tanggal_pinjam.required' => 'Tanggal pinjam harus diisi.',
+            'tanggal_pinjam.date' => 'Format tanggal pinjam tidak valid.',
+            'tanggal_pinjam.after_or_equal' => 'Tanggal pinjam minimal hari ini.',
+
+            'tanggal_kembali.required' => 'Tanggal kembali harus diisi.',
+            'tanggal_kembali.date' => 'Format tanggal kembali tidak valid.',
+            'tanggal_kembali.after' => 'Tanggal kembali harus setelah tanggal pinjam.',
+
+            'catatan.max' => 'Catatan tidak boleh lebih dari 500 karakter.'
+        ];
+
         $request->validate(
             [
                 'buku_id' => 'required|exists:buku,id',
@@ -890,26 +911,7 @@ class PeminjamanController extends Controller
                 'tanggal_kembali' => 'required|date|after:tanggal_pinjam',
                 'catatan' => 'nullable|string|max:500'
             ],
-            [
-                'buku_id.required' => 'Buku harus dipilih.',
-                'buku_id.exists' => 'Buku tidak ditemukan.',
-
-                'user_level.required' => 'Level anggota harus dipilih.',
-                'user_level.in' => 'Level anggota tidak valid.',
-
-                'user_id.required' => 'Anggota harus dipilih.',
-                'user_id.exists' => 'Anggota tidak ditemukan.',
-
-                'tanggal_pinjam.required' => 'Tanggal pinjam harus diisi.',
-                'tanggal_pinjam.date' => 'Format tanggal pinjam tidak valid.',
-                'tanggal_pinjam.after_or_equal' => 'Tanggal pinjam minimal hari ini.',
-
-                'tanggal_kembali.required' => 'Tanggal kembali harus diisi.',
-                'tanggal_kembali.date' => 'Format tanggal kembali tidak valid.',
-                'tanggal_kembali.after' => 'Tanggal kembali harus setelah tanggal pinjam.',
-
-                'catatan.max' => 'Catatan tidak boleh lebih dari 500 karakter.'
-            ]
+            $messages
         );
 
         // Validasi level user sesuai dengan user yang dipilih

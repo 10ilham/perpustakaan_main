@@ -9,20 +9,22 @@ use Illuminate\Support\Facades\Auth;
 
 class KategoriController extends Controller
 {
+    // ELOQUENT - Menampilkan semua kategori
     public function index()
     {
         $kategori = KategoriModel::all();
         return view('kategori.index', compact('kategori'));
     }
 
+    // ELOQUENT - Menampilkan detail kategori dan buku terkait
     public function detail($id)
     {
-        // Ambil detail kategori
+        // ELOQUENT - Ambil detail kategori berdasarkan ID
         $kategori = KategoriModel::findOrFail($id);
 
-        // Ambil buku yang terkait dengan pagination dan pencarian
+        // ELOQUENT - Ambil buku yang terkait dengan pagination dan pencarian
         $search = request('search');
-        $query = $kategori->buku(); // mengambil data kategori untuk setiap buku
+        $query = $kategori->buku();
 
         // Filter berdasarkan pencarian jika ada
         if ($search) {
@@ -36,12 +38,13 @@ class KategoriController extends Controller
         return view('kategori.detail', compact('kategori', 'bukuKategori'));
     }
 
+    // Menampilkan form tambah kategori
     public function tambah()
     {
-        // Tampilkan form tambah kategori
         return view('kategori.tambah');
     }
 
+    // ELOQUENT - Menyimpan kategori baru
     public function simpan(Request $request)
     {
         $messages = [
@@ -59,10 +62,10 @@ class KategoriController extends Controller
             'deskripsi' => 'nullable|string',
         ], $messages);
 
-        // Ambil data admin yang sedang login
+        // ELOQUENT - Ambil data admin yang sedang login
         $adminModel = AdminModel::where('user_id', Auth::id())->first();
 
-        // Simpan kategori baru dengan id_admin
+        // Siapkan data kategori
         $kategoriData = [
             'nama_kategori' => $request->nama_kategori,
             'deskripsi' => $request->deskripsi,
@@ -73,14 +76,16 @@ class KategoriController extends Controller
             $kategoriData['id_admin'] = $adminModel->id;
         }
 
+        // ELOQUENT - Simpan kategori baru
         KategoriModel::create($kategoriData);
 
         return redirect()->route('kategori.index')->with('success', 'Kategori berhasil ditambahkan');
     }
 
+    // ELOQUENT - Menampilkan form edit kategori
     public function edit($id)
     {
-        // Ambil data kategori berdasarkan ID
+        // ELOQUENT - Ambil data kategori berdasarkan ID
         $kategori = KategoriModel::findOrFail($id);
 
         // Ambil parameter referensi
@@ -89,6 +94,7 @@ class KategoriController extends Controller
         return view('kategori.edit', compact('kategori', 'ref'));
     }
 
+    // ELOQUENT - Memperbarui data kategori
     public function update(Request $request, $id)
     {
         $messages = [
@@ -96,7 +102,6 @@ class KategoriController extends Controller
             'nama_kategori.string' => 'Nama kategori harus berupa string',
             'nama_kategori.max' => 'Nama kategori tidak boleh lebih dari :max karakter',
             'nama_kategori.unique' => 'Nama kategori sudah ada',
-
             'deskripsi.string' => 'Deskripsi kategori harus berupa string',
         ];
 
@@ -106,10 +111,10 @@ class KategoriController extends Controller
             'deskripsi' => 'nullable|string',
         ], $messages);
 
-        // Ambil data admin yang sedang login, untuk mengisi id_admin
+        // ELOQUENT - Ambil data admin yang sedang login
         $adminModel = AdminModel::where('user_id', Auth::id())->first();
 
-        // Update kategori
+        // ELOQUENT - Update kategori
         $kategori = KategoriModel::findOrFail($id);
         $updateData = [
             'nama_kategori' => $request->nama_kategori,
@@ -131,12 +136,13 @@ class KategoriController extends Controller
         }
     }
 
+    // ELOQUENT - Menghapus kategori
     public function hapus($id)
     {
-        // Hapus kategori berdasarkan ID
+        // ELOQUENT - Hapus kategori berdasarkan ID
         $kategori = KategoriModel::findOrFail($id);
 
-        // Cek apakah kategori masih digunakan oleh buku
+        // ELOQUENT - Cek apakah kategori masih digunakan oleh buku
         if ($kategori->buku->count() > 0) {
             return redirect()->route('kategori.index')->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh buku.');
         }

@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\StaffModel;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\VerificationController;
 
 class StaffController extends Controller
 {
+    // ELOQUENT - Menampilkan profil staff
     public function showProfile()
     {
-        // Ambil data staff berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data staff berdasarkan user yang sedang login
         $staff = StaffModel::where('user_id', Auth::id())->first();
 
         if (!$staff) {
@@ -21,23 +23,23 @@ class StaffController extends Controller
         return view('staff.profile', compact('staff'));
     }
 
-    // Fungsi edit profile
+    // ELOQUENT - Menampilkan form edit profil staff
     public function editProfile()
     {
-        // Ambil data staff berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data staff berdasarkan user yang sedang login
         $staff = StaffModel::where('user_id', Auth::id())->first();
 
         if (!$staff) {
             return redirect()->back()->with('error', 'Data staff tidak ditemukan.');
         }
-        // Kirim data ke view untuk ditampilkan di form edit
+
         return view('staff.edit', compact('staff'));
     }
 
-    // Fungsi untuk update profile
+    // ELOQUENT - Memperbarui profil staff
     public function updateProfile(Request $request)
     {
-        // Buat pesan validasi kustom dalam bahasa Indonesia
+        // Pesan validasi kustom dalam bahasa Indonesia
         $messages = [
             'nama.required' => 'Nama lengkap wajib diisi',
             'nama.regex' => 'Nama hanya boleh berisi huruf dan spasi',
@@ -76,7 +78,7 @@ class StaffController extends Controller
             'foto.max' => 'Ukuran gambar tidak boleh lebih dari 3MB',
         ];
 
-        // Ambil data staff berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data staff berdasarkan user yang sedang login
         $staff = StaffModel::where('user_id', Auth::id())->first();
 
         // Validasi input
@@ -96,51 +98,60 @@ class StaffController extends Controller
             return redirect()->back()->with('error', 'Data staff tidak ditemukan.');
         }
 
-        // Siapkan data untuk update (kecualikan foto untuk mencegah overwrite (fotonya nambah terus)
-        $staffData = $request->except('foto');
+        // Siapkan data untuk update (kecuali foto dan password)
+        $staffData = $request->except(['foto', 'password', 'password_confirmation']);
 
-        // Cek apakah email diubah
+        // Cek apakah email atau password diubah
         $emailChanged = $staff->user->email != $request->email;
-        $oldEmail = $staff->user->email;
+        $passwordChanged = $request->filled('password');
         $newEmail = $request->email;
 
-        // Update nama user
+        // ELOQUENT - Update nama user terlebih dahulu
         $staff->user->update([
             'nama' => $request->nama,
         ]);
 
-        // Jika email berubah, kirim email verifikasi menggunakan VerificationController
-        if ($emailChanged) {
-            $verificationController = new VerificationController();
-            return $verificationController->sendVerificationEmail($staff->user, $newEmail);
-        }
-
-        // update password jika diisi
-        if ($request->password) {
+        // ELOQUENT - Update password jika diisi (sebelum email verification)
+        if ($passwordChanged) {
             $staff->user->update([
                 'password' => bcrypt($request->password),
             ]);
         }
 
-        // Update data di tabel staff
+        // ELOQUENT - Update data di tabel staff (kecuali foto)
         $staff->update($staffData);
 
-        // Jika ada file foto yang diunggah
+        // Upload foto baru jika ada (sebelum email verification)
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($staff->foto && file_exists(public_path('assets/img/staff_foto/' . $staff->foto))) {
                 unlink(public_path('assets/img/staff_foto/' . $staff->foto));
             }
 
-            // Ambil nama file
-            $nama_file = $staff->user->id . '_' . $request->file('foto')->getClientOriginalName(); // Menggunakan ID user untuk menghindari duplikasi
-
-            // Simpan file ke folder public/assets/img/staff_foto
+            // Simpan foto baru
+            $nama_file = $staff->user->id . '_' . $request->file('foto')->getClientOriginalName();
             $request->file('foto')->move(public_path('assets/img/staff_foto'), $nama_file);
 
-            // Simpan HANYA nama file ke database, terpisah dari update data lainnya
-            $staff->foto = $nama_file;
-            $staff->save();
+            // ELOQUENT - Update foto di database
+            $staff->update(['foto' => $nama_file]);
+        }
+
+        // Jika email berubah, kirim email verifikasi dan logout
+        if ($emailChanged) {
+            $verificationController = new VerificationController();
+            return $verificationController->sendVerificationEmail($staff->user, $newEmail);
+        }
+
+        // Jika password berubah, logout untuk keamanan
+        if ($passwordChanged) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with(
+                'success',
+                'Profile berhasil diperbarui dan password telah diubah. Silakan login kembali dengan password baru.'
+            );
         }
 
         return redirect()->route('staff.profile')->with('success', 'Profile berhasil diperbarui.');

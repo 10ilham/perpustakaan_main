@@ -67,6 +67,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.4.2/js/buttons.print.min.js"></script>
+    {{-- untuk chart di index.blade.php laporan --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Additional library for Word export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <!-- Library untuk export excel pada halaman buku -->

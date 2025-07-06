@@ -223,11 +223,11 @@ function ambilSemuaDataBuku() {
         // Buat request AJAX ke endpoint ekspor
         var xhr = new XMLHttpRequest();
         var url = '/buku/export/all?' + new URLSearchParams(filter).toString();
-        
+
         xhr.open('GET', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
 
-        xhr.onload = function() {            
+        xhr.onload = function() {
             // Hapus indikator loading
             var loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay) {
@@ -237,7 +237,7 @@ function ambilSemuaDataBuku() {
             if (xhr.status === 200) {
                 try {
                     var response = JSON.parse(xhr.responseText);
-                    
+
                     if (response.success && response.data) {
                         resolve(response.data);
                     } else {
@@ -251,7 +251,7 @@ function ambilSemuaDataBuku() {
             }
         };
 
-        xhr.onerror = function() {            
+        xhr.onerror = function() {
             // Hapus indikator loading
             var loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay) {
@@ -287,10 +287,10 @@ function eksporKeExcel() {
 
         // Tambahkan baris data
         semuaBuku.forEach(function(buku, index) {
-            var hargaBuku = (buku.harga_buku != null && buku.harga_buku !== undefined) 
-                ? formatRupiah(buku.harga_buku.toString(), 'Rp ') 
+            var hargaBuku = (buku.harga_buku != null && buku.harga_buku !== undefined)
+                ? formatRupiah(buku.harga_buku.toString(), 'Rp ')
                 : 'Rp 0';
-                
+
             var row = [
                 index + 1,
                 buku.kode_buku,
@@ -424,10 +424,10 @@ function eksporKeWord() {
 
         // Tambahkan baris data dari response API
         semuaBuku.forEach(function(buku, index) {
-            var hargaBuku = (buku.harga_buku != null && buku.harga_buku !== undefined) 
-                ? formatRupiah(buku.harga_buku.toString(), 'Rp ') 
+            var hargaBuku = (buku.harga_buku != null && buku.harga_buku !== undefined)
+                ? formatRupiah(buku.harga_buku.toString(), 'Rp ')
                 : 'Rp 0';
-                
+
             htmlContent +=
                 '<tr>' +
                 '<td style="text-align: center;">' + (index + 1) + '</td>' +
@@ -544,22 +544,4 @@ function toggleDetailBuku(bukuId) {
             detailRow.style.display = 'none';
         }
     }
-}
-
-/**
- * Fungsi untuk pencarian buku dengan AJAX (jika diperlukan)
- * Digunakan di halaman: index.blade.php
- * @param {string} kataPencarian - Kata kunci pencarian
- */
-function cariBuku(kataPencarian) {
-    // Implementasi pencarian AJAX bisa ditambahkan di sini
-}
-
-/**
- * Fungsi untuk filter buku berdasarkan kategori
- * Digunakan di halaman: index.blade.php
- * @param {number} kategoriId - ID kategori untuk filter
- */
-function filterBerdasarkanKategori(kategoriId) {
-    // Implementasi filter berdasarkan kategori bisa ditambahkan di sini
 }

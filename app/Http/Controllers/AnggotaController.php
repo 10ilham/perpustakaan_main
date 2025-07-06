@@ -12,16 +12,18 @@ use App\Models\PeminjamanModel;
 use App\Models\BukuModel;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\PeminjamanController;
 
 class AnggotaController extends Controller
 {
-    //
+    // ELOQUENT - Menampilkan daftar anggota dengan filter level
     public function index(Request $request)
     {
         // Filter level
         $level = $request->query('level', 'all');
 
-        // Mengambil data user dengan filter level jika diperlukan
+        // ELOQUENT - Mengambil data user dengan filter level jika diperlukan
         $query = User::query();
 
         if ($level !== 'all') {
@@ -36,7 +38,7 @@ class AnggotaController extends Controller
         return view('anggota.index', compact('users', 'level', 'levels'));
     }
 
-    // Menampilkan detail anggota
+    // ELOQUENT - Menampilkan detail anggota dengan riwayat peminjaman
     public function detail($id)
     {
         $user = User::findOrFail($id);
@@ -45,7 +47,7 @@ class AnggotaController extends Controller
         // Ambil parameter referensi jika ada
         $ref = request('ref');
 
-        // Ambil data profil sesuai level
+        // ELOQUENT - Ambil data profil sesuai level
         if ($user->level === 'admin') {
             $profileData = AdminModel::where('user_id', $user->id)->first();
         } elseif ($user->level === 'siswa') {
@@ -56,31 +58,29 @@ class AnggotaController extends Controller
             $profileData = StaffModel::where('user_id', $user->id)->first();
         }
 
-        // Ambil riwayat peminjaman anggota
+        // ELOQUENT - Ambil riwayat peminjaman anggota
         $peminjaman = PeminjamanModel::where('user_id', $id)
             ->with(['buku'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Tambahkan informasi keterlambatan untuk setiap peminjaman seperti di PeminjamanController
+        // Tambahkan informasi keterlambatan untuk setiap peminjaman
         foreach ($peminjaman as $item) {
             $tanggalBatasKembali = Carbon::parse($item->tanggal_kembali)->endOfDay();
             $sekarang = Carbon::now();
 
-            // Logika sederhana: hanya terlambat jika sudah lewat akhir hari batas DAN belum dikembalikan
+            // Logika keterlambatan
             $isTerlambat = ($item->status === 'Dipinjam' && $sekarang->greaterThan($tanggalBatasKembali)) ||
                 ($item->status === 'Terlambat' && $sekarang->greaterThan($tanggalBatasKembali)) ||
-                $item->is_terlambat; // Untuk buku yang sudah dikembalikan
+                $item->is_terlambat;
 
             $item->is_late = $isTerlambat;
 
-            // Hitung hari terlambat dengan konsisten
+            // Hitung hari terlambat
             if ($isTerlambat && ($item->status === 'Dipinjam' || $item->status === 'Terlambat')) {
-                // Untuk buku yang belum dikembalikan, hitung dengan method yang sama seperti PeminjamanController
                 $hariTerlambat = $this->hitungHariTerlambat($item);
                 $item->late_days = $hariTerlambat > 0 ? $hariTerlambat : 0;
             } elseif ($item->is_terlambat && $item->jumlah_hari_terlambat) {
-                // Untuk buku yang sudah dikembalikan dengan keterlambatan
                 $item->late_days = $item->jumlah_hari_terlambat;
             } else {
                 $item->late_days = 0;
@@ -90,13 +90,13 @@ class AnggotaController extends Controller
         return view('anggota.detail', compact('user', 'profileData', 'peminjaman', 'ref'));
     }
 
-    // Tambah anggota
+    // Menampilkan form tambah anggota
     public function tambah()
     {
         return view('anggota.tambah');
     }
 
-    // Simpan anggota
+    // ELOQUENT - Menyimpan anggota baru
     public function simpan(Request $request)
     {
         // Buat pesan validasi kustom dalam bahasa Indonesia
@@ -173,10 +173,12 @@ class AnggotaController extends Controller
             'no_telepon' => 'required|numeric|digits_between:10,13|unique:admin,no_telepon|unique:siswa,no_telepon|unique:guru,no_telepon|unique:staff,no_telepon',
         ], $messages);
 
+        // ELOQUENT - Buat user baru
         $user = User::create($request->only('nama', 'email', 'level', 'password'));
         $user->password = bcrypt($request->password);
         $user->save();
-        // Simpan data anggota sesuai level
+
+        // ELOQUENT - Simpan data anggota sesuai level
         if ($user->level === 'admin') {
             $profileData = new AdminModel($request->only('nip', 'tanggal_lahir', 'alamat', 'no_telepon'));
             $folder = 'admin_foto';
@@ -192,10 +194,10 @@ class AnggotaController extends Controller
         }
         $profileData->user_id = $user->id;
         $profileData->save();
-        // Handle foto upload
+        // Upload foto jika ada
         if ($request->hasFile('foto')) {
             $foto = $request->file('foto');
-            $nama_file = $user->id . '_' . $foto->getClientOriginalName(); // Menggunakan ID user untuk menghindari duplikasi
+            $nama_file = $user->id . '_' . $foto->getClientOriginalName();
             $foto->move(public_path('assets/img/' . $folder), $nama_file);
 
             $profileData->foto = $nama_file;
@@ -204,7 +206,7 @@ class AnggotaController extends Controller
         return redirect()->route('anggota.index')->with('success', 'Anggota baru berhasil ditambahkan.');
     }
 
-    // Edit anggota
+    // ELOQUENT - Menampilkan form edit anggota
     public function edit($id)
     {
         $user = User::findOrFail($id);
@@ -213,7 +215,7 @@ class AnggotaController extends Controller
         // Ambil parameter referensi jika ada
         $ref = request('ref');
 
-        // Ambil data profil sesuai level
+        // ELOQUENT - Ambil data profil sesuai level
         if ($user->level === 'admin') {
             $profileData = AdminModel::where('user_id', $user->id)->first();
         } elseif ($user->level === 'siswa') {
@@ -227,7 +229,7 @@ class AnggotaController extends Controller
         return view('anggota.edit', compact('user', 'profileData', 'ref'));
     }
 
-    // Update anggota
+    // ELOQUENT - Memperbarui data anggota
     public function update(Request $request, $id)
     {
         // Buat pesan validasi kustom dalam bahasa Indonesia
@@ -298,6 +300,8 @@ class AnggotaController extends Controller
             'alamat' => 'required|string|max:255',
             'no_telepon' => 'required|numeric|digits_between:10,15|unique:admin,no_telepon,' . $id . ',user_id|unique:siswa,no_telepon,' . $id . ',user_id|unique:guru,no_telepon,' . $id . ',user_id|unique:staff,no_telepon,' . $id . ',user_id',
         ], $messages);
+
+        // ELOQUENT - Update data user
         $user = User::findOrFail($id);
         $user->update($request->only('nama', 'email'));
 
@@ -307,7 +311,7 @@ class AnggotaController extends Controller
             $user->save();
         }
 
-        // Update atau buat data anggota sesuai level (buat disini maksudnya ketika tabel anggota tersebut belum ada datanya karena awalnya anggota tersebut misalnya ditambahkan lewat seeder yang datanya tidak lengkap)
+        // ELOQUENT - Update atau buat data anggota sesuai level
         if ($user->level === 'admin') {
             $profileData = AdminModel::where('user_id', $user->id)->first();
             if (!$profileData) {
@@ -346,7 +350,7 @@ class AnggotaController extends Controller
             $folder = 'staff_foto';
         }
 
-        // Handle foto upload
+        // Upload foto baru jika ada
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($profileData->foto && file_exists(public_path('assets/img/' . $folder . '/' . $profileData->foto))) {
@@ -354,14 +358,14 @@ class AnggotaController extends Controller
             }
 
             $foto = $request->file('foto');
-            $nama_file = $user->id . '_' . $foto->getClientOriginalName(); // Menggunakan ID user untuk menghindari duplikasi
+            $nama_file = $user->id . '_' . $foto->getClientOriginalName();
             $foto->move(public_path('assets/img/' . $folder), $nama_file);
 
             $profileData->foto = $nama_file;
             $profileData->save();
         }
 
-        // Cek apakah ada referensi ke halaman detail
+        // Redirect berdasarkan referensi
         if ($request->has('ref') && $request->ref == 'detail') {
             return redirect()->route('anggota.detail', $id)->with('success', 'Anggota berhasil diperbarui.');
         } else {
@@ -369,12 +373,12 @@ class AnggotaController extends Controller
         }
     }
 
-    // Hapus anggota
+    // ELOQUENT - Menghapus anggota dan data terkait
     public function hapus($id)
     {
         $user = User::findOrFail($id);
 
-        // Hapus data profil sesuai level
+        // ELOQUENT - Hapus data profil sesuai level
         if ($user->level === 'admin') {
             $profile = AdminModel::where('user_id', $user->id)->first();
             if ($profile) {
@@ -413,19 +417,19 @@ class AnggotaController extends Controller
             }
         }
 
-        // Hapus user
+        // ELOQUENT - Hapus user
         $user->delete();
         return redirect()->route('anggota.index')->with('success', 'Anggota berhasil dihapus');
     }
 
-    // Dashboard Anggota (untuk level: siswa, guru, staff)
+    // ELOQUENT - Dashboard untuk anggota (siswa, guru, staff)
     public function showAnggotaData()
     {
         $userLevel = Auth::user()->level;
         $userId = Auth::id();
         $profileData = null;
 
-        // Ambil data profil sesuai level
+        // ELOQUENT - Ambil data profil sesuai level
         if ($userLevel === 'siswa') {
             $profileData = SiswaModel::where('user_id', $userId)->first();
         } elseif ($userLevel === 'guru') {
@@ -434,46 +438,37 @@ class AnggotaController extends Controller
             $profileData = StaffModel::where('user_id', $userId)->first();
         }
 
-        // Menghitung total buku
+        // ELOQUENT - Menghitung total buku
         $totalBuku = BukuModel::count();
 
-        // Menghitung peminjaman berdasarkan user yang sedang login
-        // Peminjaman yang sedang dipinjam (status Dipinjam dan Terlambat)
+        // ELOQUENT - Menghitung peminjaman berdasarkan user yang sedang login
         $dipinjam = PeminjamanModel::where('user_id', $userId)
             ->where(function ($query) {
                 $query->where('status', 'Dipinjam')
                     ->orWhere('status', 'Terlambat');
             })->count();
 
-        // Peminjaman yang terlambat
         $terlambat = PeminjamanModel::where('user_id', $userId)
             ->where(function ($query) {
                 $query->where('status', 'Terlambat')
                     ->orWhere('is_terlambat', true);
             })->count();
 
-        // Peminjaman yang sudah dikembalikan
         $dikembalikan = PeminjamanModel::where('user_id', $userId)
             ->where('status', 'Dikembalikan')
             ->count();
 
-        // Mendapatkan 10 buku terpopuler
+        // Mendapatkan buku terpopuler
         $bukuPopuler = PeminjamanController::getBukuPopuler(10);
 
         return view('layouts.AnggotaDashboard', compact('profileData', 'userLevel', 'totalBuku', 'dipinjam', 'terlambat', 'dikembalikan', 'bukuPopuler'));
     }
 
     /**
-     * Mengambil data untuk grafik peminjaman anggota
+     * ELOQUENT - Mengambil data untuk grafik peminjaman anggota
      *
      * Fungsi ini menghasilkan data untuk ditampilkan dalam bentuk grafik statistik
      * berdasarkan periode waktu yang dipilih: hari ini, minggu ini, atau bulan ini.
-     * Format data disesuaikan dengan kebutuhan chart di dashboard anggota.
-     *
-     * Catatan penting:
-     * - Hanya peminjaman dengan status selain 'Diproses' yang dihitung
-     * - Data untuk periode hari ditampilkan per jam tanpa menit (00:00, 01:00, dst)
-     * - Format konsisten dengan AdminController dan LaporanController
      */
     public function getChartData(Request $request)
     {
@@ -531,17 +526,15 @@ class AnggotaController extends Controller
             // $intervalValue = 1;
         }
 
-        // Ambil data peminjaman aktual dari database untuk periode yang dipilih
-        // Tidak termasuk peminjaman dengan status 'Diproses'
-        // Menggunakan tanggal_pinjam untuk timestamp yang lebih akurat,
+        // ELOQUENT - Ambil data peminjaman untuk periode yang dipilih
         $peminjamanFromDB = PeminjamanModel::where('user_id', $userId)
-            ->where('status', '!=', 'Diproses') // Mengecualikan peminjaman yang masih berstatus 'Diproses'
-            ->where('status', '!=', 'Dibatalkan') // Mengecualikan peminjaman yang dibatalkan
-            ->whereBetween('tanggal_pinjam', [$startDate, $endDate]) // Gunakan tanggal_pinjam
-            ->select('tanggal_pinjam') // Gunakan tanggal_pinjam
+            ->where('status', '!=', 'Diproses')
+            ->where('status', '!=', 'Dibatalkan')
+            ->whereBetween('tanggal_pinjam', [$startDate, $endDate])
+            ->select('tanggal_pinjam')
             ->get();
 
-        // Dapatkan total peminjaman user (tidak termasuk status 'Diproses' dan 'Dibatalkan')
+        // ELOQUENT - Dapatkan total peminjaman user
         $totalPeminjaman = PeminjamanModel::where('user_id', $userId)
             ->where('status', '!=', 'Diproses')
             ->where('status', '!=', 'Dibatalkan')
@@ -551,83 +544,70 @@ class AnggotaController extends Controller
         $peminjamanData = [];
 
         if ($period == 'day') {
-            // === STATISTIK UNTUK PERIODE HARI INI (24 JAM) ===
-            // Inisialisasi array untuk 24 jam dengan nilai 0
+            // Statistik untuk periode hari ini (24 jam)
             $peminjamanData = array_fill(0, 24, 0);
 
-            // Buat label untuk 24 jam (00:00, 01:00, ..., 23:00)
+            // Buat label untuk 24 jam
             for ($hour = 0; $hour < 24; $hour++) {
-                $labels[] = sprintf('%02d:00', $hour); // Format: 00:00, 01:00, dst.
+                $labels[] = sprintf('%02d:00', $hour);
             }
 
-            // Hitung peminjaman untuk setiap jam (hanya yang statusnya bukan 'Diproses')
-            // Data sudah difilter pada query di atas
-            // PERBAIKAN: Menggunakan tanggal_pinjam sebagai timestamp akurat, bukan created_at
+            // Hitung peminjaman untuk setiap jam
             foreach ($peminjamanFromDB as $peminjaman) {
                 $tanggalPinjam = \Carbon\Carbon::parse($peminjaman->tanggal_pinjam);
-                $hour = (int) $tanggalPinjam->format('H'); // Ambil jam dari timestamp, tanpa menit
-
-                // Tambahkan ke penghitung jam yang sesuai
+                $hour = (int) $tanggalPinjam->format('H');
                 $peminjamanData[$hour]++;
             }
         } else {
-            // === STATISTIK UNTUK PERIODE MINGGU ATAU BULAN ===
+            // Statistik untuk periode minggu atau bulan
             $current = clone $startDate;
             $dateMap = [];
 
-            // Inisialisasi map tanggal (semua hari dalam rentang)
+            // Inisialisasi map tanggal
             while ($current <= $endDate) {
                 $dateKey = $current->format('Y-m-d');
-                $dateMap[$dateKey] = 0; // Nilai awal 0 untuk setiap tanggal
+                $dateMap[$dateKey] = 0;
                 $current->addDay();
             }
 
             // Hitung peminjaman per hari
-            // PERBAIKAN: Menggunakan tanggal_pinjam untuk timestamp yang lebih akurat
             foreach ($peminjamanFromDB as $peminjaman) {
                 $dateKey = \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->format('Y-m-d');
                 if (isset($dateMap[$dateKey])) {
-                    $dateMap[$dateKey]++; // Tambah penghitung untuk tanggal tersebut
+                    $dateMap[$dateKey]++;
                 }
-            }            // Generate labels dan data untuk chart
+            }
+
+            // Generate labels dan data untuk chart
             $current = clone $startDate;
             while ($current <= $endDate) {
-                // Format label berdasarkan periode (d/m untuk minggu dan bulan)
                 $labels[] = $current->format($format);
-
-                // Ambil data untuk tanggal ini
                 $dateKey = $current->format('Y-m-d');
                 $peminjamanData[] = isset($dateMap[$dateKey]) ? $dateMap[$dateKey] : 0;
-
-                $current->addDay(); // Pindah ke hari berikutnya
+                $current->addDay();
             }
         }
 
-        // Format label jam dibuat dengan konsisten untuk periode harian (00:00, 01:00, dst)
-        // sehingga tidak perlu pemrosesan tambahan untuk menampilkan menit
-        // Ini agar data chart anggota konsisten dengan chart pada dashboard admin
-
-        // Hitung total data dalam chart (untuk verifikasi)
+        // Hitung total data dalam chart
         $totalInChart = array_sum($peminjamanData);
 
-        // Kembalikan data dalam format JSON yang mudah digunakan oleh frontend
+        // Kembalikan data dalam format JSON
         return response()->json([
-            'labels' => $labels,                            // Label untuk sumbu X chart (jam atau tanggal)
-            'peminjaman' => $peminjamanData,                // Data jumlah peminjaman untuk ditampilkan
-            'total' => $totalPeminjaman,                    // Total semua peminjaman user (tidak termasuk 'Diproses')
-            'totalInChart' => $totalInChart,                // Total peminjaman dalam periode chart
+            'labels' => $labels,
+            'peminjaman' => $peminjamanData,
+            'total' => $totalPeminjaman,
+            'totalInChart' => $totalInChart,
         ]);
     }
 
-    // Menghitung jumlah hari keterlambatan (sama seperti di PeminjamanController)
+    // Menghitung jumlah hari keterlambatan
     private function hitungHariTerlambat($peminjaman)
     {
         $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
         $sekarang = Carbon::now();
 
-        // Hanya hitung keterlambatan jika sudah melewati akhir hari batas
+        // Hitung keterlambatan jika sudah melewati batas
         if ($sekarang->greaterThan($tanggalBatasKembali)) {
-            // Hitung selisih hari dari hari berikutnya setelah batas kembali
             $hariTerlambat = Carbon::parse($peminjaman->tanggal_kembali)->addDay()->startOfDay()
                 ->diffInDays($sekarang->startOfDay()) + 1;
             return $hariTerlambat;

@@ -151,8 +151,10 @@
                                     <option value="">Pilih Kelas</option>
                                     <option value="VII A" {{ old('kelas') == 'VII A' ? 'selected' : '' }}>VII A</option>
                                     <option value="VII B" {{ old('kelas') == 'VII B' ? 'selected' : '' }}>VII B</option>
-                                    <option value="VIII A" {{ old('kelas') == 'VIII A' ? 'selected' : '' }}>VIII A</option>
-                                    <option value="VIII B" {{ old('kelas') == 'VIII B' ? 'selected' : '' }}>VIII B</option>
+                                    <option value="VIII A" {{ old('kelas') == 'VIII A' ? 'selected' : '' }}>VIII A
+                                    </option>
+                                    <option value="VIII B" {{ old('kelas') == 'VIII B' ? 'selected' : '' }}>VIII B
+                                    </option>
                                     <option value="IX A" {{ old('kelas') == 'IX A' ? 'selected' : '' }}>IX A</option>
                                     <option value="IX B" {{ old('kelas') == 'IX B' ? 'selected' : '' }}>IX B</option>
                                 </select>
@@ -187,18 +189,33 @@
                             </div>
                             <div class="form-group">
                                 <label for="mata_pelajaran">Mata Pelajaran</label>
-                                 <select name="mata_pelajaran" id="mata_pelajaran" class="form-control">
+                                <select name="mata_pelajaran" id="mata_pelajaran" class="form-control">
                                     <option value="">Pilih Mata Pelajaran</option>
-                                    <option value="Matematika" {{ old('mata_pelajaran') == 'Matematika' ? 'selected' : '' }}>Matematika</option>
-                                    <option value="Bahasa Indonesia" {{ old('mata_pelajaran') == 'Bahasa Indonesia' ? 'selected' : '' }}>Bahasa Indonesia</option>
-                                    <option value="Bahasa Inggris" {{ old('mata_pelajaran') == 'Bahasa Inggris' ? 'selected' : '' }}>Bahasa Inggris</option>
-                                    <option value="Bahasa Arab" {{ old('mata_pelajaran') == 'Bahasa Arab' ? 'selected' : '' }}>Bahasa Arab</option>
-                                    <option value="Bahasa Sunda" {{ old('mata_pelajaran') == 'Bahasa Sunda' ? 'selected' : '' }}>Bahasa Sunda</option>
-                                    <option value="IPA" {{ old('mata_pelajaran') == 'IPA' ? 'selected' : '' }}>IPA</option>
-                                    <option value="IPS" {{ old('mata_pelajaran') == 'IPS' ? 'selected' : '' }}>IPS</option>
-                                    <option value="Pendidikan Agama Islam" {{ old('mata_pelajaran') == 'Pendidikan Agama Islam' ? 'selected' : '' }}>Pendidikan Agama Islam</option>
-                                    <option value="Fiqih" {{ old('mata_pelajaran') == 'Fiqih' ? 'selected' : '' }}>Fiqih</option>
-                                    <option value="Akidah Akhlak" {{ old('mata_pelajaran') == 'Akidah Akhlak' ? 'selected' : '' }}>Akidah Akhlak</option>
+                                    <option value="Matematika"
+                                        {{ old('mata_pelajaran') == 'Matematika' ? 'selected' : '' }}>Matematika</option>
+                                    <option value="Bahasa Indonesia"
+                                        {{ old('mata_pelajaran') == 'Bahasa Indonesia' ? 'selected' : '' }}>Bahasa
+                                        Indonesia</option>
+                                    <option value="Bahasa Inggris"
+                                        {{ old('mata_pelajaran') == 'Bahasa Inggris' ? 'selected' : '' }}>Bahasa Inggris
+                                    </option>
+                                    <option value="Bahasa Arab"
+                                        {{ old('mata_pelajaran') == 'Bahasa Arab' ? 'selected' : '' }}>Bahasa Arab</option>
+                                    <option value="Bahasa Sunda"
+                                        {{ old('mata_pelajaran') == 'Bahasa Sunda' ? 'selected' : '' }}>Bahasa Sunda
+                                    </option>
+                                    <option value="IPA" {{ old('mata_pelajaran') == 'IPA' ? 'selected' : '' }}>IPA
+                                    </option>
+                                    <option value="IPS" {{ old('mata_pelajaran') == 'IPS' ? 'selected' : '' }}>IPS
+                                    </option>
+                                    <option value="Pendidikan Agama Islam"
+                                        {{ old('mata_pelajaran') == 'Pendidikan Agama Islam' ? 'selected' : '' }}>
+                                        Pendidikan Agama Islam</option>
+                                    <option value="Fiqih" {{ old('mata_pelajaran') == 'Fiqih' ? 'selected' : '' }}>Fiqih
+                                    </option>
+                                    <option value="Akidah Akhlak"
+                                        {{ old('mata_pelajaran') == 'Akidah Akhlak' ? 'selected' : '' }}>Akidah Akhlak
+                                    </option>
                                 </select>
                                 @error('mata_pelajaran')
                                     <div class="custom-alert" role="alert">
@@ -231,13 +248,21 @@
                             </div>
                             <div class="form-group">
                                 <label for="bagian">Bagian</label>
-                                 <select name="bagian" id="bagian" class="form-control">
+                                <select name="bagian" id="bagian" class="form-control">
                                     <option value="">Pilih Bagian</option>
-                                    <option value="Kepala Tata Usaha" {{ old('bagian') == 'Kepala Tata Usaha' ? 'selected' : '' }}>Kepala Tata Usaha</option>
-                                    <option value="Staff Keuangan" {{ old('bagian') == 'Staff Keuangan' ? 'selected' : '' }}>Staff Keuangan</option>
-                                    <option value="Staff Laboratorium" {{ old('bagian') == 'Staff Laboratorium' ? 'selected' : '' }}>Staff Laboratorium</option>
-                                    <option value="Staff Keamanan" {{ old('bagian') == 'Staff Keamanan' ? 'selected' : '' }}>Staff Keamanan</option>
-                                    <option value="Staff Kebersihan" {{ old('bagian') == 'Staff Kebersihan' ? 'selected' : '' }}>Staff Kebersihan</option>
+                                    <option value="Kepala Tata Usaha"
+                                        {{ old('bagian') == 'Kepala Tata Usaha' ? 'selected' : '' }}>Kepala Tata Usaha
+                                    </option>
+                                    <option value="Staff Keuangan"
+                                        {{ old('bagian') == 'Staff Keuangan' ? 'selected' : '' }}>Staff Keuangan</option>
+                                    <option value="Staff Laboratorium"
+                                        {{ old('bagian') == 'Staff Laboratorium' ? 'selected' : '' }}>Staff Laboratorium
+                                    </option>
+                                    <option value="Staff Keamanan"
+                                        {{ old('bagian') == 'Staff Keamanan' ? 'selected' : '' }}>Staff Keamanan</option>
+                                    <option value="Staff Kebersihan"
+                                        {{ old('bagian') == 'Staff Kebersihan' ? 'selected' : '' }}>Staff Kebersihan
+                                    </option>
                                 </select>
                                 @error('bagian')
                                     <div class="custom-alert" role="alert">
@@ -346,51 +371,5 @@
 @endsection
 
 @section('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const levelSelect = document.getElementById('level');
-            const levelFields = document.querySelectorAll('.level-fields');
-
-            // Inisialisasi form - tampilkan field berdasarkan level yang dipilih (jika ada)
-            showFieldsBasedOnLevel(levelSelect.value);
-
-            // Event listener untuk perubahan level
-            levelSelect.addEventListener('change', function() {
-                showFieldsBasedOnLevel(this.value);
-            });
-
-            // Fungsi untuk menampilkan field berdasarkan level yang dipilih
-            function showFieldsBasedOnLevel(level) {
-                // Sembunyikan semua field khusus dulu
-                levelFields.forEach(field => {
-                    field.style.display = 'none';
-
-                    // Nonaktifkan input di dalam field yang disembunyikan
-                    const inputs = field.querySelectorAll('input, select, textarea');
-                    inputs.forEach(input => {
-                        input.disabled = true;
-                    });
-                });
-
-                // Tampilkan field sesuai level yang dipilih
-                if (level) {
-                    const selectedField = document.getElementById(level + '-fields');
-                    if (selectedField) {
-                        selectedField.style.display = 'block';
-
-                        // Aktifkan input di dalam field yang ditampilkan
-                        const inputs = selectedField.querySelectorAll('input, select, textarea');
-                        inputs.forEach(input => {
-                            input.disabled = false;
-                        });
-                    }
-                }
-            }
-
-            // Jika ada nilai level yang sudah dipilih sebelumnya (misalnya karena validation error)
-            if ("{{ old('level') }}") {
-                showFieldsBasedOnLevel("{{ old('level') }}");
-            }
-        });
-    </script>
+    <script src="{{ asset('assets/js/anggota/anggota.js') }}"></script>
 @endsection

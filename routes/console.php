@@ -32,14 +32,15 @@ Artisan::command('inspire', function () {
 // Menjalankan command pengecekan dan pengiriman notifikasi pada pukul 07:00 pagi setiap hari
 Schedule::command('app:send-pengembalian-reminders')
     ->dailyAt('07:00')
-    //->cron('0 7 * * *') // Setiap hari pada pukul 07:00
     ->appendOutputTo(storage_path('logs/scheduler-pengembalian-reminders.log'))
     ->description('Pengiriman notifikasi pengembalian pagi hari');
 
 // Menjalankan command notifikasi setiap jam
 Schedule::command('app:send-pengembalian-reminders')
-    //->everyTwoHours() menjalankan setiap 2 jam
-    ->hourly()
+    //menjalankan setiap 2 jam
+    ->everyTwoHours()
+    // Menjalankan setiap jam
+    // ->hourly()
     ->appendOutputTo(storage_path('logs/scheduler-pengembalian-reminders.log'))
     ->description('Pengiriman notifikasi pengembalian setiap jam');
 

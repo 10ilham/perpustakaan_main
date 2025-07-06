@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="tanggal_lahir">Tanggal Lahir</label>
-                                    <input type="date" id="tanggal_lahir" class="form-control"
+                                    <input type="text" id="tanggal_lahir" class="form-control"
                                         value="{{ $siswa->tanggal_lahir }}" readonly>
                                 </div>
                                 <div class="form-group">

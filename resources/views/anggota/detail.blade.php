@@ -109,9 +109,9 @@
                                             value="{{ $profileData->nip ?? '-' }}" readonly>
                                     </div>
                                     <div class="form-group">
-                                        <label for="mapel">Mata Pelajaran</label>
-                                        <input type="text" id="mapel" class="form-control"
-                                            value="{{ $profileData->mapel ?? '-' }}" readonly>
+                                        <label for="mata_pelajaran">Mata Pelajaran</label>
+                                        <input type="text" id="mata_pelajaran" class="form-control"
+                                            value="{{ $profileData->mata_pelajaran ?? '-' }}" readonly>
                                     </div>
                                 @elseif($user->level === 'staff')
                                     <div class="form-group">

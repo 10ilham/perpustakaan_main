@@ -21,15 +21,24 @@ class SendPengembalianReminders extends Command
         // Mengambil tanggal hari ini tanpa waktu
         $today = Carbon::today()->format('Y-m-d');
 
-        // Mencari peminjaman dengan batas waktu pengembalian hari ini dan belum dikembalikan
+        // Mencari peminjaman yang:
+        // 1. Batas pengembaliannya hari ini (tanggal_kembali = today)
+        // 2. Sudah terlambat (tanggal_kembali < today)
+        // Dan statusnya masih Dipinjam atau Terlambat
         $peminjamans = PeminjamanModel::with(['user', 'buku'])
-            ->where('tanggal_kembali', $today)
-            ->whereIn('status', ['Dipinjam', 'Terlambat'])  // Termasuk status Dipinjam dan Terlambat
+            ->where('tanggal_kembali', '<=', $today) // Hari ini atau sudah lewat
+            ->whereIn('status', ['Dipinjam', 'Terlambat'])
             ->get();
 
-        $this->info('Ditemukan ' . $peminjamans->count() . ' peminjaman dengan batas waktu pengembalian hari ini.');
+        // Pisahkan data untuk logging yang lebih detail
+        $peminjamanHariIni = $peminjamans->where('tanggal_kembali', $today)->count();
+        $peminjamanTerlambat = $peminjamans->where('tanggal_kembali', '<', $today)->count();
 
-        // Jika tidak ada peminjaman dengan batas waktu hari ini, selesai
+        $this->info("Ditemukan {$peminjamans->count()} peminjaman yang memerlukan notifikasi:");
+        $this->info("- Batas pengembalian hari ini: {$peminjamanHariIni}");
+        $this->info("- Sudah terlambat: {$peminjamanTerlambat}");
+
+        // Jika tidak ada peminjaman yang memerlukan notifikasi, selesai
         if ($peminjamans->count() == 0) {
             $this->info('Tidak ada notifikasi yang dikirim.');
             return;
@@ -42,10 +51,18 @@ class SendPengembalianReminders extends Command
             try {
                 // Pastikan user ada dan memiliki email
                 if ($peminjaman->user && $peminjaman->user->email) {
+                    // Tentukan jenis notifikasi berdasarkan tanggal
+                    $hariTerlambat = Carbon::parse($peminjaman->tanggal_kembali)->diffInDays($today, false);
+                    $jenisNotifikasi = $hariTerlambat > 0 ? 'terlambat' : 'reminder';
+
                     $peminjaman->user->notify(new PengembalianBukuNotification($peminjaman));
                     $sentCount++;
 
-                    $this->info("Notifikasi berhasil dikirim ke {$peminjaman->user->nama} ({$peminjaman->user->email}) untuk buku '{$peminjaman->buku->judul}'");
+                    if ($hariTerlambat > 0) {
+                        $this->info("Notifikasi TERLAMBAT ({$hariTerlambat} hari) dikirim ke {$peminjaman->user->nama} ({$peminjaman->user->email}) untuk buku '{$peminjaman->buku->judul}'");
+                    } else {
+                        $this->info("Notifikasi REMINDER dikirim ke {$peminjaman->user->nama} ({$peminjaman->user->email}) untuk buku '{$peminjaman->buku->judul}'");
+                    }
                 } else {
                     $this->error("Gagal mengirim notifikasi: User atau email tidak ditemukan untuk peminjaman ID {$peminjaman->id}");
                 }

@@ -44,7 +44,7 @@ function initPeminjamanIndex() {
     document.addEventListener('click', function(e) {
         if (e.target.closest('.btn-success-peminjaman')) {
             const button = e.target.closest('.btn-success-peminjaman');
-            
+
             const peminjamanData = {
                 peminjaman_id: button.getAttribute('data-peminjaman-id'),
                 judul_buku: button.getAttribute('data-judul-buku'),

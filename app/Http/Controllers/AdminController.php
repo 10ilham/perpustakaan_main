@@ -12,34 +12,43 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
+    /**
+     * Tampilkan dashboard admin dengan statistik
+     */
     public function showAdminData()
     {
-        // Ambil data admin berdasarkan user yang sedang login
+        // Ambil data admin yang sedang login - ELOQUENT
         $admin = AdminModel::where('user_id', Auth::id())->first();
 
         if (!$admin) {
             return redirect()->back()->with('error', 'Data admin tidak ditemukan.');
         }
 
-        // Data untuk dashboard
+        // Hitung statistik dashboard - ELOQUENT
         $totalBuku = BukuModel::count();
         $totalKategori = KategoriModel::count();
-        $totalPeminjaman = PeminjamanModel::where('status', '!=', 'Dibatalkan')->where('status', '!=', 'Diproses')->count();
-
-        // Total anggota tidak termasuk admin
-        // $totalAnggota = User::where('level', '!=', 'admin')->count();
-        // Total semua anggota termasuk admin
+        $totalPeminjaman = PeminjamanModel::whereNotIn('status', ['Dibatalkan', 'Diproses'])->count();
         $totalAnggota = User::count();
 
-        // Mendapatkan 10 buku terpopuler
+        // Ambil buku populer - ELOQUENT
         $bukuPopuler = PeminjamanController::getBukuPopuler(10);
 
-        return view('layouts.AdminDashboard', compact('admin', 'totalBuku', 'totalKategori', 'totalPeminjaman', 'totalAnggota', 'bukuPopuler'));
+        return view('layouts.AdminDashboard', compact(
+            'admin',
+            'totalBuku',
+            'totalKategori',
+            'totalPeminjaman',
+            'totalAnggota',
+            'bukuPopuler'
+        ));
     }
 
+    /**
+     * Tampilkan halaman profile admin
+     */
     public function showProfile()
     {
-        // Ambil data admin berdasarkan user yang sedang login
+        // Ambil data admin yang sedang login - ELOQUENT
         $admin = AdminModel::where('user_id', Auth::id())->first();
 
         if (!$admin) {
@@ -49,23 +58,29 @@ class AdminController extends Controller
         return view('admin.profile', compact('admin'));
     }
 
-    // Fungsi edit profile
+    /**
+     * Tampilkan form edit profile admin
+     */
     public function editProfile()
     {
-        // Ambil data admin berdasarkan user yang sedang login
+        // Ambil data admin yang sedang login - ELOQUENT
         $admin = AdminModel::where('user_id', Auth::id())->first();
 
         if (!$admin) {
             return redirect()->back()->with('error', 'Data admin tidak ditemukan.');
         }
-        // Kirim data ke view untuk ditampilkan di form edit
+
         return view('admin.edit', compact('admin'));
     }
 
-    // Fungsi untuk update profile
+    /**
+     * Update profile admin
+     */
     public function updateProfile(Request $request)
     {
-        // Buat pesan validasi kustom dalam bahasa Indonesia
+        // Ambil data admin yang sedang login - ELOQUENT
+        $admin = AdminModel::where('user_id', Auth::id())->first();
+
         $messages = [
             'nama.required' => 'Nama lengkap wajib diisi',
             'nama.regex' => 'Nama hanya boleh berisi huruf dan spasi',
@@ -100,9 +115,6 @@ class AdminController extends Controller
             'foto.max' => 'Ukuran gambar tidak boleh lebih dari 3MB',
         ];
 
-        // Ambil data admin berdasarkan user yang sedang login
-        $admin = AdminModel::where('user_id', Auth::id())->first();
-
         // Validasi input
         $request->validate([
             'nama' => 'required|regex:/^[a-zA-Z\s]+$/|max:80',
@@ -119,191 +131,165 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Data admin tidak ditemukan.');
         }
 
-        // Siapkan data untuk update (kecualikan foto untuk mencegah overwrite (fotonya nambah terus)
-        $adminData = $request->except('foto');
-
-        // Cek apakah email diubah
+        // Cek apakah email atau password berubah
         $emailChanged = $admin->user->email != $request->email;
-        $oldEmail = $admin->user->email;
-        $newEmail = $request->email;
+        $passwordChanged = $request->filled('password');
 
-        // Update nama user
-        $admin->user->update([
-            'nama' => $request->nama,
-        ]);
+        // Update data user - ELOQUENT
+        $admin->user->update(['nama' => $request->nama]);
 
-        // Jika email berubah, kirim email verifikasi menggunakan VerificationController
-        if ($emailChanged) {
-            $verificationController = new VerificationController();
-            return $verificationController->sendVerificationEmail($admin->user, $newEmail);
+        // Update password jika ada - ELOQUENT (sebelum email verification)
+        if ($passwordChanged) {
+            $admin->user->update(['password' => bcrypt($request->password)]);
         }
 
-        // update password jika diisi
-        if ($request->password) {
-            $admin->user->update([
-                'password' => bcrypt($request->password),
-            ]);
-        }
+        // Update data admin - ELOQUENT (kecualikan foto untuk mencegah overwrite)
+        $admin->update($request->except(['foto', 'password', 'password_confirmation']));
 
-        // Update data di tabel admin
-        $admin->update($adminData);
-
-        // Jika ada file foto yang diunggah
+        // Handle upload foto (sebelum email verification)
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($admin->foto && file_exists(public_path('assets/img/admin_foto/' . $admin->foto))) {
                 unlink(public_path('assets/img/admin_foto/' . $admin->foto));
             }
 
-            // Ambil nama file
-            $nama_file = $admin->user->id . '_' . $request->file('foto')->getClientOriginalName(); // Menggunakan ID user untuk menghindari duplikasi
-
-            // Simpan file ke folder public/assets/img/admin_foto
+            // Simpan foto baru
+            $nama_file = $admin->user->id . '_' . $request->file('foto')->getClientOriginalName();
             $request->file('foto')->move(public_path('assets/img/admin_foto'), $nama_file);
 
-            // Simpan HANYA nama file ke database, terpisah dari update data lainnya
-            $admin->foto = $nama_file;
-            $admin->save();
+            // Update nama foto di database - ELOQUENT
+            $admin->update(['foto' => $nama_file]);
+        }
+
+        // Jika email berubah, kirim verifikasi email dan logout
+        if ($emailChanged) {
+            $verificationController = new VerificationController();
+            return $verificationController->sendVerificationEmail($admin->user, $request->email);
+        }
+
+        // Jika password berubah, logout untuk keamanan
+        if ($passwordChanged) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with(
+                'success',
+                'Profile berhasil diperbarui dan password telah diubah. Silakan login kembali dengan password baru.'
+            );
         }
 
         return redirect()->route('admin.profile')->with('success', 'Profile berhasil diperbarui.');
     }
 
     /**
-     * Generate chart data for admin dashboard
+     * Generate data chart untuk dashboard admin
      */
     public function getChartData(Request $request)
     {
-        $period = $request->query('period', 'day'); // menentukan periode default ke 'day' yang ditampilkan di admin dashboard
+        $period = $request->query('period', 'day');
 
         // Tentukan rentang waktu berdasarkan periode
-        $startDate = now();
-        $endDate = now();
+        [$startDate, $endDate, $format, $interval, $intervalValue] = $this->getDateRange($period);
 
-        if ($period == 'day') {
-            $startDate = now()->startOfDay();
-            $endDate = now()->endOfDay();
-            $format = 'H:i';
-            $interval = 'hour';
-            $intervalValue = 1; // setiap 1 jam untuk detail lebih baik
-        } elseif ($period == 'week') {
-            $startDate = now()->subDays(6)->startOfDay();
-            $endDate = now()->endOfDay();
-            $format = 'd/m';
-            $interval = 'day';
-            $intervalValue = 1; // setiap hari
-        } elseif ($period == 'month') {
-            $startDate = now()->subDays(29)->startOfDay();
-            $endDate = now()->endOfDay();
-            $format = 'd/m';
-            $interval = 'day';
-            $intervalValue = 1; // setiap 1 hari
+        // Ambil data total peminjaman per level - ELOQUENT
+        $totalPeminjamanSiswa = PeminjamanModel::whereHas('user', fn($q) => $q->where('level', 'siswa'))->count();
+        $totalPeminjamanGuru = PeminjamanModel::whereHas('user', fn($q) => $q->where('level', 'guru'))->count();
+        $totalPeminjamanStaff = PeminjamanModel::whereHas('user', fn($q) => $q->where('level', 'staff'))->count();
+
+        // Generate labels untuk chart
+        $labels = $this->generateLabels($startDate, $endDate, $interval, $intervalValue, $format);
+
+        // Ambil data peminjaman per level - ELOQUENT
+        $siswaData = $this->getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, 'siswa');
+        $guruData = $this->getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, 'guru');
+        $staffData = $this->getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, 'staff');
+
+        return response()->json([
+            'labels' => $labels,
+            'siswa' => $siswaData,
+            'guru' => $guruData,
+            'staff' => $staffData,
+            'totalSiswa' => $totalPeminjamanSiswa,
+            'totalGuru' => $totalPeminjamanGuru,
+            'totalStaff' => $totalPeminjamanStaff,
+        ]);
+    }
+
+    /**
+     * Tentukan rentang tanggal berdasarkan periode
+     */
+    private function getDateRange($period)
+    {
+        switch ($period) {
+            case 'day':
+                return [now()->startOfDay(), now()->endOfDay(), 'H:i', 'hour', 1];
+            case 'week':
+                return [now()->subDays(6)->startOfDay(), now()->endOfDay(), 'd/m', 'day', 1];
+            case 'month':
+                return [now()->subDays(29)->startOfDay(), now()->endOfDay(), 'd/m', 'day', 1];
+            default:
+                return [now()->startOfDay(), now()->endOfDay(), 'H:i', 'hour', 1];
         }
+    }
 
-        // Ambil data total peminjaman untuk verifikasi
-        $totalPeminjamanDB = PeminjamanModel::count();
-        $totalPeminjamanSiswa = PeminjamanModel::whereHas('user', function ($query) {
-            $query->where('level', 'siswa');
-        })->count();
-        $totalPeminjamanGuru = PeminjamanModel::whereHas('user', function ($query) {
-            $query->where('level', 'guru');
-        })->count();
-        $totalPeminjamanStaff = PeminjamanModel::whereHas('user', function ($query) {
-            $query->where('level', 'staff');
-        })->count();
-
-        // Generate labels untuk chart (tanggal)
+    /**
+     * Generate labels untuk chart
+     */
+    private function generateLabels($startDate, $endDate, $interval, $intervalValue, $format)
+    {
         $labels = [];
-        $current = clone $startDate;
 
         if ($interval == 'hour') {
-            // Untuk periode hari, buat label per jam
             for ($hour = 0; $hour < 24; $hour += $intervalValue) {
                 $labels[] = sprintf('%02d:00', $hour);
             }
         } else {
-            // Format untuk week dan month seperti sebelumnya
+            $current = clone $startDate;
             while ($current <= $endDate) {
                 $labels[] = $current->format($format);
                 $current->addDays($intervalValue);
             }
         }
 
-        // Ambil data peminjaman untuk setiap level user
-        $siswaData = $this->getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, 'siswa');
-        $guruData = $this->getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, 'guru');
-        $staffData = $this->getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, 'staff');
-
-        // Hitung total dari semua data grafik untuk verifikasi
-        $totalInChart = array_sum($siswaData) + array_sum($guruData) + array_sum($staffData);
-
-        // Kembalikan data dalam format JSON yang lebih sederhana
-        return response()->json([
-            'labels' => $labels,
-            'siswa' => $siswaData,
-            'guru' => $guruData,
-            'staff' => $staffData,
-            'totalPeminjamanDB' => $totalPeminjamanDB,
-            'totalSiswa' => $totalPeminjamanSiswa,
-            'totalGuru' => $totalPeminjamanGuru,
-            'totalStaff' => $totalPeminjamanStaff,
-            'totalInChart' => $totalInChart,
-            'chartMode' => $interval
-        ]);
+        return $labels;
     }
 
     /**
-     * Helper function to get loan data by period and user level
-     * @return array Array of loan counts
-     */
-    /**
-     * Helper function to get loan data by period and user level
-     * Mengambil data peminjaman berdasarkan periode dan level user
-     * Menggunakan tanggal_pinjam untuk memastikan data sesuai waktu aktual peminjaman
-     * @return array Array of loan counts
+     * Ambil data peminjaman berdasarkan periode dan level user
      */
     private function getPeminjamanByPeriodAndLevel($startDate, $endDate, $interval, $intervalValue, $userLevel)
     {
-        // Ambil data peminjaman aktual dari database
-        // Gunakan tanggal_pinjam (bukan created_at) untuk menentukan waktu peminjaman
-        $peminjamanData = PeminjamanModel::whereHas('user', function ($query) use ($userLevel) {
-            $query->where('level', $userLevel);
-        })
-            ->where('status', '!=', 'Diproses')
-            ->where('status', '!=', 'Dibatalkan')
+        // Ambil data peminjaman dari database - ELOQUENT
+        $peminjamanData = PeminjamanModel::whereHas('user', fn($q) => $q->where('level', $userLevel))
+            ->whereNotIn('status', ['Diproses', 'Dibatalkan'])
             ->whereBetween('tanggal_pinjam', [$startDate, $endDate])
-            ->select('tanggal_pinjam') // Gunakan tanggal_pinjam untuk timestamp yang lebih akurat
+            ->select('tanggal_pinjam')
             ->get();
 
         if ($interval == 'hour') {
-            // Untuk tampilan per jam (24 jam), tanpa menit
-            $hourData = array_fill(0, 24, 0); // Inisialisasi 24 jam dengan nilai 0
+            // Data per jam (24 jam)
+            $hourData = array_fill(0, 24, 0);
 
-            // Hitung peminjaman untuk setiap jam
             foreach ($peminjamanData as $peminjaman) {
-                $tanggalPinjam = \Carbon\Carbon::parse($peminjaman->tanggal_pinjam);
-                $hour = (int) $tanggalPinjam->format('H');
-
-                // Tambahkan count untuk jam yang sesuai
+                $hour = (int) \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->format('H');
                 $hourData[$hour]++;
             }
 
             return $hourData;
         } else {
-            // Format untuk week dan month
-            $format = ($interval == 'day') ? 'd/m' : 'Y-m-d';
+            // Data per hari
+            $format = 'd/m';
             $dateMap = [];
 
-            // Inisialisasi semua tanggal dalam rentang dengan nilai 0
+            // Inisialisasi semua tanggal dengan nilai 0
             $current = clone $startDate;
             while ($current <= $endDate) {
-                $dateKey = $current->format($format);
-                $dateMap[$dateKey] = 0;
+                $dateMap[$current->format($format)] = 0;
                 $current->addDays($intervalValue);
             }
 
-            // Hitung peminjaman untuk setiap tanggal
-            // PERBAIKAN: Menggunakan tanggal_pinjam, bukan created_at
+            // Hitung peminjaman per tanggal
             foreach ($peminjamanData as $peminjaman) {
                 $dateKey = \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->format($format);
                 if (isset($dateMap[$dateKey])) {
@@ -311,7 +297,6 @@ class AdminController extends Controller
                 }
             }
 
-            // Konversi ke array berurutan
             return array_values($dateMap);
         }
     }

@@ -6,12 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\GuruModel;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\VerificationController;
 
 class GuruController extends Controller
 {
+    // ELOQUENT - Menampilkan profil guru
     public function showProfile()
     {
-        // Ambil data guru berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data guru berdasarkan user yang sedang login
         $guru = GuruModel::where('user_id', Auth::id())->first();
 
         if (!$guru) {
@@ -21,23 +23,23 @@ class GuruController extends Controller
         return view('guru.profile', compact('guru'));
     }
 
-    // Fungsi edit profile
+    // ELOQUENT - Menampilkan form edit profil guru
     public function editProfile()
     {
-        // Ambil data guru berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data guru berdasarkan user yang sedang login
         $guru = GuruModel::where('user_id', Auth::id())->first();
 
         if (!$guru) {
             return redirect()->back()->with('error', 'Data guru tidak ditemukan.');
         }
-        // Kirim data ke view untuk ditampilkan di form edit
+
         return view('guru.edit', compact('guru'));
     }
 
-    // Fungsi untuk update profile
+    // ELOQUENT - Memperbarui profil guru
     public function updateProfile(Request $request)
     {
-        // Buat pesan validasi kustom dalam bahasa Indonesia
+        // Pesan validasi kustom dalam bahasa Indonesia
         $messages = [
             'nama.required' => 'Nama lengkap wajib diisi',
             'nama.regex' => 'Nama hanya boleh berisi huruf dan spasi',
@@ -76,7 +78,7 @@ class GuruController extends Controller
             'foto.max' => 'Ukuran gambar tidak boleh lebih dari 3MB',
         ];
 
-        // Ambil data guru berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data guru berdasarkan user yang sedang login
         $guru = GuruModel::where('user_id', Auth::id())->first();
 
         // Validasi input
@@ -96,51 +98,60 @@ class GuruController extends Controller
             return redirect()->back()->with('error', 'Data guru tidak ditemukan.');
         }
 
-        // Siapkan data untuk update (kecualikan foto untuk mencegah overwrite (fotonya nambah terus)
-        $guruData = $request->except('foto');
+        // Siapkan data untuk update
+        $guruData = $request->except(['foto', 'password', 'password_confirmation']);
 
-        // Cek apakah email diubah
+        // Cek apakah email atau password diubah
         $emailChanged = $guru->user->email != $request->email;
-        $oldEmail = $guru->user->email;
+        $passwordChanged = $request->filled('password');
         $newEmail = $request->email;
 
-        // Update nama user
+        // ELOQUENT - Update nama user terlebih dahulu
         $guru->user->update([
             'nama' => $request->nama,
         ]);
 
-        // Jika email berubah, kirim email verifikasi menggunakan VerificationController
-        if ($emailChanged) {
-            $verificationController = new VerificationController();
-            return $verificationController->sendVerificationEmail($guru->user, $newEmail);
-        }
-
-        // update password jika diisi
-        if ($request->password) {
+        // ELOQUENT - Update password jika diisi (sebelum email verification)
+        if ($passwordChanged) {
             $guru->user->update([
                 'password' => bcrypt($request->password),
             ]);
         }
 
-        // Update data di tabel guru
+        // ELOQUENT - Update data di tabel guru (kecuali foto)
         $guru->update($guruData);
 
-        // Jika ada file foto yang diunggah
+        // Upload foto baru jika ada (sebelum email verification)
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($guru->foto && file_exists(public_path('assets/img/guru_foto/' . $guru->foto))) {
                 unlink(public_path('assets/img/guru_foto/' . $guru->foto));
             }
 
-            // Ambil nama file
-            $nama_file = $guru->user->id . '_' . $request->file('foto')->getClientOriginalName(); // Menggunakan ID user untuk menghindari duplikasi
-
-            // Simpan file ke folder public/assets/img/guru_foto
+            // Simpan foto baru
+            $nama_file = $guru->user->id . '_' . $request->file('foto')->getClientOriginalName();
             $request->file('foto')->move(public_path('assets/img/guru_foto'), $nama_file);
 
-            // Simpan HANYA nama file ke database, terpisah dari update data lainnya
-            $guru->foto = $nama_file;
-            $guru->save();
+            // ELOQUENT - Update foto di database
+            $guru->update(['foto' => $nama_file]);
+        }
+
+        // Jika email berubah, kirim email verifikasi dan logout
+        if ($emailChanged) {
+            $verificationController = new VerificationController();
+            return $verificationController->sendVerificationEmail($guru->user, $newEmail);
+        }
+
+        // Jika password berubah, logout untuk keamanan
+        if ($passwordChanged) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with(
+                'success',
+                'Profile berhasil diperbarui dan password telah diubah. Silakan login kembali dengan password baru.'
+            );
         }
 
         return redirect()->route('guru.profile')->with('success', 'Profile berhasil diperbarui.');

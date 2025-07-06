@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SiswaModel;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\VerificationController;
 
 class SiswaController extends Controller
 {
+    // ELOQUENT - Menampilkan profil siswa
     public function showProfile()
     {
-        // Ambil data siswa berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data siswa berdasarkan user yang sedang login
         $siswa = SiswaModel::where('user_id', Auth::id())->first();
 
         if (!$siswa) {
@@ -20,23 +22,23 @@ class SiswaController extends Controller
         return view('siswa.profile', compact('siswa'));
     }
 
-    // Fungsi edit profile
+    // ELOQUENT - Menampilkan form edit profil siswa
     public function editProfile()
     {
-        // Ambil data siswa berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data siswa berdasarkan user yang sedang login
         $siswa = SiswaModel::where('user_id', Auth::id())->first();
 
         if (!$siswa) {
             return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
         }
-        // Kirim data ke view untuk ditampilkan di form edit
+
         return view('siswa.edit', compact('siswa'));
     }
 
-    // Fungsi untuk update profile
+    // ELOQUENT - Memperbarui profil siswa
     public function updateProfile(Request $request)
     {
-        // Buat pesan validasi kustom dalam bahasa Indonesia
+        // Pesan validasi kustom dalam bahasa Indonesia
         $messages = [
             'nama.required' => 'Nama lengkap wajib diisi',
             'nama.regex' => 'Nama hanya boleh berisi huruf dan spasi',
@@ -76,7 +78,7 @@ class SiswaController extends Controller
             'foto.max' => 'Ukuran gambar tidak boleh lebih dari 3MB',
         ];
 
-        // Ambil data siswa berdasarkan user yang sedang login
+        // ELOQUENT - Ambil data siswa berdasarkan user yang sedang login
         $siswa = SiswaModel::where('user_id', Auth::id())->first();
 
         // Validasi input
@@ -96,51 +98,60 @@ class SiswaController extends Controller
             return redirect()->back()->with('error', 'Data siswa tidak ditemukan.');
         }
 
-        // Siapkan data untuk update (kecualikan foto untuk mencegah overwrite (fotonya nambah terus)
-        $siswaData = $request->except('foto');
+        // Siapkan data untuk update (kecuali foto dan password)
+        $siswaData = $request->except(['foto', 'password', 'password_confirmation']);
 
-        // Cek apakah email diubah
+        // Cek apakah email atau password diubah
         $emailChanged = $siswa->user->email != $request->email;
-        $oldEmail = $siswa->user->email;
+        $passwordChanged = $request->filled('password');
         $newEmail = $request->email;
 
-        // Update nama user
+        // ELOQUENT - Update nama user terlebih dahulu
         $siswa->user->update([
             'nama' => $request->nama,
         ]);
 
-        // Jika email berubah, kirim email verifikasi menggunakan VerificationController
-        if ($emailChanged) {
-            $verificationController = new VerificationController();
-            return $verificationController->sendVerificationEmail($siswa->user, $newEmail);
-        }
-
-        // Update password jika diisi
-        if ($request->password) {
+        // ELOQUENT - Update password jika diisi (sebelum email verification)
+        if ($passwordChanged) {
             $siswa->user->update([
                 'password' => bcrypt($request->password),
             ]);
         }
 
-        // Update data di tabel siswa
+        // ELOQUENT - Update data di tabel siswa (kecuali foto)
         $siswa->update($siswaData);
 
-        // Jika ada foto baru, hapus foto lama dan simpan foto baru
+        // Upload foto baru jika ada (sebelum email verification)
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada
             if ($siswa->foto && file_exists(public_path('assets/img/siswa_foto/' . $siswa->foto))) {
                 unlink(public_path('assets/img/siswa_foto/' . $siswa->foto));
             }
 
-            // Ambil nama file
-            $nama_file = $siswa->user->id . '_' . $request->file('foto')->getClientOriginalName(); // Menggunakan ID user untuk menghindari duplikasi
-
-            // Simpan file ke folder public/assets/img/siswa_foto
+            // Simpan foto baru
+            $nama_file = $siswa->user->id . '_' . $request->file('foto')->getClientOriginalName();
             $request->file('foto')->move(public_path('assets/img/siswa_foto'), $nama_file);
 
-            // Simpan HANYA nama file ke database, terpisah dari update data lainnya
-            $siswa->foto = $nama_file;
-            $siswa->save();
+            // ELOQUENT - Update foto di database
+            $siswa->update(['foto' => $nama_file]);
+        }
+
+        // Jika email berubah, kirim email verifikasi dan logout
+        if ($emailChanged) {
+            $verificationController = new VerificationController();
+            return $verificationController->sendVerificationEmail($siswa->user, $newEmail);
+        }
+
+        // Jika password berubah, logout untuk keamanan
+        if ($passwordChanged) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with(
+                'success',
+                'Profile berhasil diperbarui dan password telah diubah. Silakan login kembali dengan password baru.'
+            );
         }
 
         return redirect()->route('siswa.profile')->with('success', 'Profile berhasil diperbarui.');
