@@ -229,15 +229,15 @@
                             </div>
 
                             <!-- Informasi Sanksi -->
-                            @if ($peminjaman->sanksi->isNotEmpty())
+                            @if ($peminjaman->sanksi)
                                 <div class="sanksi-info mt-4" style="margin-top: 20px">
                                     <h5 style="font-size: 16px"><i class='bx bx-receipt'></i> Informasi Sanksi
                                     </h5>
-                                    @foreach ($peminjaman->sanksi as $sanksi)
+                                    @foreach ([$peminjaman->sanksi] as $sanksi)
                                         <div class="sanksi-card">
                                             <div class="sanksi-header">
                                                 <div class="sanksi-title">
-                                                    <strong>Sanksi #{{ $sanksi->id }}</strong>
+                                                    <strong>Sanksi :</strong>
                                                     <span
                                                         class="sanksi-date">{{ \Carbon\Carbon::parse($sanksi->created_at)->format('d/m/Y') }}</span>
                                                 </div>

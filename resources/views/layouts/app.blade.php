@@ -73,8 +73,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <!-- Library untuk export excel pada halaman buku -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+    <!-- Global DataTables defaults -->
+    <script>
+        $.extend(true, $.fn.dataTable.defaults, {
+            responsive: true,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/2.0.2/i18n/id.json'
+            }
+        });
+    </script>
     <!-- Custom JS - should be loaded after all other libraries but before page-specific scripts -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+
 
     <!-- Pastikan SweetAlert sudah di-load di layout utama atau tambahkan disini -->
     <script>
