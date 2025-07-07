@@ -21,7 +21,7 @@ $(document).ready(function() {
         },
         pageLength: 10,
         order: [
-            isAdmin ? [4, "asc"] : [3, "asc"] // Tanggal Sanksi
+            isAdmin ? [4, "desc"] : [3, "desc"] // Tanggal Sanksi
         ],
         columnDefs: [{
             orderable: false,

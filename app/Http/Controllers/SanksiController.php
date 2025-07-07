@@ -36,7 +36,7 @@ class SanksiController extends Controller
             'harga_buku.required' => 'Harga buku harus diisi.',
             'harga_buku.numeric' => 'Harga buku harus berupa angka.',
             'harga_buku.min' => 'Harga buku tidak boleh kurang dari 0.',
-            
+
             'keterangan.string' => 'Keterangan harus berupa string.'
         ];
         $request->validate([
@@ -158,7 +158,7 @@ class SanksiController extends Controller
     public function index()
     {
         $query = SanksiModel::with(['peminjaman.buku', 'peminjaman.user'])
-            ->orderBy('created_at', 'asc');
+            ->orderBy('created_at', 'desc');
 
         // Jika bukan admin, hanya tampilkan sanksi user yang sedang login
         if (Auth::user()->level !== 'admin') {

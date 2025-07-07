@@ -73,7 +73,7 @@ class PeminjamanModel extends Model // Konsep OOP: Inheritance - mewarisi sifat 
      */
     public function sanksi() // public - dapat diakses dari mana saja
     {
-        // Implementasi relasi one-to-many - Satu peminjaman bisa memiliki beberapa sanksi
-        return $this->hasMany(\App\Models\SanksiModel::class, 'peminjaman_id');
+        // Implementasi relasi one-to-one - Satu peminjaman hanya bisa memiliki satu sanksi
+        return $this->hasOne(\App\Models\SanksiModel::class, 'peminjaman_id');
     }
 }
