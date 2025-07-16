@@ -140,7 +140,7 @@
                 <div class="col-md-8 col-sm-8">
 
                     <!-- kontak FORM HERE -->
-                    <form id="kontak-form" role="form" action="/kirim" method="POST">
+                    <form id="kontak-form" role="form" action="{{ url('/kirim') }}" method="POST">
                         @csrf
                         <div class="col-md-6 col-sm-6">
                             <input type="text" class="form-control" placeholder="Full Name" name="nama"
