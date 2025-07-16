@@ -777,7 +777,7 @@
                                     <th>No.</th>
                                     <th>No. Peminjaman</th>
                                     <th>Judul Buku</th>
-                                    <th>Nama Peminjam</th>
+                                    {{-- <th>Nama Peminjam</th> --}}
                                     <th>Tanggal Pinjam</th>
                                     <th>Tanggal Batas Kembali</th>
                                     <th>Tanggal Pengembalian</th>
@@ -794,7 +794,7 @@
                                             <td>{{ $count }}</td>
                                             <td>{{ $item->no_peminjaman }}</td>
                                             <td>{{ $item->buku->judul }}</td>
-                                            <td>{{ $item->user->nama }}</td>
+                                            {{-- <td>{{ $item->user->nama }}</td> --}}
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }}</td>
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') }}</td>
                                             <td>

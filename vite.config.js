@@ -11,7 +11,7 @@ export default defineConfig({
     server: {
         host: "0.0.0.0",
         hmr: {
-            host: "192.168.18.28", //ipv4 address laptop
+            host: "192.168.144.20", //ipv4 address laptop
         },
     },
 });

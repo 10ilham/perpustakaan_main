@@ -702,21 +702,30 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menghapus data peminjaman.');
         }
 
-        // Jika status masih dipinjam, kembalikan stok buku terlebih dahulu
-        if ($peminjaman->status == 'Dipinjam') {
-            // Tambah stok buku
-            $buku = BukuModel::findOrFail($peminjaman->buku_id);
-            $buku->stok_buku += 1;
-
-            // Update status buku jika stok tersedia
-            if ($buku->stok_buku > 0) {
-                $buku->status = 'Tersedia';
+        // Cek apakah peminjaman masih aktif
+        if (in_array($peminjaman->status, ['Dipinjam', 'Terlambat', 'Diproses'])) {
+            $statusText = '';
+            switch ($peminjaman->status) {
+                case 'Dipinjam':
+                    $statusText = 'sedang dipinjam';
+                    break;
+                case 'Terlambat':
+                    $statusText = 'terlambat dan belum dikembalikan';
+                    break;
+                case 'Diproses':
+                    $statusText = 'sedang diproses';
+                    break;
             }
 
-            $buku->save();
+            return redirect()->back()->with('error', "Data peminjaman tidak dapat dihapus karena status peminjaman masih aktif ($statusText). Silakan tunggu hingga buku dikembalikan atau dibatalkan.");
         }
 
-        // Hapus data peminjaman
+        // Hanya peminjaman dengan status 'Dikembalikan' atau 'Dibatalkan' yang boleh dihapus
+        if (!in_array($peminjaman->status, ['Dikembalikan', 'Dibatalkan'])) {
+            return redirect()->back()->with('error', 'Data peminjaman hanya dapat dihapus jika status sudah Dikembalikan atau Dibatalkan.');
+        }
+
+        // Hapus data peminjaman (hanya untuk status non-aktif)
         $peminjaman->delete();
 
         return redirect()->route('peminjaman.index')->with('success', 'Data peminjaman berhasil dihapus.');

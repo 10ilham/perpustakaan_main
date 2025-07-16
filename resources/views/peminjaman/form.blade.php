@@ -90,7 +90,9 @@
                                 @csrf
                                 <input type="hidden" name="buku_id" value="{{ $buku->id }}">
 
-                                <div class="form-group mb-3">
+                                <input type="hidden" name="nama" value="{{ auth()->user()->nama }}">
+
+                                {{-- <div class="form-group mb-3">
                                     <label for="nama">Nama Peminjam</label>
                                     <input type="text" name="nama" id="nama" class="form-control"
                                         placeholder="Masukkan nama Anda sebagai peminjam"
@@ -108,7 +110,7 @@
                                             <p>{{ $message }}</p>
                                         </div>
                                     @enderror
-                                </div>
+                                </div> --}}
 
                                 <div class="row">
                                     <div class="col-md-6">

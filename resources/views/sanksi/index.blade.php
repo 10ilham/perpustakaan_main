@@ -71,7 +71,9 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Nama Peminjam</th>
+                                @if (auth()->user()->level == 'admin')
+                                    <th>Nama Peminjam</th>
+                                @endif
                                 @if (auth()->user()->level == 'admin')
                                     <th>Level</th>
                                 @endif
@@ -92,9 +94,11 @@
                             @foreach ($sanksi as $index => $item)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>
-                                        <strong>{{ $item->peminjaman->user->nama ?? $item->peminjaman->user->name }}</strong><br>
-                                    </td>
+                                    @if (auth()->user()->level == 'admin')
+                                        <td>
+                                            <strong>{{ $item->peminjaman->user->nama ?? $item->peminjaman->user->nama }}</strong><br>
+                                        </td>
+                                    @endif
                                     @if (auth()->user()->level == 'admin')
                                         <td>
                                             <strong>{{ ucfirst($item->peminjaman->user->level) }}</strong>

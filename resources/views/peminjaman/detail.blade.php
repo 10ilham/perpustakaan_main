@@ -161,10 +161,12 @@
                                             <span class="value">{{ $peminjaman->no_peminjaman }}</span>
                                         </div>
 
+                                        @if (auth()->user()->level == 'admin')
                                         <div class="detail-item">
                                             <span class="label">Nama Peminjam</span>
                                             <span class="value">{{ $peminjaman->user->nama }}</span>
                                         </div>
+                                        @endif
 
                                         @if (auth()->user()->level == 'admin' || auth()->user()->level == 'staff')
                                             <div class="detail-item">

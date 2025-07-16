@@ -786,7 +786,8 @@ function initPeminjamanManual() {
             const inputKembali = $('#tanggal_kembali');
             inputKembali.attr('min', tanggalKembali.toISOString().split('T')[0]);
             inputKembali.attr('max', tanggalMax.toISOString().split('T')[0]);
-            inputKembali.val(tanggalKembali.toISOString().split('T')[0]);
+            // Removed automatic value setting - let user choose the return date manually
+            // inputKembali.val(tanggalKembali.toISOString().split('T')[0]);
         }
     });
 
@@ -809,7 +810,9 @@ function initPeminjamanManual() {
     // Trigger event untuk data lama
     if ($('#user_level').val()) $('#user_level').trigger('change');
     if ($('#buku_id').val()) $('#buku_id').trigger('change');
-    $('#tanggal_pinjam').trigger('change');
+    // Removed automatic trigger for tanggal_pinjam to prevent auto-filling return date
+    // $('#tanggal_pinjam').trigger('change');
+
 
     // Validasi form sebelum submit
     $('#manualPeminjamanForm').submit(function(e) {

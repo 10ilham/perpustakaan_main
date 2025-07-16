@@ -64,7 +64,7 @@ class BukuController extends Controller
      */
     public function simpan(Request $request)
     {
-       $messages = [
+        $messages = [
             'kode_buku.required' => 'Kode buku harus diisi.',
             'kode_buku.max' => 'Kode buku tidak boleh lebih dari :max karakter.',
             'kode_buku.unique' => 'Kode buku sudah ada.',
@@ -394,10 +394,22 @@ class BukuController extends Controller
     public function hapus($id)
     {
         $buku = BukuModel::findOrFail($id);
+
+        // Cek apakah ada peminjaman aktif untuk buku ini
+        $peminjamanAktif = \App\Models\PeminjamanModel::where('buku_id', $id)
+            ->whereIn('status', ['Diproses', 'Dipinjam', 'Terlambat'])
+            ->count();
+
+        // Jika ada peminjaman aktif, buku tidak bisa dihapus
+        if ($peminjamanAktif > 0) {
+            return redirect()->route('buku.index')->with('error', 'Buku tidak dapat dihapus karena masih ada ' . $peminjamanAktif . ' peminjaman aktif. Tunggu hingga semua peminjaman selesai atau dibatalkan.');
+        }
+
         // Hapus foto jika ada
         if ($buku->foto && file_exists(public_path('assets/img/buku/' . $buku->foto))) {
             unlink(public_path('assets/img/buku/' . $buku->foto));
         }
+
         $buku->delete();
         return redirect()->route('buku.index')->with('success', 'Buku berhasil dihapus.');
     }
