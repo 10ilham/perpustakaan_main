@@ -357,18 +357,27 @@ class PeminjamanController extends Controller
     private function updateLateStatus()
     {
         // Update status menjadi 'Terlambat' untuk peminjaman yang sudah melewati akhir hari batas
-        // Hanya terlambat jika sudah melewati jam 23:59:59 dari tanggal_kembali
+        // dan kembalikan status ke 'Dipinjam' jika tanggal sistem kembali normal.
         $sekarang = Carbon::now();
 
-        // Ambil semua peminjaman dengan status 'Dipinjam'
+        // 1. Cek peminjaman yang statusnya 'Dipinjam' dan ubah ke 'Terlambat' jika sudah lewat waktu
         $peminjamanDipinjam = PeminjamanModel::where('status', 'Dipinjam')->get();
-
         foreach ($peminjamanDipinjam as $peminjaman) {
             $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
-
-            // Hanya update status jika sudah melewati akhir hari batas
             if ($sekarang->greaterThan($tanggalBatasKembali)) {
                 $peminjaman->status = 'Terlambat';
+                $peminjaman->save();
+            }
+        }
+
+        // 2. Cek peminjaman yang statusnya 'Terlambat' dan kembalikan ke 'Dipinjam' jika belum lewat waktu
+        $peminjamanTerlambat = PeminjamanModel::where('status', 'Terlambat')->get();
+        foreach ($peminjamanTerlambat as $peminjaman) {
+            $tanggalBatasKembali = Carbon::parse($peminjaman->tanggal_kembali)->endOfDay();
+            // Jika tanggal pengembalian belum terisi (artinya belum dikembalikan)
+            // dan tanggal sekarang TIDAK lebih besar dari batas kembali
+            if (is_null($peminjaman->tanggal_pengembalian) && !$sekarang->greaterThan($tanggalBatasKembali)) {
+                $peminjaman->status = 'Dipinjam';
                 $peminjaman->save();
             }
         }
