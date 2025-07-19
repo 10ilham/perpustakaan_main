@@ -97,43 +97,44 @@
 
                             <form class="profile-display">
                                 {{-- Total Keseluruhan Buku --}}
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label for="total_buku">Total Buku</label>
                                     <input type="text" id="total_buku" class="form-control" value="{{ $totalStokBuku }}"
                                         readonly>
-                                </div>
+                                </div> --}}
 
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label for="kategori">Kategori</label>
                                     <input type="text" id="kategori" class="form-control"
                                         value="{{ $buku->kategori->pluck('nama_kategori')->implode(', ') }}" readonly>
-                                </div>
+                                </div> --}}
 
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label for="penerbit">Penerbit</label>
                                     <input type="text" id="penerbit" class="form-control" value="{{ $buku->penerbit }}"
                                         readonly>
-                                </div>
+                                </div> --}}
 
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label for="tahun_terbit">Tahun Terbit</label>
                                     <input type="text" id="tahun_terbit" class="form-control"
                                         value="{{ $buku->tahun_terbit }}" readonly>
-                                </div>
+                                </div> --}}
 
+                                @if (auth()->user()->level == 'admin')
                                 <div class="form-group">
                                     <label for="harga_buku">Harga Buku</label>
                                     <input type="text" id="harga_buku" class="form-control"
                                         value="Rp {{ number_format($buku->harga_buku ?? 0, 0, ',', '.') }}" readonly>
                                 </div>
+                                @endif
 
                                 <div class="form-group">
-                                    <label for="deskripsi">Deskripsi</label>
+                                    <label for="deskripsi">Sinopsis</label>
                                     <textarea id="deskripsi" class="form-control" rows="5" readonly>{{ $buku->deskripsi }}</textarea>
                                 </div>
 
-
-                                <div class="form-group">
+                                {{-- <div class="form-group">
                                     <label for="created_at">Ditambahkan Pada</label>
                                     <input type="text" id="created_at" class="form-control"
                                         value="{{ $buku->created_at->format('d F Y H:i') }}" readonly>
@@ -143,7 +144,7 @@
                                     <label for="updated_at">Terakhir Diperbarui</label>
                                     <input type="text" id="updated_at" class="form-control"
                                         value="{{ $buku->updated_at->format('d F Y H:i') }}" readonly>
-                                </div>
+                                </div> --}}
 
                                 <!-- Tombol Aksi -->
                                 <div class="form-group text-end">

@@ -279,13 +279,13 @@
                                                         <td>{{ $item->no_peminjaman }}</td>
                                                         <td>{{ $item->buku->judul }}</td>
                                                         <td>{{ $item->user->nama }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }}
+                                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y H:i') }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') }}
                                                         </td>
                                                         <td>
                                                             @if ($item->tanggal_pengembalian)
-                                                                {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') }}
+                                                                {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y H:i') }}
                                                             @else
                                                                 -
                                                             @endif
@@ -334,7 +334,7 @@
 
                                                                 @if ($item->status == 'Diproses')
                                                                     @if (auth()->user()->level == 'admin')
-                                                                        @if ($item->diproses_by == 'admin')
+                                                                        @if ($item->diproses_by == 'admin' || $item->diproses_by == null)
                                                                             <button type="button"
                                                                                 class="btn btn-sm btn-success-pengambilan"
                                                                                 data-bs-toggle="modal"
@@ -343,19 +343,6 @@
                                                                                 title="Konfirmasi Pengambilan">
                                                                                 <i class="bx bx-package"></i>
                                                                             </button>
-                                                                        @endif
-                                                                    @else
-                                                                        @if ($item->user_id == auth()->id())
-                                                                            @if ($item->diproses_by == null)
-                                                                                <button type="button"
-                                                                                    class="btn btn-sm btn-success-pengambilan"
-                                                                                    data-bs-toggle="modal"
-                                                                                    data-bs-target="#pengambilanModal"
-                                                                                    data-action="{{ route('peminjaman.konfirmasi-pengambilan', $item->id) }}"
-                                                                                    title="Konfirmasi Pengambilan">
-                                                                                    <i class="bx bx-package"></i>
-                                                                                </button>
-                                                                            @endif
                                                                         @endif
                                                                     @endif
                                                                 @endif
@@ -438,13 +425,13 @@
                                                         <td>{{ $item->no_peminjaman }}</td>
                                                         <td>{{ $item->buku->judul }}</td>
                                                         <td>{{ $item->user->nama }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }}
+                                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y H:i') }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') }}
                                                         </td>
                                                         <td>
                                                             @if ($item->tanggal_pengembalian)
-                                                                {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') }}
+                                                                {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y H:i') }}
                                                             @else
                                                                 -
                                                             @endif
@@ -493,7 +480,7 @@
 
                                                                 @if ($item->status == 'Diproses')
                                                                     @if (auth()->user()->level == 'admin')
-                                                                        @if ($item->diproses_by == 'admin')
+                                                                        @if ($item->diproses_by == 'admin' || $item->diproses_by == null)
                                                                             <button type="button"
                                                                                 class="btn btn-sm btn-success-pengambilan"
                                                                                 data-bs-toggle="modal"
@@ -594,13 +581,13 @@
                                                         <td>{{ $item->no_peminjaman }}</td>
                                                         <td>{{ $item->buku->judul }}</td>
                                                         <td>{{ $item->user->nama }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }}
+                                                        <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y H:i') }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') }}
                                                         </td>
                                                         <td>
                                                             @if ($item->tanggal_pengembalian)
-                                                                {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') }}
+                                                                {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y H:i') }}
                                                             @else
                                                                 -
                                                             @endif
@@ -649,7 +636,7 @@
 
                                                                 @if ($item->status == 'Diproses')
                                                                     @if (auth()->user()->level == 'admin')
-                                                                        @if ($item->diproses_by == 'admin')
+                                                                        @if ($item->diproses_by == 'admin' || $item->diproses_by == null)
                                                                             <button type="button"
                                                                                 class="btn btn-sm btn-success-pengambilan"
                                                                                 data-bs-toggle="modal"
@@ -777,7 +764,6 @@
                                     <th>No.</th>
                                     <th>No. Peminjaman</th>
                                     <th>Judul Buku</th>
-                                    {{-- <th>Nama Peminjam</th> --}}
                                     <th>Tanggal Pinjam</th>
                                     <th>Tanggal Batas Kembali</th>
                                     <th>Tanggal Pengembalian</th>
@@ -794,12 +780,12 @@
                                             <td>{{ $count }}</td>
                                             <td>{{ $item->no_peminjaman }}</td>
                                             <td>{{ $item->buku->judul }}</td>
-                                            {{-- <td>{{ $item->user->nama }}</td> --}}
-                                            <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }}</td>
+                                            <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y H:i') }}
+                                            </td>
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') }}</td>
                                             <td>
                                                 @if ($item->tanggal_pengembalian)
-                                                    {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y') }}
+                                                    {{ \Carbon\Carbon::parse($item->tanggal_pengembalian)->format('d/m/Y H:i') }}
                                                 @else
                                                     -
                                                 @endif
@@ -844,18 +830,6 @@
                                                         class="btn btn-sm btn-info" title="Detail">
                                                         <i class="bx bx-info-circle"></i>
                                                     </a>
-
-                                                    @if ($item->status == 'Diproses')
-                                                        @if ($item->diproses_by == 'admin' || $item->diproses_by == null)
-                                                            <button type="button"
-                                                                class="btn btn-sm btn-success-pengambilan"
-                                                                data-bs-toggle="modal" data-bs-target="#pengambilanModal"
-                                                                data-action="{{ route('peminjaman.konfirmasi-pengambilan', $item->id) }}"
-                                                                title="Konfirmasi Pengambilan">
-                                                                <i class="bx bx-package"></i>
-                                                            </button>
-                                                        @endif
-                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>

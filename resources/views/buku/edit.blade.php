@@ -237,7 +237,7 @@
 
                         <!-- Deskripsi Buku -->
                         <div class="form-group mt-3">
-                            <label for="deskripsi">Deskripsi Buku</label>
+                            <label for="deskripsi">Sinopsis Buku</label>
                             <textarea name="deskripsi" id="deskripsi" class="form-control" rows="5" required>{{ old('deskripsi', $buku->deskripsi) }}</textarea>
                             @error('deskripsi')
                                 <div class="custom-alert" role="alert">

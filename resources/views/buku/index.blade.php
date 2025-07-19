@@ -143,8 +143,11 @@
                                         </h5>
                                         <p class="card-text m-0">Kode Buku: {{ $item->kode_buku }}</p>
                                         <p class="card-text m-0">Pengarang: {{ $item->pengarang }}</p>
+                                        <p class="card-text m-0">Penerbit: {{ $item->penerbit }}</p>
+                                        <p class="card-text m-0">Tahun Terbit: {{ $item->tahun_terbit }}</p>
                                         <p class="card-text m-0">Kategori:
                                             {{ $item->kategori->pluck('nama_kategori')->implode(', ') }}</p>
+                                        <p class="card-text m-0">Total Buku: {{ $item->total_buku }}</p>
                                         <p class="card-text m-0">Status:
                                             @if ($item->status === 'Tersedia')
                                                 <span class="badge badge-outline-success">{{ $item->status }}</span>

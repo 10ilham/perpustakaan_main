@@ -1000,11 +1000,21 @@ class PeminjamanController extends Controller
     // Proses konfirmasi pengambilan buku
     public function konfirmasiPengambilan($id)
     {
+        // Cek apakah user adalah admin
+        if (Auth::user()->level !== 'admin') {
+            return redirect()->back()->with('error', 'Hanya admin yang dapat mengkonfirmasi pengambilan buku.');
+        }
+
         $peminjaman = PeminjamanModel::findOrFail($id);
 
         // Cek status peminjaman harus dalam status Diproses
         if ($peminjaman->status !== 'Diproses') {
             return redirect()->back()->with('error', 'Status peminjaman tidak valid untuk pengambilan buku.');
+        }
+
+        // Cek apakah diproses_by adalah admin atau null
+        if (!($peminjaman->diproses_by == 'admin' || $peminjaman->diproses_by == null)) {
+            return redirect()->back()->with('error', 'Peminjaman ini tidak dapat dikonfirmasi pengambilannya.');
         }
 
         // Update tanggal pinjam menjadi saat ini

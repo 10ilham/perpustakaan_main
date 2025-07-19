@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('no_peminjaman', 21)->unique();
             $table->dateTime('tanggal_pinjam');
             $table->date('tanggal_kembali');
-            $table->date('tanggal_pengembalian')->nullable();
+            $table->dateTime('tanggal_pengembalian')->nullable();
             $table->enum('status', ['Diproses', 'Dipinjam', 'Dikembalikan', 'Terlambat', 'Dibatalkan'])->default('Diproses');
             $table->text('catatan')->nullable();
             $table->boolean('is_terlambat')->default(false);

@@ -63,12 +63,6 @@
                             @enderror
                         </div>
 
-                        <div class="form-group mt-3">
-                            <label for="jumlah_buku">Jumlah Buku dalam Kategori</label>
-                            <input type="text" class="form-control" value="{{ $kategori->buku->count() }} buku" readonly>
-                            <small class="text-muted">Informasi ini tidak dapat diubah</small>
-                        </div>
-
                         <div class="form-group mt-4 text-end">
                             {{-- Parameter referensi yang akan digunakan di controller --}}
                             @if (isset($ref) && $ref == 'detail')

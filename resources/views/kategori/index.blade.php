@@ -36,7 +36,9 @@
                                 <th>No</th>
                                 <th>Nama Kategori</th>
                                 <th>Deskripsi</th>
-                                <th>Jumlah Buku</th>
+                                @if (auth()->user()->level == 'admin')
+                                    <th>Jumlah Buku</th>
+                                @endif
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -46,7 +48,9 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $item->nama_kategori }}</td>
                                     <td>{{ $item->deskripsi ?: 'Tidak ada deskripsi' }}</td>
-                                    <td>{{ $item->buku->count() }} buku</td>
+                                    @if (auth()->user()->level == 'admin')
+                                        <td>{{ $item->buku->count() }} buku</td>
+                                    @endif
                                     <td>
                                         <div class="btn-group">
                                             <a href="{{ route('kategori.detail', $item->id) }}" class="btn btn-sm btn-info"

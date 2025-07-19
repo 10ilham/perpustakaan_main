@@ -203,7 +203,7 @@
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ $item->no_peminjaman }}</td>
                                             <td>{{ $item->buku->judul }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y') }}
+                                            <td>{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d/m/Y H:i') }}
                                             </td>
                                             <td>{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d/m/Y') }}
                                             </td>

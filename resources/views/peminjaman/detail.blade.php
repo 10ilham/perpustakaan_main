@@ -162,10 +162,10 @@
                                         </div>
 
                                         @if (auth()->user()->level == 'admin')
-                                        <div class="detail-item">
-                                            <span class="label">Nama Peminjam</span>
-                                            <span class="value">{{ $peminjaman->user->nama }}</span>
-                                        </div>
+                                            <div class="detail-item">
+                                                <span class="label">Nama Peminjam</span>
+                                                <span class="value">{{ $peminjaman->user->nama }}</span>
+                                            </div>
                                         @endif
 
                                         @if (auth()->user()->level == 'admin' || auth()->user()->level == 'staff')
@@ -193,7 +193,7 @@
                                             <div class="detail-item">
                                                 <span class="label">Tanggal Pengembalian</span>
                                                 <span
-                                                    class="value">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pengembalian)->translatedFormat('d F Y') }}</span>
+                                                    class="value">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pengembalian)->translatedFormat('d F Y H:i') }}</span>
                                             </div>
                                         @endif
                                     </div>
@@ -365,23 +365,13 @@
                                     @endif
 
                                     @if ($peminjaman->status == 'Diproses')
-                                        @if (auth()->user()->level == 'admin' && $peminjaman->diproses_by == 'admin')
+                                        @if (auth()->user()->level == 'admin' && ($peminjaman->diproses_by == 'admin' || $peminjaman->diproses_by == null))
                                             <button type="button" class="btn btn-success btn-success-pengambilan"
                                                 data-bs-toggle="modal" data-bs-target="#pengambilanModal"
                                                 data-action="{{ route('peminjaman.konfirmasi-pengambilan', $peminjaman->id) }}"
                                                 title="Konfirmasi Pengambilan">
                                                 <i class="bx bx-check"></i> Konfirmasi Pengambilan
                                             </button>
-                                            {{-- untuk user selain admin --}}
-                                        @elseif (auth()->user()->level != 'admin')
-                                            @if ($peminjaman->user_id == auth()->id() && ($peminjaman->diproses_by == 'admin' || $peminjaman->diproses_by == null))
-                                                <button type="button" class="btn btn-success btn-success-pengambilan"
-                                                    data-bs-toggle="modal" data-bs-target="#pengambilanModal"
-                                                    data-action="{{ route('peminjaman.konfirmasi-pengambilan', $peminjaman->id) }}"
-                                                    title="Konfirmasi Pengambilan">
-                                                    <i class="bx bx-check"></i> Konfirmasi Pengambilan
-                                                </button>
-                                            @endif
                                         @endif
                                     @endif
                                 </div>

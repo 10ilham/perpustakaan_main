@@ -20,7 +20,7 @@ $(document).ready(function() {
             order: [[0, "asc"]], // Urutkan berdasarkan id kategori
             columnDefs: [{
                 orderable: false,
-                targets: [4] // Kolom aksi tidak bisa diurutkan
+                targets: isAdmin ? [4] : [3] // Kolom aksi tidak bisa diurutkan (sesuaikan dengan level user)
             }]
         };
 
@@ -32,14 +32,14 @@ $(document).ready(function() {
                     extend: 'copy',
                     text: '<i class="bx bx-copy"></i><span>Copy</span>',
                     className: 'btn btn-outline-primary btn-sm export-btn',
-                    exportOptions: { columns: [0, 1, 2, 3] }
+                    exportOptions: { columns: ':visible' }
                 },
                 {
                     extend: 'csv',
                     text: '<i class="bx bx-file"></i><span>CSV</span>',
                     className: 'btn btn-outline-success btn-sm export-btn',
                     filename: 'Data_Kategori_' + new Date().toLocaleDateString('id-ID').replace(/\//g, '-'),
-                    exportOptions: { columns: [0, 1, 2, 3] }
+                    exportOptions: { columns: ':visible' }
                 },
                 {
                     extend: 'excel',
@@ -47,7 +47,7 @@ $(document).ready(function() {
                     className: 'btn btn-outline-success btn-sm export-btn',
                     filename: 'Data_Kategori_' + new Date().toLocaleDateString('id-ID').replace(/\//g, '-'),
                     title: 'Data Kategori Buku',
-                    exportOptions: { columns: [0, 1, 2, 3] }
+                    exportOptions: { columns: ':visible' }
                 },
                 {
                     text: '<i class="bx bxs-file-doc"></i><span>Word</span>',
@@ -55,7 +55,7 @@ $(document).ready(function() {
                     action: function(e, dt, button, config) {
                         // Export Word sederhana
                         var data = dt.buttons.exportData({
-                            columns: [0, 1, 2, 3]
+                            columns: ':visible'
                         });
 
                         var wordContent = `
@@ -91,14 +91,14 @@ $(document).ready(function() {
                     className: 'btn btn-outline-danger btn-sm export-btn',
                     filename: 'Data_Kategori_' + new Date().toLocaleDateString('id-ID').replace(/\//g, '-'),
                     title: 'Data Kategori Buku',
-                    exportOptions: { columns: [0, 1, 2, 3] }
+                    exportOptions: { columns: ':visible' }
                 },
                 {
                     extend: 'print',
                     text: '<i class="bx bx-printer"></i><span>Print</span>',
                     className: 'btn btn-outline-warning btn-sm export-btn',
                     title: 'Data Kategori Buku',
-                    exportOptions: { columns: [0, 1, 2, 3] }
+                    exportOptions: { columns: ':visible' }
                 }
             ];
         }
