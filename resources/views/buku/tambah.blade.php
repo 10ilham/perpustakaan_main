@@ -38,7 +38,7 @@
                             <div class="col-md-6">
                                 <!-- Informasi Dasar Buku -->
                                 <div class="form-group">
-                                    <label for="kode_buku">Kode Buku</label>
+                                    <label for="kode_buku">Kode Buku *</label>
                                     <input type="text" name="kode_buku" id="kode_buku" class="form-control"
                                         value="{{ old('kode_buku') }}" required>
                                     @error('kode_buku')
@@ -54,7 +54,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="judul">Judul Buku</label>
+                                    <label for="judul">Judul Buku *</label>
                                     <input type="text" name="judul" id="judul" class="form-control"
                                         value="{{ old('judul') }}" required>
                                     @error('judul')
@@ -70,7 +70,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="kategori_id">Kategori</label>
+                                    <label for="kategori_id">Kategori *</label>
                                     <select name="kategori_id[]" id="kategori_id" class="form-control" multiple>
                                         @foreach ($kategori as $kat)
                                             <option value="{{ $kat->id }}"
@@ -92,7 +92,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="pengarang">Pengarang</label>
+                                    <label for="pengarang">Pengarang *</label>
                                     <input type="text" name="pengarang" id="pengarang" class="form-control"
                                         value="{{ old('pengarang') }}" required>
                                     @error('pengarang')
@@ -110,7 +110,7 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="penerbit">Penerbit</label>
+                                    <label for="penerbit">Penerbit *</label>
                                     <input type="text" name="penerbit" id="penerbit" class="form-control"
                                         value="{{ old('penerbit') }}" required>
                                     @error('penerbit')
@@ -126,7 +126,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="tahun_terbit">Tahun Terbit</label>
+                                    <label for="tahun_terbit">Tahun Terbit *</label>
                                     <input type="text" name="tahun_terbit" id="tahun_terbit" class="form-control"
                                         value="{{ old('tahun_terbit') }}" required>
                                     @error('tahun_terbit')
@@ -142,7 +142,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="total_buku">Total Buku</label>
+                                    <label for="total_buku">Total Buku *</label>
                                     <input type="number" name="total_buku" id="total_buku" class="form-control"
                                         value="{{ old('total_buku', 0) }}">
                                     <small class="form-text text-muted">Jumlah keseluruhan buku. Stok buku akan otomatis
@@ -160,7 +160,7 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="harga_buku">Harga Buku</label>
+                                    <label for="harga_buku">Harga Buku *</label>
                                     <input type="text" name="harga_buku" id="harga_buku" class="form-control"
                                         value="{{ old('harga_buku', 0) }}" placeholder="0">
                                     <small class="form-text text-muted">Harga buku untuk perhitungan denda (dalam
@@ -209,9 +209,26 @@
 
                         <!-- Deskripsi Buku -->
                         <div class="form-group mt-3">
-                            <label for="deskripsi">Sinopsis Buku</label>
+                            <label for="deskripsi">Sinopsis Buku *</label>
                             <textarea name="deskripsi" id="deskripsi" class="form-control" rows="5" required>{{ old('deskripsi') }}</textarea>
                             @error('deskripsi')
+                                <div class="custom-alert" role="alert">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path
+                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z">
+                                        </path>
+                                    </svg>
+                                    <p>{{ $message }}</p>
+                                </div>
+                            @enderror
+                        </div>
+
+                        <!-- Alasan Penambahan Buku -->
+                        <div class="form-group mt-3">
+                            <label for="alasan">Alasan Penambahan Buku *</label>
+                            <textarea name="alasan" id="alasan" class="form-control" rows="3" required
+                                placeholder="Contoh: Penambahan koleksi baru, Permintaan siswa, Kurikulum baru, dll.">{{ old('alasan') }}</textarea>
+                            @error('alasan')
                                 <div class="custom-alert" role="alert">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                         <path

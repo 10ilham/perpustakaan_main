@@ -35,7 +35,7 @@
 
                         <!-- Informasi Umum -->
                         <div class="form-group">
-                            <label for="nama">Nama Lengkap</label>
+                            <label for="nama">Nama Lengkap *</label>
                             <input type="text" name="nama" id="nama" class="form-control"
                                 value="{{ old('nama') }}" required>
                             @error('nama')
@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="email">Email</label>
+                            <label for="email">Email *</label>
                             <input type="email" name="email" id="email" class="form-control"
                                 value="{{ old('email') }}" required>
                             @error('email')
@@ -68,7 +68,7 @@
 
                         <!-- Password -->
                         <div class="form-group">
-                            <label for="password">Password</label>
+                            <label for="password">Password *</label>
                             <input type="password" name="password" id="password" class="form-control" required>
                             @error('password')
                                 <div class="custom-alert" role="alert">
@@ -83,14 +83,14 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="password_confirmation">Konfirmasi Password</label>
+                            <label for="password_confirmation">Konfirmasi Password *</label>
                             <input type="password" name="password_confirmation" id="password_confirmation"
                                 class="form-control" required>
                         </div>
 
                         <!-- Level User -->
                         <div class="form-group">
-                            <label for="level">Level</label>
+                            <label for="level">Level *</label>
                             <select name="level" id="level" class="form-control" required>
                                 <option value="">-- Pilih Level --</option>
                                 <option value="admin" {{ old('level') == 'admin' ? 'selected' : '' }}>Admin</option>
@@ -113,7 +113,7 @@
                         <!-- Informasi Khusus Sesuai Level -->
                         <div id="admin-fields" class="level-fields" style="display: none;">
                             <div class="form-group">
-                                <label for="nip">NIP</label>
+                                <label for="nip">NIP *</label>
                                 <input type="number" name="nip" id="nip" class="form-control"
                                     value="{{ old('nip') }}">
                                 @error('nip')
@@ -131,7 +131,7 @@
 
                         <div id="siswa-fields" class="level-fields" style="display: none;">
                             <div class="form-group">
-                                <label for="nisn">NISN</label>
+                                <label for="nisn">NISN *</label>
                                 <input type="number" name="nisn" id="nisn" class="form-control"
                                     value="{{ old('nisn') }}">
                                 @error('nisn')
@@ -146,7 +146,7 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label for="kelas">Kelas</label>
+                                <label for="kelas">Kelas *</label>
                                 <select name="kelas" id="kelas" class="form-control">
                                     <option value="">Pilih Kelas</option>
                                     <option value="VII A" {{ old('kelas') == 'VII A' ? 'selected' : '' }}>VII A</option>
@@ -173,7 +173,7 @@
 
                         <div id="guru-fields" class="level-fields" style="display: none;">
                             <div class="form-group">
-                                <label for="nip">NIP</label>
+                                <label for="nip">NIP *</label>
                                 <input type="number" name="nip" id="nip" class="form-control"
                                     value="{{ old('nip') }}">
                                 @error('nip')
@@ -188,7 +188,7 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label for="mata_pelajaran">Mata Pelajaran</label>
+                                <label for="mata_pelajaran">Mata Pelajaran *</label>
                                 <select name="mata_pelajaran" id="mata_pelajaran" class="form-control">
                                     <option value="">Pilih Mata Pelajaran</option>
                                     <option value="Matematika"
@@ -232,7 +232,7 @@
 
                         <div id="staff-fields" class="level-fields" style="display: none;">
                             <div class="form-group">
-                                <label for="nip">NIP</label>
+                                <label for="nip">NIP *</label>
                                 <input type="number" name="nip" id="nip" class="form-control"
                                     value="{{ old('nip') }}">
                                 @error('nip')
@@ -247,7 +247,7 @@
                                 @enderror
                             </div>
                             <div class="form-group">
-                                <label for="bagian">Bagian</label>
+                                <label for="bagian">Bagian *</label>
                                 <select name="bagian" id="bagian" class="form-control">
                                     <option value="">Pilih Bagian</option>
                                     <option value="Kepala Tata Usaha"
@@ -279,7 +279,7 @@
 
                         <!-- Informasi Kontak -->
                         <div class="form-group">
-                            <label for="tanggal_lahir">Tanggal Lahir</label>
+                            <label for="tanggal_lahir">Tanggal Lahir *</label>
                             <input type="date" name="tanggal_lahir" id="tanggal_lahir" class="form-control"
                                 value="{{ old('tanggal_lahir') }}" required>
                             @error('tanggal_lahir')
@@ -295,7 +295,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="alamat">Alamat</label>
+                            <label for="alamat">Alamat *</label>
                             <textarea name="alamat" id="alamat" class="form-control" rows="3" required>{{ old('alamat') }}</textarea>
                             @error('alamat')
                                 <div class="custom-alert" role="alert">
@@ -310,7 +310,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="no_telepon">Nomor Telepon</label>
+                            <label for="no_telepon">Nomor Telepon *</label>
                             <input type="text" name="no_telepon" id="no_telepon" class="form-control"
                                 value="{{ old('no_telepon') }}" required>
                             @error('no_telepon')

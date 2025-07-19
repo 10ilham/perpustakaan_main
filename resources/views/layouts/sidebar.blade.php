@@ -95,6 +95,11 @@
                             Laporan Sanksi
                         </a>
                     </li>
+                    <li><a href="{{ route('laporan.buku_log') }}"
+                            class="{{ request()->routeIs('laporan.buku_log') ? 'active-menu-item' : '' }}">
+                            Laporan Buku Masuk/Keluar
+                        </a>
+                    </li>
                 @endif
 
                 @if (Auth::user()->level !== 'admin')

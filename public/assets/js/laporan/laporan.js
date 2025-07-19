@@ -463,6 +463,7 @@ function getPageType(currentPath) {
     if (currentPath.includes('sudah-kembali')) return 'sudah_kembali';
     if (currentPath.includes('sanksi-belum-bayar')) return 'sanksi_belum_bayar';
     if (currentPath.includes('sanksi-sudah-bayar')) return 'sanksi_sudah_bayar';
+    if (currentPath.includes('buku-log') || currentPath.includes('buku_log')) return 'buku_log';
     return 'default';
 }
 
@@ -506,6 +507,12 @@ function getResponsivePriorities(isAdmin, pageType) {
                 { responsivePriority: 2, targets: [7] },
                 { orderable: false, targets: [-1] }
             ];
+        case 'buku_log':
+            return [
+                { responsivePriority: 1, targets: [0, 1, 3, 4, 7] },
+                { responsivePriority: 2, targets: [5, 6] },
+                { orderable: false, targets: [7] }
+            ];
         default:
             return [{ orderable: false, targets: [-1] }];
     }
@@ -526,6 +533,7 @@ function getExportButtons(pageType) {
         case 'sudah_kembali': filePrefix += 'Sudah_Dikembalikan_'; break;
         case 'sanksi_belum_bayar': filePrefix += 'Sanksi_Belum_Bayar_'; break;
         case 'sanksi_sudah_bayar': filePrefix += 'Sanksi_Sudah_Bayar_'; break;
+        case 'buku_log': filePrefix += 'Buku_Masuk_Keluar_'; break;
         default: filePrefix = 'Laporan_';
     }
 
@@ -767,6 +775,11 @@ function getColumnWidthStyles(pageType, isAdmin) {
                 .col-no { width: 6%; } .col-tanggal { width: 15%; } .col-buku { width: 20%; }
                 .col-jenis { width: 15%; } .col-hari { width: 10%; } .col-denda-keterlambatan { width: 12%; }
                 .col-denda-kerusakan { width: 12%; } .col-total { width: 12%; } .col-keterangan { width: 8%; }`;
+        case 'buku_log':
+            return `
+                .col-no { width: 5%; } .col-tanggal { width: 10%; } .col-kode { width: 12%; }
+                .col-judul { width: 25%; } .col-tipe { width: 8%; } .col-jumlah { width: 8%; }
+                .col-alasan { width: 22%; } .col-aksi { width: 10%; }`;
         default:
             return '.col-no { width: 10%; }';
     }

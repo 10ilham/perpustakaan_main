@@ -155,17 +155,69 @@ function inisialisasiFormatHargaDisplay() {
 function inisialisasiModalHapus() {
     // Cari semua tombol hapus
     var tombolHapus = document.querySelectorAll('.delete-btn');
+    var formHapus = document.getElementById('delete-form');
+    var submitDelete = document.getElementById('submit-delete');
 
+    // Handle click on delete buttons
     tombolHapus.forEach(function(tombol) {
         tombol.addEventListener('click', function() {
             var actionUrl = this.getAttribute('data-action');
-            var formHapus = document.getElementById('delete-form');
+            var judulBuku = this.getAttribute('data-judul-buku') || 'buku ini';
 
+            // Set modal title with book title
+            var modalTitle = document.getElementById('deleteModalLabel');
+            if (modalTitle) {
+                modalTitle.textContent = 'Konfirmasi Hapus Buku: ' + judulBuku;
+            }
+
+            // Update form action
             if (formHapus && actionUrl) {
                 formHapus.action = actionUrl;
             }
         });
     });
+
+    // Handle submit delete button
+    if (submitDelete) {
+        submitDelete.addEventListener('click', function() {
+            var alasan = document.getElementById('alasan');
+            var tanggalInput = document.querySelector('input[name="tanggal"]');
+            var tanggalDisplay = document.getElementById('tanggal_display');
+
+            // Get today's date in YYYY-MM-DD format for comparison
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+            var yyyy = today.getFullYear();
+            var todayFormatted = yyyy + '-' + mm + '-' + dd;
+            var todayDisplayFormatted = dd + '-' + mm + '-' + yyyy;
+
+            // Form validation
+            if (!alasan.value.trim()) {
+                alert('Alasan penghapusan harus diisi');
+                alasan.focus();
+                return false;
+            }
+
+            if (!tanggalInput || !tanggalInput.value) {
+                alert('Tanggal penghapusan harus diisi');
+                return false;
+            }
+
+            // Check if date is today's date (already ensured by hidden field)
+            if (tanggalInput.value !== todayFormatted) {
+                alert('Tanggal penghapusan harus tanggal hari ini (' + todayDisplayFormatted + ')');
+                tanggalInput.value = todayFormatted;
+                tanggalDisplay.value = todayDisplayFormatted;
+                return false;
+            }
+
+            // Submit the form if validation passes
+            if (formHapus) {
+                formHapus.submit();
+            }
+        });
+    }
 }
 
 /**

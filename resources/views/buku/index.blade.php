@@ -171,6 +171,7 @@
                                             <button class="btn btn-sm btn-danger px-3 delete-btn" data-bs-toggle="modal"
                                                 data-bs-target="#deleteModal"
                                                 data-action="{{ route('buku.hapus', $item->id) }}"
+                                                data-judul-buku="{{ $item->judul }}"
                                                 style="height: 31px; display: flex; align-items: center;">Hapus</button>
                                         @endif
 
@@ -210,23 +211,50 @@
     </main>
 
     <!-- Modal Konfirmasi Hapus -->
-    <div class="modal fade bootstrap-modal" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Hapus</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-book me-2"></i> Konfirmasi Hapus Buku
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    Apakah Anda yakin ingin menghapus item ini?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <form id="delete-form" method="POST" style="display: inline;">
+                <div class="modal-body p-4">
+                    <div class="alert alert-info border-0 shadow-sm mb-4 p-3">
+                        <h6 class="alert-heading mb-2" style="font-size: 15px">
+                            <i class="fas fa-info-circle me-1"></i> Perhatian:
+                        </h6>
+                        <p class="mb-0">Apakah Anda yakin ingin menghapus buku ini? Data buku yang dihapus akan dicatat
+                            dalam log buku keluar.</p>
+                    </div>
+
+                    <form id="delete-form" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-danger">Hapus</button>
+                        <div class="card border-0 shadow-sm mb-0">
+                            <div class="card-body p-4">
+                                <div class="form-group mb-4">
+                                    <label for="alasan" class="form-label fw-bold mb-2">Alasan Penghapusan <span
+                                            class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="alasan" name="alasan" rows="3"
+                                        placeholder="Masukkan alasan penghapusan buku..." required style="resize: none;"></textarea>
+                                </div>
+                                <!-- Hidden tanggal field - otomatis hari ini -->
+                                <input type="hidden" name="tanggal" value="{{ date('Y-m-d') }}">
+                            </div>
+                        </div>
                     </form>
+                </div>
+                <div class="modal-footer bg-light p-4">
+                    <div class="d-flex justify-content-between w-100">
+                        <button type="button" class="btn btn-secondary btn-lg px-4" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i> Batal
+                        </button>
+                        <button type="button" class="btn btn-success btn-lg px-4" id="submit-delete">
+                            <i class="fas fa-check me-2"></i> Konfirmasi
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BukuModel;
 use App\Models\KategoriModel;
+use App\Models\BukuLogModel;
+use Carbon\Carbon;
 use App\Models\AdminModel;
 use Illuminate\Support\Facades\Auth;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -85,8 +87,8 @@ class BukuController extends Controller
             'tahun_terbit.numeric' => 'Tahun terbit buku harus berupa angka.',
             'tahun_terbit.digits' => 'Tahun terbit buku harus terdiri dari 4 digit.',
 
-            'deskripsi.required' => 'Deskripsi buku harus diisi.',
-            'deskripsi.string' => 'Deskripsi buku harus berupa string.',
+            'deskripsi.required' => 'Sinopsis buku harus diisi.',
+            'deskripsi.string' => 'Sinopsis buku harus berupa string.',
 
             'foto.image' => 'File yang diunggah harus berupa gambar.',
             'foto.mimes' => 'File yang diunggah harus berupa jpeg, png, jpg, atau gif.',
@@ -102,6 +104,10 @@ class BukuController extends Controller
 
             'kategori_id.required' => 'Kategori buku harus diisi minimal 1.',
             'kategori_id.min' => 'Kategori minimal 1 kategori harus dipilih.',
+
+            'alasan.required' => 'Alasan penambahan buku harus diisi.',
+            'alasan.string' => 'Alasan penambahan buku harus berupa teks.',
+            'alasan.max' => 'Alasan penambahan buku tidak boleh lebih dari :max karakter.',
         ];
 
         // Validasi input
@@ -116,6 +122,7 @@ class BukuController extends Controller
             'total_buku' => 'required|integer|min:0',
             'harga_buku' => 'required|integer|min:0',
             'kategori_id' => 'required|min:1',
+            'alasan' => 'required|string|max:500',
         ], $messages);
 
         // Ambil admin yang sedang login - ELOQUENT
@@ -153,6 +160,18 @@ class BukuController extends Controller
         if ($request->filled('kategori_id')) {
             $buku->kategori()->attach($request->kategori_id);
         }
+
+        // Log penambahan buku
+        BukuLogModel::create([
+            'buku_id' => $buku->id,
+            'admin_id' => Auth::id(),
+            'tipe' => 'masuk',
+            'judul_buku' => $buku->judul,
+            'kode_buku' => $buku->kode_buku,
+            'alasan' => $request->alasan,
+            'jumlah' => $request->total_buku,
+            'tanggal' => Carbon::now()->format('Y-m-d')
+        ]);
 
         return redirect()->route('buku.index')->with('success', 'Buku berhasil ditambahkan.');
     }
@@ -222,8 +241,8 @@ class BukuController extends Controller
             'tahun_terbit.numeric' => 'Tahun terbit buku harus berupa angka.',
             'tahun_terbit.digits' => 'Tahun terbit buku harus terdiri dari 4 digit.',
 
-            'deskripsi.required' => 'Deskripsi buku harus diisi.',
-            'deskripsi.string' => 'Deskripsi buku harus berupa string.',
+            'deskripsi.required' => 'Sinopsis buku harus diisi.',
+            'deskripsi.string' => 'Sinopsis buku harus berupa string.',
 
             'foto.image' => 'File yang diunggah harus berupa gambar.',
             'foto.mimes' => 'File yang diunggah harus berupa jpeg, png, jpg, atau gif.',
@@ -404,6 +423,23 @@ class BukuController extends Controller
         if ($peminjamanAktif > 0) {
             return redirect()->route('buku.index')->with('error', 'Buku tidak dapat dihapus karena masih ada ' . $peminjamanAktif . ' peminjaman aktif. Tunggu hingga semua peminjaman selesai atau dibatalkan.');
         }
+
+        // Get request data for reason and date
+        $request = request();
+        $alasan = $request->alasan;
+        $tanggal = $request->tanggal ?? Carbon::now()->format('Y-m-d');
+
+        // Log penghapusan buku
+        BukuLogModel::create([
+            'buku_id' => null, // Set to null since the book will be deleted
+            'admin_id' => Auth::id(),
+            'tipe' => 'keluar',
+            'judul_buku' => $buku->judul,
+            'kode_buku' => $buku->kode_buku,
+            'alasan' => $alasan,
+            'jumlah' => $buku->total_buku,
+            'tanggal' => $tanggal
+        ]);
 
         // Hapus foto jika ada
         if ($buku->foto && file_exists(public_path('assets/img/buku/' . $buku->foto))) {

@@ -28,7 +28,7 @@
                         @csrf
 
                         <div class="form-group">
-                            <label for="nama_kategori">Nama Kategori</label>
+                            <label for="nama_kategori">Nama Kategori *</label>
                             <input type="text" name="nama_kategori" id="nama_kategori" class="form-control"
                                 value="{{ old('nama_kategori') }}" required>
                             @error('nama_kategori')

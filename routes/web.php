@@ -115,6 +115,8 @@ Route::middleware(['auth', LevelMiddleware::class])->group(function () {
     Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/belum_kembali', [App\Http\Controllers\LaporanController::class, 'belumKembali'])->name('laporan.belum_kembali');
     Route::get('/laporan/sudah_kembali', [App\Http\Controllers\LaporanController::class, 'sudahKembali'])->name('laporan.sudah_kembali');
+    Route::get('/laporan/buku_log', [App\Http\Controllers\BukuLogController::class, 'index'])->name('laporan.buku_log');
+    Route::delete('/laporan/buku-log/{id}', [App\Http\Controllers\BukuLogController::class, 'destroy'])->name('laporan.buku_log.destroy');
     Route::get('/laporan/sanksi', [App\Http\Controllers\LaporanController::class, 'sanksi'])->name('laporan.sanksi');
     Route::get('/laporan/sanksi/belum-bayar', [App\Http\Controllers\LaporanController::class, 'sanksiBelumBayar'])->name('laporan.sanksi.belum_bayar');
     Route::get('/laporan/sanksi/sudah-bayar', [App\Http\Controllers\LaporanController::class, 'sanksiSudahBayar'])->name('laporan.sanksi.sudah_bayar');
