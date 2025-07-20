@@ -67,15 +67,4 @@ class AdminModel extends Model // Konsep OOP: Inheritance - mewarisi sifat dan m
         // Implementasi relasi one-to-many - Satu admin bisa mengelola banyak buku
         return $this->hasMany(BukuModel::class, 'id_admin');
     }
-
-    /**
-     * Relasi ke tabel buku_log - Menghubungkan AdminModel dengan BukuLogModel
-     * Konsep OOP: Association (Asosiasi) - Menunjukkan hubungan one-to-many antara Admin dan BukuLog
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function bukuLogs()
-    {
-        // Implementasi relasi one-to-many - Satu admin bisa membuat banyak log aktivitas buku
-        return $this->hasMany(BukuLogModel::class, 'admin_id');
-    }
 }

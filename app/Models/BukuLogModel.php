@@ -21,7 +21,6 @@ class BukuLogModel extends Model
      */
     protected $fillable = [
         'buku_id',
-        'admin_id',
         'tipe',
         'judul_buku',
         'kode_buku',
@@ -36,13 +35,5 @@ class BukuLogModel extends Model
     public function buku()
     {
         return $this->belongsTo(BukuModel::class, 'buku_id');
-    }
-
-    /**
-     * Relasi ke tabel users (admin)
-     */
-    public function admin()
-    {
-        return $this->belongsTo(User::class, 'admin_id');
     }
 }

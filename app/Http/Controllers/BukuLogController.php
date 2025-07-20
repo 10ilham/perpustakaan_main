@@ -19,7 +19,7 @@ class BukuLogController extends Controller
         $filter = $request->filter ?? 'semua';
 
         // Start query builder
-        $query = BukuLogModel::with('admin');
+        $query = BukuLogModel::query();
 
         // Apply filter
         if ($filter == 'masuk') {

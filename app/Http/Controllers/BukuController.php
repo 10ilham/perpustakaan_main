@@ -178,7 +178,6 @@ class BukuController extends Controller
         // Log penambahan buku
         BukuLogModel::create([
             'buku_id' => $buku->id,
-            'admin_id' => Auth::id(),
             'tipe' => 'masuk',
             'judul_buku' => $buku->judul,
             'kode_buku' => $buku->kode_buku,
@@ -446,7 +445,6 @@ class BukuController extends Controller
         // Log penghapusan buku
         BukuLogModel::create([
             'buku_id' => null, // Set to null since the book will be deleted
-            'admin_id' => Auth::id(),
             'tipe' => 'keluar',
             'judul_buku' => $buku->judul,
             'kode_buku' => $buku->kode_buku,
