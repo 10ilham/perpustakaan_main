@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\BukuModel;
 use App\Models\KategoriModel;
 use App\Models\BukuLogModel;
+use App\Models\UserBlacklistModel;
 use Carbon\Carbon;
 use App\Models\AdminModel;
 use Illuminate\Support\Facades\Auth;
@@ -48,7 +49,20 @@ class BukuController extends Controller
         // Ambil semua kategori untuk dropdown - ELOQUENT
         $kategori = KategoriModel::all();
 
-        return view('buku.index', compact('buku', 'kategori', 'totalBuku', 'tersedia', 'habis'));
+        // Cek status blacklist untuk user yang sedang login (untuk anggota)
+        $isBlacklisted = false;
+        $blacklistData = null;
+        if (Auth::check() && in_array(Auth::user()->level, ['siswa', 'guru', 'staff'])) {
+            $isBlacklisted = UserBlacklistModel::isUserBlacklisted(Auth::id());
+            if ($isBlacklisted) {
+                $blacklistData = UserBlacklistModel::where('user_id', Auth::id())
+                    ->where('is_active', true)
+                    ->where('blacklist_expires_at', '>', Carbon::now())
+                    ->first();
+            }
+        }
+
+        return view('buku.index', compact('buku', 'kategori', 'totalBuku', 'tersedia', 'habis', 'isBlacklisted', 'blacklistData'));
     }
 
     /**

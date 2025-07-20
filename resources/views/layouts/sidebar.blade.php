@@ -95,6 +95,11 @@
                             Laporan Sanksi
                         </a>
                     </li>
+                    <li><a href="{{ route('laporan.blacklist') }}"
+                            class="{{ request()->routeIs('laporan.blacklist') ? 'active-menu-item' : '' }}">
+                            Laporan Blacklist
+                        </a>
+                    </li>
                     <li><a href="{{ route('laporan.buku_log') }}"
                             class="{{ request()->routeIs('laporan.buku_log') ? 'active-menu-item' : '' }}">
                             Laporan Buku Masuk/Keluar

@@ -28,6 +28,59 @@
         </div>
 
         <section class="section">
+            <!-- Alert Blacklist jika user sedang dalam blacklist -->
+            @if (auth()->user()->isBlacklisted())
+                @php
+                    $blacklist = auth()->user()->blacklist;
+                    $tanggalSelesai = $blacklist->blacklist_expires_at
+                        ? \Carbon\Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y H:i')
+                        : 'tidak diketahui';
+                @endphp
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="status-box status-blacklist">
+                            <div class="icon">
+                                <i class="bx bx-error-circle"></i>
+                            </div>
+                            <div class="info">
+                                <h4>Peringatan Blacklist!</h4>
+                                <p>Anda sedang dalam daftar blacklist karena sering tidak mengambil buku yang sudah
+                                    dibooking sebanyak {{ $blacklist->cancelled_bookings_count }} kali. Anda tidak dapat
+                                    melakukan
+                                    booking buku sampai tanggal {{ $tanggalSelesai }}.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            <!-- Alert untuk booking yang akan expired atau sudah expired -->
+            @if ($peminjaman->booking_expired_at)
+                @php
+                    $bookingExpired = \Carbon\Carbon::parse($peminjaman->booking_expired_at);
+                    $now = \Carbon\Carbon::now();
+                    $hoursLeft = $now->diffInHours($bookingExpired, false);
+                @endphp
+                @if (auth()->user()->level != 'admin')
+                    @if ($peminjaman->status == 'Diproses' && $hoursLeft > 0 && $hoursLeft < 6)
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="status-box status-warning">
+                                    <div class="icon">
+                                        <i class="bx bx-time"></i>
+                                    </div>
+                                    <div class="info">
+                                        <h4>Segera Ambil Buku!</h4>
+                                        <p>Booking Anda akan berakhir pada {{ $bookingExpired->format('d/m/Y H:i') }}.
+                                            Jika tidak diambil sebelum jam tersebut, booking akan otomatis dibatalkan.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endif
+            @endif
+
             <div class="row">
                 <!-- Detail Buku yang Dipinjam - Kolom Kiri -->
                 <div class="col-12 col-md-4">
@@ -135,8 +188,7 @@
                                         </div>
                                         <div class="info">
                                             <h4>{{ $peminjaman->status }}</h4>
-                                            <p>Peminjaman sedang diproses. Silakan ambil buku dan konfirmasi pengambilan
-                                                buku.</p>
+                                            <p>Peminjaman sedang diproses. Silakan ambil buku.</p>
                                         </div>
                                     </div>
                                 @elseif ($peminjaman->status == 'Dibatalkan')
@@ -146,8 +198,8 @@
                                         </div>
                                         <div class="info">
                                             <h4>{{ $peminjaman->status }}</h4>
-                                            <p>Peminjaman dibatalkan karena buku tidak diambil sebelum tanggal batas
-                                                pengembalian kadaluarsa.</p>
+                                            <p>Peminjaman dibatalkan karena buku tidak diambil sebelum
+                                                {{ $bookingExpired->format('d/m/Y H:i') }}.</p>
                                         </div>
                                     </div>
                                 @endif

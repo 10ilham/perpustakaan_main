@@ -35,6 +35,8 @@ class PeminjamanModel extends Model // Konsep OOP: Inheritance - mewarisi sifat 
         'tanggal_kembali',       // Tanggal buku harus dikembalikan
         'tanggal_pengembalian',  // Tanggal buku dikembalikan (aktual)
         'status',                // Status peminjaman (Dipinjam, Dikembalikan, Terlambat)
+        'booking_expired_at',    // Waktu booking expired
+        'is_auto_cancelled',     // Flag apakah dibatalkan otomatis
         'catatan',               // Catatan terkait peminjaman
         'is_terlambat',          // Flag apakah peminjaman terlambat
         'jumlah_hari_terlambat', // Jumlah hari keterlambatan
@@ -42,6 +44,19 @@ class PeminjamanModel extends Model // Konsep OOP: Inheritance - mewarisi sifat 
         'diproses_by',
         'created_at',            // Timestamp saat peminjaman dibuat
         'updated_at',            // Timestamp saat peminjaman terakhir diperbarui
+    ];
+
+    /**
+     * Atribut yang harus di-cast ke tipe data tertentu
+     */
+    protected $casts = [
+        'booking_expired_at' => 'datetime',
+        'tanggal_pinjam' => 'datetime',
+        'tanggal_kembali' => 'date',
+        'tanggal_pengembalian' => 'datetime',
+        'is_terlambat' => 'boolean',
+        'is_stok_returned' => 'boolean',
+        'is_auto_cancelled' => 'boolean',
     ];
 
     /**
@@ -75,5 +90,37 @@ class PeminjamanModel extends Model // Konsep OOP: Inheritance - mewarisi sifat 
     {
         // Implementasi relasi one-to-one - Satu peminjaman hanya bisa memiliki satu sanksi
         return $this->hasOne(\App\Models\SanksiModel::class, 'peminjaman_id');
+    }
+
+    /**
+     * Set booking expiration time to 16:00 on the same day
+     */
+    public function setBookingExpiration()
+    {
+        $today = \Carbon\Carbon::today();
+        $expiredAt = $today->setTime(16, 0, 0); // Set ke jam 16:00
+
+        // Jika sudah lewat jam 16:00 hari ini, set ke jam 16:00 hari ini juga
+        // (akan langsung expired untuk booking yang dibuat setelah jam 16:00)
+        $this->update(['booking_expired_at' => $expiredAt]);
+
+        return $this;
+    }
+
+    /**
+     * Check if booking is expired
+     */
+    public function isBookingExpired()
+    {
+        return $this->booking_expired_at && $this->booking_expired_at->isPast();
+    }
+
+    /**
+     * Scope untuk booking yang expired
+     */
+    public function scopeExpiredBookings($query)
+    {
+        return $query->where('status', 'Diproses')
+            ->where('booking_expired_at', '<=', \Carbon\Carbon::now());
     }
 }

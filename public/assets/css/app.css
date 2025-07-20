@@ -1852,6 +1852,27 @@ option .icon {
     border: 1px solid #ffe082;
 }
 
+.status-blacklist {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-left: 4px solid #ffc107;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-warning {
+    background-color: #fff8e1;
+    border: 1px solid #ffb74d;
+    border-left: 4px solid #ff9800;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.status-danger {
+    background-color: #ffebee;
+    border: 1px solid #ef5350;
+    border-left: 4px solid #f44336;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
 .status-returned {
     background-color: #e8f5e9;
     border: 1px solid #a5d6a7;
@@ -1891,6 +1912,18 @@ option .icon {
     color: #ffa000;
 }
 
+.status-blacklist .icon {
+    color: #856404;
+}
+
+.status-warning .icon {
+    color: #ef6c00;
+}
+
+.status-danger .icon {
+    color: #c62828;
+}
+
 .status-returned .icon {
     color: #43a047;
 }
@@ -1905,6 +1938,30 @@ option .icon {
 
 .status-late .icon {
     color: #ffffff;
+}
+
+.status-blacklist .info h4 {
+    color: #856404;
+}
+
+.status-blacklist .info p {
+    color: #856404;
+}
+
+.status-warning .info h4 {
+    color: #ef6c00;
+}
+
+.status-warning .info p {
+    color: #ef6c00;
+}
+
+.status-danger .info h4 {
+    color: #c62828;
+}
+
+.status-danger .info p {
+    color: #c62828;
 }
 
 .status-box .info h4 {

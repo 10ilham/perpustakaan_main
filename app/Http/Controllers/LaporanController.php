@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\PeminjamanModel;
 use App\Models\SanksiModel;
 use App\Models\User;
+use App\Models\UserBlacklistModel;
 use Illuminate\Support\Facades\Auth;
 
 class LaporanController extends Controller
@@ -583,7 +584,7 @@ class LaporanController extends Controller
         })->sum('total_denda');
 
         // ELOQUENT - Statistik berdasarkan level
-        $statistikLevel = User::selectRaw('level, 
+        $statistikLevel = User::selectRaw('level,
             COUNT(DISTINCT sanksi.id) as total_sanksi,
             COUNT(CASE WHEN sanksi.status_bayar = "belum_bayar" THEN 1 END) as belum_bayar,
             COUNT(CASE WHEN sanksi.status_bayar = "sudah_bayar" THEN 1 END) as sudah_bayar')
@@ -697,5 +698,79 @@ class LaporanController extends Controller
         })->count();
 
         return view('laporan.sanksi-sudah-bayar', compact('sanksi', 'totalSanksi', 'totalDenda', 'siswaCount', 'guruCount', 'staffCount'));
+    }
+
+    /**
+     * Halaman laporan user blacklist
+     */
+    public function blacklist(Request $request)
+    {
+        // Query dasar untuk blacklist
+        $query = UserBlacklistModel::with('user');
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            if ($request->status == 'aktif') {
+                $query->active();
+            } elseif ($request->status == 'tidak_aktif') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Filter berdasarkan tanggal blacklist
+        if ($request->filled('tanggal_mulai')) {
+            $query->whereDate('blacklisted_at', '>=', $request->tanggal_mulai);
+        }
+
+        if ($request->filled('tanggal_selesai')) {
+            $query->whereDate('blacklisted_at', '<=', $request->tanggal_selesai);
+        }
+
+        // Urutkan berdasarkan tanggal blacklist terbaru
+        $blacklists = $query->orderBy('blacklisted_at', 'desc')->get();
+
+        // Statistik
+        $totalBlacklist = UserBlacklistModel::count();
+        $blacklistAktif = UserBlacklistModel::active()->count();
+        $blacklistTidakAktif = UserBlacklistModel::where('is_active', false)->count();
+
+        // Statistik berdasarkan level user
+        $statistikLevel = UserBlacklistModel::with('user')
+            ->get()
+            ->groupBy('user.level')
+            ->map(function ($items, $level) {
+                return [
+                    'level' => $level,
+                    'total' => $items->count(),
+                    'aktif' => $items->where('is_active', true)->count(),
+                ];
+            });
+
+        return view('laporan.blacklist', compact(
+            'blacklists',
+            'totalBlacklist',
+            'blacklistAktif',
+            'blacklistTidakAktif',
+            'statistikLevel'
+        ));
+    }
+
+    /**
+     * Hapus data blacklist
+     */
+    public function destroyBlacklist($id)
+    {
+        try {
+            $blacklist = UserBlacklistModel::findOrFail($id);
+            $userName = $blacklist->user->nama ?? 'User Tidak Ditemukan';
+
+            $blacklist->delete();
+
+            return redirect()->route('laporan.blacklist')
+                ->with('success', "Blacklist untuk user {$userName} berhasil dihapus.");
+        } catch (\Exception $e) {
+            return redirect()->route('laporan.blacklist')
+                ->with('error', 'Gagal menghapus blacklist. ' . $e->getMessage());
+        }
     }
 }

@@ -155,7 +155,7 @@
                                 <div class="form-group">
                                     <label for="total_buku">Total Buku</label>
                                     <input type="number" name="total_buku" id="total_buku" class="form-control"
-                                        value="{{ old('total_buku', $buku->total_buku ?? 0) }}" required>
+                                        value="{{ old('total_buku', $buku->total_buku ?? 0) }}" min="0" required>
                                     <small class="form-text text-muted">Jumlah keseluruhan buku. Stok buku akan otomatis
                                         diperbarui.</small>
                                     @error('total_buku')

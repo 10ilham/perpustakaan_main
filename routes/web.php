@@ -120,6 +120,8 @@ Route::middleware(['auth', LevelMiddleware::class])->group(function () {
     Route::get('/laporan/sanksi', [App\Http\Controllers\LaporanController::class, 'sanksi'])->name('laporan.sanksi');
     Route::get('/laporan/sanksi/belum-bayar', [App\Http\Controllers\LaporanController::class, 'sanksiBelumBayar'])->name('laporan.sanksi.belum_bayar');
     Route::get('/laporan/sanksi/sudah-bayar', [App\Http\Controllers\LaporanController::class, 'sanksiSudahBayar'])->name('laporan.sanksi.sudah_bayar');
+    Route::get('/laporan/blacklist', [App\Http\Controllers\LaporanController::class, 'blacklist'])->name('laporan.blacklist');
+    Route::delete('/laporan/blacklist/{id}', [App\Http\Controllers\LaporanController::class, 'destroyBlacklist'])->name('laporan.blacklist.destroy');
     Route::get('/laporan/chart-data', [App\Http\Controllers\LaporanController::class, 'getChartData'])->name('laporan.chart-data');
     Route::get('/laporan/pie-chart-data', [App\Http\Controllers\LaporanController::class, 'getPieChartData'])->name('laporan.pie-chart-data');
 

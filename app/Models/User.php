@@ -111,4 +111,21 @@ class User extends Authenticatable implements MustVerifyEmail
         // Implementasi relasi one-to-many - User bisa memiliki banyak peminjaman (historis peminjaman)
         return $this->hasMany(PeminjamanModel::class, 'user_id');
     }
+
+    /**
+     * Relasi ke tabel blacklist
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function blacklist()
+    {
+        return $this->hasOne(\App\Models\UserBlacklistModel::class, 'user_id');
+    }
+
+    /**
+     * Check if user is currently blacklisted
+     */
+    public function isBlacklisted()
+    {
+        return \App\Models\UserBlacklistModel::isUserBlacklisted($this->id);
+    }
 }

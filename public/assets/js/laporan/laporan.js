@@ -464,6 +464,7 @@ function getPageType(currentPath) {
     if (currentPath.includes('sanksi-belum-bayar')) return 'sanksi_belum_bayar';
     if (currentPath.includes('sanksi-sudah-bayar')) return 'sanksi_sudah_bayar';
     if (currentPath.includes('buku-log') || currentPath.includes('buku_log')) return 'buku_log';
+    if (currentPath.includes('blacklist')) return 'blacklist';
     return 'default';
 }
 
@@ -507,6 +508,12 @@ function getResponsivePriorities(isAdmin, pageType) {
                 { responsivePriority: 2, targets: [7] },
                 { orderable: false, targets: [-1] }
             ];
+        case 'blacklist':
+            return [
+                { responsivePriority: 1, targets: [0, 1, 3, 7, 8] }, // No, Nama, Level, Status, Aksi
+                { responsivePriority: 2, targets: [4, 5, 6] }, // Jumlah Pembatalan, Tanggal Blacklist, Tanggal Berakhir
+                { responsivePriority: 3, targets: [2] } // Email
+            ];
         case 'buku_log':
             return [
                 { responsivePriority: 1, targets: [0, 1, 3, 4, 7] },
@@ -533,11 +540,12 @@ function getExportButtons(pageType) {
         case 'sudah_kembali': filePrefix += 'Sudah_Dikembalikan_'; break;
         case 'sanksi_belum_bayar': filePrefix += 'Sanksi_Belum_Bayar_'; break;
         case 'sanksi_sudah_bayar': filePrefix += 'Sanksi_Sudah_Bayar_'; break;
+        case 'blacklist': filePrefix += 'User_Blacklist_'; break;
         case 'buku_log': filePrefix += 'Buku_Masuk_Keluar_'; break;
         default: filePrefix = 'Laporan_';
     }
 
-    const exportColumns = pageType.includes('sanksi') ? ':visible' : ':not(:last-child)';
+    const exportColumns = (pageType.includes('sanksi')) ? ':visible' : (pageType === 'blacklist') ? ':not(:last-child)' : ':not(:last-child)';
 
     return [
         {
@@ -597,7 +605,7 @@ function getExportButtons(pageType) {
  * @param {string} pageType - Tipe halaman untuk konfigurasi export
  */
 function exportTableToWord(dt, isAdmin, pageType) {
-    const exportColumns = pageType.includes('sanksi') ? ':visible' : ':not(:last-child)';
+    const exportColumns = (pageType.includes('sanksi')) ? ':visible' : (pageType === 'blacklist') ? ':not(:last-child)' : ':not(:last-child)';
     const data = dt.buttons.exportData({ columns: exportColumns });
 
     var columnClasses, documentTitle, fileName;
@@ -648,6 +656,11 @@ function exportTableToWord(dt, isAdmin, pageType) {
                 documentTitle = 'Sanksi Sudah Bayar Anda';
                 fileName = `Sanksi_Sudah_Bayar_${currentDate}.doc`;
             }
+            break;
+        case 'blacklist':
+            columnClasses = ['col-no', 'col-nama', 'col-email', 'col-level', 'col-jumlah-pembatalan', 'col-tgl-blacklist', 'col-tgl-berakhir', 'col-status', 'col-aksi'];
+            documentTitle = 'Laporan User Blacklist';
+            fileName = `Laporan_User_Blacklist_${currentDate}.doc`;
             break;
         default:
             columnClasses = [];
@@ -780,6 +793,11 @@ function getColumnWidthStyles(pageType, isAdmin) {
                 .col-no { width: 5%; } .col-tanggal { width: 10%; } .col-kode { width: 12%; }
                 .col-judul { width: 25%; } .col-tipe { width: 8%; } .col-jumlah { width: 8%; }
                 .col-alasan { width: 22%; } .col-aksi { width: 10%; }`;
+        case 'blacklist':
+            return `
+                .col-no { width: 5%; } .col-nama { width: 16%; } .col-email { width: 18%; }
+                .col-level { width: 8%; } .col-jumlah-pembatalan { width: 10%; } .col-tgl-blacklist { width: 13%; }
+                .col-tgl-berakhir { width: 13%; } .col-status { width: 9%; } .col-aksi { width: 8%; }`;
         default:
             return '.col-no { width: 10%; }';
     }

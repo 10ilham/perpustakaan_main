@@ -44,6 +44,23 @@ Schedule::command('app:send-pengembalian-reminders')
     ->appendOutputTo(storage_path('logs/scheduler-pengembalian-reminders.log'))
     ->description('Pengiriman notifikasi pengembalian setiap jam');
 
+// Menjalankan command pengecekan booking yang expired setiap jam dari jam 16:00-18:00
+Schedule::command('app:check-expired-bookings')
+    ->dailyAt('16:00')
+    ->appendOutputTo(storage_path('logs/scheduler-expired-bookings.log'))
+    ->description('Pengecekan dan pembatalan booking yang tidak diambil setelah jam 16:00');
+
+// Menjalankan command pengecekan booking expired tambahan pada jam 17:00 dan 18:00
+Schedule::command('app:check-expired-bookings')
+    ->dailyAt('17:00')
+    ->appendOutputTo(storage_path('logs/scheduler-expired-bookings.log'))
+    ->description('Pengecekan tambahan booking expired jam 17:00');
+
+Schedule::command('app:check-expired-bookings')
+    ->dailyAt('18:00')
+    ->appendOutputTo(storage_path('logs/scheduler-expired-bookings.log'))
+    ->description('Pengecekan tambahan booking expired jam 18:00');
+
 // Menjalankan command notifikasi setiap 30 menit
 // Schedule::command('app:send-pengembalian-reminders')
 //     ->everyThirtyMinutes()

@@ -20,6 +20,8 @@ return new class extends Migration
             $table->date('tanggal_kembali');
             $table->dateTime('tanggal_pengembalian')->nullable();
             $table->enum('status', ['Diproses', 'Dipinjam', 'Dikembalikan', 'Terlambat', 'Dibatalkan'])->default('Diproses');
+            $table->dateTime('booking_expired_at')->nullable();
+            $table->boolean('is_auto_cancelled')->default(false);
             $table->text('catatan')->nullable();
             $table->boolean('is_terlambat')->default(false);
             $table->boolean('is_stok_returned')->default(false);

@@ -176,7 +176,13 @@
                                         @endif
 
                                         @if (auth()->user()->level == 'siswa' || auth()->user()->level == 'guru' || auth()->user()->level == 'staff')
-                                            @if ($item->stok_buku > 0)
+                                            @if ($isBlacklisted)
+                                                <button class="btn btn-sm btn-danger px-2" disabled
+                                                    style="text-decoration: none; height: 31px; display: flex; align-items: center;"
+                                                    title="Anda sedang dalam masa blacklist sampai {{ $blacklistData ? $blacklistData->blacklist_expires_at->format('d/m/Y H:i') : 'tidak diketahui' }}">
+                                                    Blacklist
+                                                </button>
+                                            @elseif ($item->stok_buku > 0)
                                                 <a href="{{ route('peminjaman.form', $item->id) }}"
                                                     class="btn btn-sm btn-success px-2"
                                                     style="text-decoration: none; color: white; height: 31px; display: flex; align-items: center;">Pinjam</a>
