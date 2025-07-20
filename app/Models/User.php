@@ -114,11 +114,26 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Relasi ke tabel blacklist
-     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     * Konsep OOP: Association - Menunjukkan hubungan antara objek User dan UserBlacklistModel
+     * Konsep OOP: Composition - User "memiliki" banyak catatan blacklist (history)
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function blacklist()
     {
-        return $this->hasOne(\App\Models\UserBlacklistModel::class, 'user_id');
+        // Implementasi relasi one-to-many - User bisa memiliki banyak catatan blacklist (history)
+        return $this->hasMany(\App\Models\UserBlacklistModel::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke blacklist aktif saat ini
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function activeBlacklist()
+    {
+        // Relasi untuk mendapatkan blacklist yang sedang aktif
+        return $this->hasOne(\App\Models\UserBlacklistModel::class, 'user_id')
+            ->where('is_active', true)
+            ->where('blacklist_expires_at', '>', now());
     }
 
     /**

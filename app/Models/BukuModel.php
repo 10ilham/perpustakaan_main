@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\KategoriModel;
 use App\Models\AdminModel;
 use App\Models\PeminjamanModel;
+use App\Models\BukuLogModel;
 
 /**
  * Kelas BukuModel - Representasi data buku di perpustakaan
@@ -78,5 +79,16 @@ class BukuModel extends Model // Konsep OOP: Inheritance - mewarisi sifat dan me
     {
         // Implementasi relasi one-to-many - Satu buku bisa banyak dipinjam (tegantung stok buku)
         return $this->hasMany(PeminjamanModel::class, 'buku_id');
+    }
+
+    /**
+     * Relasi ke tabel buku_log - Menghubungkan BukuModel dengan BukuLogModel
+     * Konsep OOP: Association (Asosiasi) - Menunjukkan hubungan one-to-many antara Buku dan BukuLog
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function bukuLogs()
+    {
+        // Implementasi relasi one-to-many - Satu buku bisa memiliki banyak log aktivitas
+        return $this->hasMany(BukuLogModel::class, 'buku_id');
     }
 }

@@ -31,10 +31,15 @@
             <!-- Alert Blacklist jika user sedang dalam blacklist -->
             @if (auth()->user()->isBlacklisted())
                 @php
+                    // Ambil blacklist pertama jika relasi mengembalikan koleksi
                     $blacklist = auth()->user()->blacklist;
-                    $tanggalSelesai = $blacklist->blacklist_expires_at
-                        ? \Carbon\Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y H:i')
-                        : 'tidak diketahui';
+                    if ($blacklist instanceof \Illuminate\Support\Collection) {
+                        $blacklist = $blacklist->first();
+                    }
+                    $tanggalSelesai =
+                        $blacklist && $blacklist->blacklist_expires_at
+                            ? \Carbon\Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y')
+                            : 'tidak diketahui';
                 @endphp
                 <div class="row mb-4">
                     <div class="col-12">
@@ -60,9 +65,23 @@
                     $bookingExpired = \Carbon\Carbon::parse($peminjaman->booking_expired_at);
                     $now = \Carbon\Carbon::now();
                     $hoursLeft = $now->diffInHours($bookingExpired, false);
+
+                    // Tampilkan peringatan jika:
+                    $shouldShowWarning = false;
+
+                    if ($peminjaman->status == 'Diproses' && $hoursLeft > 0) {
+                        // Jika booking berakhir hari ini (peminjaman < jam 16), tampilkan peringatan jika kurang dari 6 jam
+                        if ($bookingExpired->isToday() && $hoursLeft <= 6) {
+                            $shouldShowWarning = true;
+                        }
+                        // Jika peminjaman >= jam 16, tampilkan peringatan sampai jam 16 besok harinya
+                        elseif ($bookingExpired->isTomorrow()) {
+                            $shouldShowWarning = true;
+                        }
+                    }
                 @endphp
                 @if (auth()->user()->level != 'admin')
-                    @if ($peminjaman->status == 'Diproses' && $hoursLeft > 0 && $hoursLeft < 6)
+                    @if ($shouldShowWarning)
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="status-box status-warning">
@@ -114,10 +133,6 @@
                                                     {{ $peminjaman->buku->penerbit }}</p>
                                                 <p class="card-text m-0">Tahun Terbit:
                                                     {{ $peminjaman->buku->tahun_terbit }}</p>
-                                                <p class="card-text m-0">Harga Buku:
-                                                    <span class="text-primary">Rp
-                                                        {{ number_format($peminjaman->buku->harga_buku, 0, ',', '.') }}</span>
-                                                </p>
                                                 <p class="card-text m-0">Stok:
                                                     {{ $peminjaman->buku->stok_buku }}</p>
                                             </div>
@@ -188,7 +203,7 @@
                                         </div>
                                         <div class="info">
                                             <h4>{{ $peminjaman->status }}</h4>
-                                            <p>Peminjaman sedang diproses. Silakan ambil buku.</p>
+                                            <p>Peminjaman sedang diproses. Silakan ambil buku sebelum terlambat.</p>
                                         </div>
                                     </div>
                                 @elseif ($peminjaman->status == 'Dibatalkan')
@@ -232,7 +247,7 @@
                                         <div class="detail-item">
                                             <span class="label">Tanggal Peminjaman</span>
                                             <span
-                                                class="value">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->translatedFormat('d F Y') }}</span>
+                                                class="value">{{ \Carbon\Carbon::parse($peminjaman->tanggal_pinjam)->translatedFormat('d F Y H:i') }}</span>
                                         </div>
 
                                         <div class="detail-item">

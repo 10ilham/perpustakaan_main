@@ -510,9 +510,18 @@ function getResponsivePriorities(isAdmin, pageType) {
             ];
         case 'blacklist':
             return [
-                { responsivePriority: 1, targets: [0, 1, 3, 7, 8] }, // No, Nama, Level, Status, Aksi
-                { responsivePriority: 2, targets: [4, 5, 6] }, // Jumlah Pembatalan, Tanggal Blacklist, Tanggal Berakhir
-                { responsivePriority: 3, targets: [2] } // Email
+                { responsivePriority: 1, targets: [0, 1, 2, 7, 8] }, // No, Nama, Email, Status, Aksi
+                { responsivePriority: 2, targets: [3, 4] }, // Level, Jumlah Pembatalan
+                { responsivePriority: 3, targets: [5, 6] }, // Tanggal Blacklist, Tanggal Berakhir
+                { width: "60px", targets: [0] }, // No column fixed width
+                { width: "180px", targets: [1] }, // Nama Anggota
+                { width: "160px", targets: [2] }, // Email
+                { width: "80px", targets: [3] }, // Level
+                { width: "100px", targets: [4] }, // Jumlah Pembatalan
+                { width: "80px", targets: [7] }, // Status
+                { width: "70px", targets: [8] }, // Aksi
+                { className: "text-center", targets: [0, 3, 4, 7, 8] }, // Center align for these columns
+                { orderable: false, targets: [8] }
             ];
         case 'buku_log':
             return [

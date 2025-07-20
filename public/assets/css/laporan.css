@@ -707,3 +707,62 @@
             margin-right: 5px;
             flex-shrink: 0;
         }
+
+        /* Simple spacing fix for blacklist table - no borders, just better spacing */
+        #dataTableExport.dataTable th,
+        #dataTableExport.dataTable td {
+            padding: 12px 15px !important;
+        }
+
+        /* Specific width for number column to prevent it being hidden */
+        #dataTableExport.dataTable th:nth-child(1),
+        #dataTableExport.dataTable td:nth-child(1) {
+            min-width: 60px !important;
+            width: 60px !important;
+            text-align: center !important;
+        }
+
+        /* Specific width for name and email columns to prevent crowding */
+        #dataTableExport.dataTable th:nth-child(2),
+        #dataTableExport.dataTable td:nth-child(2) {
+            min-width: 180px !important;
+            width: 180px !important;
+        }
+
+        #dataTableExport.dataTable th:nth-child(3),
+        #dataTableExport.dataTable td:nth-child(3) {
+            min-width: 160px !important;
+            width: 160px !important;
+        }
+
+        /* Level column */
+        #dataTableExport.dataTable th:nth-child(4),
+        #dataTableExport.dataTable td:nth-child(4) {
+            min-width: 80px !important;
+            width: 80px !important;
+            text-align: center !important;
+        }
+
+        /* Jumlah Pembatalan column */
+        #dataTableExport.dataTable th:nth-child(5),
+        #dataTableExport.dataTable td:nth-child(5) {
+            min-width: 100px !important;
+            width: 100px !important;
+            text-align: center !important;
+        }
+
+        /* Status column */
+        #dataTableExport.dataTable th:nth-child(8),
+        #dataTableExport.dataTable td:nth-child(8) {
+            min-width: 80px !important;
+            width: 80px !important;
+            text-align: center !important;
+        }
+
+        /* Aksi column */
+        #dataTableExport.dataTable th:nth-child(9),
+        #dataTableExport.dataTable td:nth-child(9) {
+            min-width: 70px !important;
+            width: 70px !important;
+            text-align: center !important;
+        }

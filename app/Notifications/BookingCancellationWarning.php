@@ -94,8 +94,8 @@ class BookingCancellationWarning extends Notification implements ShouldQueue
         if ($this->isBlacklisted) {
             $mail->line(new HtmlString('<div style="background-color: #fee; border: 1px solid #fcc; padding: 15px; border-radius: 5px; margin: 10px 0;">
                 <strong style="color: #c33;">🚫 AKUN ANDA TELAH DI-BLACKLIST!</strong><br>
-                Karena Anda telah membatalkan booking sebanyak 3 kali atau lebih, akun Anda tidak dapat melakukan peminjaman selama <strong>1 minggu</strong>.<br>
-                Blacklist akan berakhir pada tanggal: <strong>' . \Carbon\Carbon::now()->addWeek()->translatedFormat('d F Y') . '</strong>
+                Karena Anda telah membatalkan booking sebanyak 3 kali atau lebih, akun Anda tidak dapat melakukan peminjaman selama <strong>7 hari</strong>.<br>
+                Blacklist akan berakhir pada tanggal: <strong>' . \Carbon\Carbon::now()->addDays(7)->translatedFormat('d F Y') . '</strong>
             </div>'));
         } else {
             $remainingChances = 3 - $this->cancelledCount;

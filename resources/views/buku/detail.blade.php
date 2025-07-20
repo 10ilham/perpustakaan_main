@@ -69,6 +69,19 @@
                                         class="badge badge-outline-warning status-badge-custom">{{ $buku->status }}</span>
                                 @endif
                             </div>
+
+                            <!-- Harga Buku (hanya untuk admin) -->
+                            @if (auth()->user()->level == 'admin')
+                                <div class="mt-3 p-3"
+                                    style="background: rgba(52, 152, 219, 0.1); border-radius: 8px; border-left: 4px solid #3498db;">
+                                    <div class="text-center">
+                                        <h6 class="mb-1" style="color: #2c3e50; font-weight: 600;">Harga Buku</h6>
+                                        <h5 class="mb-0" style="color: #27ae60; font-weight: bold;">
+                                            Rp {{ number_format($buku->harga_buku ?? 0, 0, ',', '.') }}
+                                        </h5>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
@@ -96,55 +109,11 @@
                             <h4 class="card-title mb-4" style="margin-bottom: 10px">Informasi Buku</h4>
 
                             <form class="profile-display">
-                                {{-- Total Keseluruhan Buku --}}
-                                {{-- <div class="form-group">
-                                    <label for="total_buku">Total Buku</label>
-                                    <input type="text" id="total_buku" class="form-control" value="{{ $totalStokBuku }}"
-                                        readonly>
-                                </div> --}}
-
-                                {{-- <div class="form-group">
-                                    <label for="kategori">Kategori</label>
-                                    <input type="text" id="kategori" class="form-control"
-                                        value="{{ $buku->kategori->pluck('nama_kategori')->implode(', ') }}" readonly>
-                                </div> --}}
-
-                                {{-- <div class="form-group">
-                                    <label for="penerbit">Penerbit</label>
-                                    <input type="text" id="penerbit" class="form-control" value="{{ $buku->penerbit }}"
-                                        readonly>
-                                </div> --}}
-
-                                {{-- <div class="form-group">
-                                    <label for="tahun_terbit">Tahun Terbit</label>
-                                    <input type="text" id="tahun_terbit" class="form-control"
-                                        value="{{ $buku->tahun_terbit }}" readonly>
-                                </div> --}}
-
-                                @if (auth()->user()->level == 'admin')
-                                <div class="form-group">
-                                    <label for="harga_buku">Harga Buku</label>
-                                    <input type="text" id="harga_buku" class="form-control"
-                                        value="Rp {{ number_format($buku->harga_buku ?? 0, 0, ',', '.') }}" readonly>
-                                </div>
-                                @endif
-
                                 <div class="form-group">
                                     <label for="deskripsi">Sinopsis</label>
-                                    <textarea id="deskripsi" class="form-control" rows="5" readonly>{{ $buku->deskripsi }}</textarea>
+                                    <textarea id="deskripsi" class="form-control" readonly
+                                        style="min-height: 200px; resize: none; overflow: hidden; line-height: 1.6; padding: 15px; font-size: 14px;">{{ $buku->deskripsi }}</textarea>
                                 </div>
-
-                                {{-- <div class="form-group">
-                                    <label for="created_at">Ditambahkan Pada</label>
-                                    <input type="text" id="created_at" class="form-control"
-                                        value="{{ $buku->created_at->format('d F Y H:i') }}" readonly>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="updated_at">Terakhir Diperbarui</label>
-                                    <input type="text" id="updated_at" class="form-control"
-                                        value="{{ $buku->updated_at->format('d F Y H:i') }}" readonly>
-                                </div> --}}
 
                                 <!-- Tombol Aksi -->
                                 <div class="form-group text-end">
@@ -182,4 +151,18 @@
 
 @section('scripts')
     <script src="{{ asset('assets/js/buku/buku.js') }}"></script>
+    <script>
+        // Auto-resize textarea untuk sinopsis
+        document.addEventListener('DOMContentLoaded', function() {
+            const deskripsiTextarea = document.getElementById('deskripsi');
+            if (deskripsiTextarea) {
+                // Reset height to auto untuk menghitung scroll height yang benar
+                deskripsiTextarea.style.height = 'auto';
+                // Set height berdasarkan scroll height dengan minimum 200px untuk memberikan ruang lebih
+                const scrollHeight = deskripsiTextarea.scrollHeight;
+                const minHeight = 200;
+                deskripsiTextarea.style.height = Math.max(scrollHeight + 20, minHeight) + 'px';
+            }
+        });
+    </script>
 @endsection

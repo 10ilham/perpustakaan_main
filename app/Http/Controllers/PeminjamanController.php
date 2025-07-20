@@ -407,8 +407,14 @@ class PeminjamanController extends Controller
 
             // Update status jika perlu dibatalkan
             if ($shouldCancel) {
+                $oldStatus = $peminjaman->status;
                 $peminjaman->status = 'Dibatalkan';
                 $peminjaman->save();
+
+                // Update blacklist jika status berubah ke Dibatalkan
+                if ($oldStatus !== 'Dibatalkan') {
+                    \App\Models\UserBlacklistModel::processNewCancellation($peminjaman->user_id);
+                }
             }
         }
 
@@ -436,8 +442,14 @@ class PeminjamanController extends Controller
 
             // Update status kembali ke Diproses jika masih dalam batas waktu
             if ($shouldReactivate) {
+                $oldStatus = $peminjaman->status;
                 $peminjaman->status = 'Diproses';
                 $peminjaman->save();
+
+                // Update blacklist jika status berubah dari Dibatalkan
+                if ($oldStatus === 'Dibatalkan') {
+                    \App\Models\UserBlacklistModel::updateBlacklistStatus($peminjaman->user_id);
+                }
             }
         }
 
@@ -464,6 +476,9 @@ class PeminjamanController extends Controller
                 $peminjaman->save();
             }
         }
+
+        // Reset counter blacklist untuk user yang blacklist-nya sudah expired
+        UserBlacklistModel::checkAndResetExpiredBlacklists();
     }
 
     // Menampilkan form peminjaman buku
@@ -534,8 +549,8 @@ class PeminjamanController extends Controller
         // Cek apakah user sedang dalam blacklist
         if (UserBlacklistModel::isUserBlacklisted(Auth::id())) {
             $blacklist = UserBlacklistModel::where('user_id', Auth::id())->first();
-            $tanggalSelesai = $blacklist && $blacklist->blacklist_expires_at ? Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y H:i') : 'tidak diketahui';
-            return redirect()->back()->with('error', "Anda sedang dalam daftar blacklist karena sering tidak mengambil buku yang sudah dibooking. Blacklist akan berakhir pada: {$tanggalSelesai}");
+            $tanggalSelesai = $blacklist && $blacklist->blacklist_expires_at ? Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y') : 'tidak diketahui';
+            return redirect()->back()->with('error', "Anda sedang dalam daftar blacklist karena sering tidak mengambil buku yang sudah dibooking sebanyak 3 kali. Anda tidak dapat melakukan booking buku sampai tanggal {$tanggalSelesai}.");
         }
 
         $request->validate(
@@ -603,15 +618,36 @@ class PeminjamanController extends Controller
         $peminjaman->user_id = Auth::id();
         $peminjaman->buku_id = $request->buku_id;
         $peminjaman->no_peminjaman = $no_peminjaman;
-        $peminjaman->tanggal_pinjam = $request->tanggal_pinjam;
+
+        // Set tanggal_pinjam dengan waktu yang tepat
+        $tanggalPinjamRequest = Carbon::parse($request->tanggal_pinjam);
+        $sekarang = Carbon::now();
+
+        // Jika tanggal pinjam adalah hari ini, gunakan waktu saat ini
+        if ($tanggalPinjamRequest->isSameDay($sekarang)) {
+            $peminjaman->tanggal_pinjam = $sekarang;
+        } else {
+            // Jika tanggal pinjam adalah hari mendatang, gunakan awal hari (00:00)
+            $peminjaman->tanggal_pinjam = $tanggalPinjamRequest->startOfDay();
+        }
+
         $peminjaman->tanggal_kembali = $request->tanggal_kembali;
         $peminjaman->status = 'Diproses';
         $peminjaman->diproses_by = null; // Set diproses_by ke null untuk peminjaman self-service
         $peminjaman->catatan = $request->catatan;
 
-        // Set waktu expired untuk booking - harus diambil sebelum jam 16:00 pada tanggal peminjaman
-        $tanggalPinjam = Carbon::parse($request->tanggal_pinjam);
-        $peminjaman->booking_expired_at = $tanggalPinjam->setTime(16, 0, 0); // 16:00 pada hari peminjaman
+        // Set waktu expired untuk booking - harus diambil sebelum jam 16:00
+        // Gunakan tanggal_pinjam yang sudah diset di atas
+        $tanggalPinjam = $peminjaman->tanggal_pinjam;
+
+        // Jika tanggal pinjam adalah hari ini dan sekarang sudah lewat jam 16:00,
+        // set booking_expired_at ke jam 16:00 hari berikutnya
+        if ($tanggalPinjam->isSameDay($sekarang) && $sekarang->hour >= 16) {
+            $peminjaman->booking_expired_at = $tanggalPinjam->copy()->addDay()->setTime(16, 0, 0);
+        } else {
+            // Jika tanggal pinjam adalah hari mendatang atau hari ini tapi belum jam 16:00
+            $peminjaman->booking_expired_at = $tanggalPinjam->copy()->setTime(16, 0, 0);
+        }
 
         $peminjaman->save();
 
@@ -814,8 +850,17 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Data peminjaman hanya dapat dihapus jika status sudah Dikembalikan atau Dibatalkan.');
         }
 
+        // Simpan user_id sebelum hapus untuk update blacklist
+        $userId = $peminjaman->user_id;
+        $wasStatusDibatalkan = $peminjaman->status === 'Dibatalkan';
+
         // Hapus data peminjaman (hanya untuk status non-aktif)
         $peminjaman->delete();
+
+        // Jika peminjaman yang dihapus berstatus 'Dibatalkan', update blacklist
+        if ($wasStatusDibatalkan) {
+            \App\Models\UserBlacklistModel::incrementCancelledBookings($userId);
+        }
 
         return redirect()->route('peminjaman.index')->with('success', 'Data peminjaman berhasil dihapus.');
     }
@@ -1021,8 +1066,8 @@ class PeminjamanController extends Controller
         // Cek apakah user sedang dalam blacklist (meskipun ini peminjaman manual oleh admin)
         if (UserBlacklistModel::isUserBlacklisted($user->id)) {
             $blacklist = UserBlacklistModel::where('user_id', $user->id)->first();
-            $tanggalSelesai = $blacklist && $blacklist->blacklist_expires_at ? Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y H:i') : 'tidak diketahui';
-            return redirect()->back()->with('error', "Anggota {$user->nama} sedang dalam daftar blacklist karena sering tidak mengambil buku yang sudah dibooking. Blacklist akan berakhir pada: {$tanggalSelesai}");
+            $tanggalSelesai = $blacklist && $blacklist->blacklist_expires_at ? Carbon::parse($blacklist->blacklist_expires_at)->format('d/m/Y') : 'tidak diketahui';
+            return redirect()->back()->with('error', "Anggota {$user->nama} sedang dalam daftar blacklist karena sering tidak mengambil buku yang sudah dibooking sebanyak 3 kali. Anda tidak dapat melakukan booking buku sampai tanggal {$tanggalSelesai}.");
         }
 
         $buku = BukuModel::findOrFail($request->buku_id);
@@ -1061,15 +1106,24 @@ class PeminjamanController extends Controller
         $peminjaman->user_id = $request->user_id;
         $peminjaman->buku_id = $request->buku_id;
         $peminjaman->no_peminjaman = $no_peminjaman;
-        $peminjaman->tanggal_pinjam = $request->tanggal_pinjam;
+        $peminjaman->tanggal_pinjam = Carbon::now(); // Gunakan waktu saat ini ketika admin membuat peminjaman manual
         $peminjaman->tanggal_kembali = $request->tanggal_kembali;
         $peminjaman->status = 'Diproses';
         $peminjaman->diproses_by = 'admin'; // Set diproses_by untuk peminjaman manual
         $peminjaman->catatan = $request->catatan;
 
-        // Set waktu expired untuk booking - harus diambil sebelum jam 16:00 pada tanggal peminjaman
-        $tanggalPinjam = Carbon::parse($request->tanggal_pinjam);
-        $peminjaman->booking_expired_at = $tanggalPinjam->setTime(16, 0, 0); // 16:00 pada hari peminjaman
+        // Set waktu expired untuk booking - harus diambil sebelum jam 16:00
+        $tanggalPinjamForm = Carbon::parse($request->tanggal_pinjam);
+        $sekarang = Carbon::now();
+
+        // Jika tanggal pinjam adalah hari ini dan sekarang sudah lewat jam 16:00,
+        // set booking_expired_at ke jam 16:00 hari berikutnya
+        if ($tanggalPinjamForm->isSameDay($sekarang) && $sekarang->hour >= 16) {
+            $peminjaman->booking_expired_at = $tanggalPinjamForm->copy()->addDay()->setTime(16, 0, 0);
+        } else {
+            // Jika tanggal pinjam adalah hari mendatang atau hari ini tapi belum jam 16:00
+            $peminjaman->booking_expired_at = $tanggalPinjamForm->copy()->setTime(16, 0, 0);
+        }
 
         $peminjaman->save();
 
@@ -1109,8 +1163,13 @@ class PeminjamanController extends Controller
             return redirect()->back()->with('error', 'Peminjaman ini tidak dapat dikonfirmasi pengambilannya.');
         }
 
-        // Update tanggal pinjam menjadi saat ini
-        $peminjaman->tanggal_pinjam = now();
+        // Update status dan waktu konfirmasi pengambilan
+        // Untuk peminjaman self-service (diproses_by = null), update tanggal_pinjam ke waktu konfirmasi pengambilan
+        if ($peminjaman->diproses_by == null) {
+            $peminjaman->tanggal_pinjam = Carbon::now();
+        }
+        // Untuk peminjaman manual (diproses_by = 'admin'), tanggal_pinjam tetap tidak diubah karena sudah benar
+
         $peminjaman->status = 'Dipinjam';
 
         // Reset booking tracking karena buku sudah diambil

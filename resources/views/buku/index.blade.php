@@ -147,7 +147,9 @@
                                         <p class="card-text m-0">Tahun Terbit: {{ $item->tahun_terbit }}</p>
                                         <p class="card-text m-0">Kategori:
                                             {{ $item->kategori->pluck('nama_kategori')->implode(', ') }}</p>
-                                        <p class="card-text m-0">Total Buku: {{ $item->total_buku }}</p>
+                                        @if (auth()->user()->level == 'admin')
+                                            <p class="card-text m-0">Total Buku: {{ $item->total_buku }}</p>
+                                        @endif
                                         <p class="card-text m-0">Status:
                                             @if ($item->status === 'Tersedia')
                                                 <span class="badge badge-outline-success">{{ $item->status }}</span>

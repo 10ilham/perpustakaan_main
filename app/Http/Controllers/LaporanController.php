@@ -8,6 +8,7 @@ use App\Models\SanksiModel;
 use App\Models\User;
 use App\Models\UserBlacklistModel;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class LaporanController extends Controller
 {
@@ -705,8 +706,18 @@ class LaporanController extends Controller
      */
     public function blacklist(Request $request)
     {
-        // Query dasar untuk blacklist
-        $query = UserBlacklistModel::with('user');
+        // Bersihkan data blacklist berdasarkan jumlah pembatalan yang sebenarnya
+        UserBlacklistModel::autoCleanupInvalidBlacklists();
+
+        // Otomatis reset blacklist yang sudah expired
+        UserBlacklistModel::checkAndResetExpiredBlacklists();
+
+        // Validasi entri blacklist untuk setiap user
+        $this->validateUserBlacklists();
+
+        // Query dasar untuk blacklist - hanya yang pernah mencapai 3+ pembatalan
+        $query = UserBlacklistModel::with('user')
+            ->where('cancelled_bookings_count', '>=', 3);
 
         // Filter berdasarkan status
         if ($request->filled('status')) {
@@ -729,13 +740,36 @@ class LaporanController extends Controller
         // Urutkan berdasarkan tanggal blacklist terbaru
         $blacklists = $query->orderBy('blacklisted_at', 'desc')->get();
 
-        // Statistik
-        $totalBlacklist = UserBlacklistModel::count();
-        $blacklistAktif = UserBlacklistModel::active()->count();
-        $blacklistTidakAktif = UserBlacklistModel::where('is_active', false)->count();
+        // Update status aktif untuk semua item dalam koleksi
+        $now = Carbon::now();
+        foreach ($blacklists as $blacklist) {
+            // Update status aktif secara real-time berdasarkan tanggal expire
+            if ($blacklist->is_active && $blacklist->blacklist_expires_at <= $now) {
+                $blacklist->is_active = false;
+                $blacklist->save();
+            } elseif (!$blacklist->is_active && $blacklist->blacklist_expires_at > $now) {
+                // Jika tanggal belum expire tapi status tidak aktif, aktifkan kembali
+                $blacklist->is_active = true;
+                $blacklist->save();
+            }
+        }
 
-        // Statistik berdasarkan level user
+        // Statistik - hanya yang pernah mencapai 3+ pembatalan
+        $totalBlacklist = UserBlacklistModel::where('cancelled_bookings_count', '>=', 3)->count();
+        $blacklistAktif = UserBlacklistModel::where('is_active', true)
+            ->where('blacklist_expires_at', '>', $now)
+            ->where('cancelled_bookings_count', '>=', 3)
+            ->count();
+        $blacklistTidakAktif = UserBlacklistModel::where(function ($query) use ($now) {
+            $query->where('is_active', false)
+                ->orWhere('blacklist_expires_at', '<=', $now);
+        })
+            ->where('cancelled_bookings_count', '>=', 3)
+            ->count();
+
+        // Statistik berdasarkan level user - hanya yang pernah mencapai 3+ pembatalan
         $statistikLevel = UserBlacklistModel::with('user')
+            ->where('cancelled_bookings_count', '>=', 3)
             ->get()
             ->groupBy('user.level')
             ->map(function ($items, $level) {
@@ -756,6 +790,67 @@ class LaporanController extends Controller
     }
 
     /**
+     * Memvalidasi entri blacklist untuk setiap user
+     * Memastikan bahwa jumlah entri blacklist sesuai dengan jumlah set pembatalan
+     */
+    private function validateUserBlacklists()
+    {
+        $now = Carbon::now();
+
+        // Dapatkan semua user yang memiliki entri blacklist
+        $userIds = UserBlacklistModel::distinct('user_id')->pluck('user_id')->toArray();
+
+        foreach ($userIds as $userId) {
+            // Hitung total pembatalan untuk user ini
+            $cancellations = \App\Models\PeminjamanModel::where('user_id', $userId)
+                ->where('status', 'Dibatalkan')
+                ->orderBy('updated_at', 'asc')
+                ->get();
+
+            $totalCancellations = $cancellations->count();
+
+            // Jika kurang dari 3 pembatalan, hapus semua blacklist user
+            if ($totalCancellations < 3) {
+                UserBlacklistModel::where('user_id', $userId)->delete();
+                continue;
+            }
+
+            // Hitung berapa banyak set pembatalan 3 yang ada
+            $validBlacklistCount = floor($totalCancellations / 3);
+
+            // Dapatkan blacklist yang dimiliki user
+            $blacklists = UserBlacklistModel::where('user_id', $userId)
+                ->orderBy('blacklisted_at', 'asc')
+                ->get();
+
+            // Jika jumlah blacklist lebih dari yang valid, hapus yang berlebihan
+            if ($blacklists->count() > $validBlacklistCount) {
+                $keepIds = $blacklists->take($validBlacklistCount)->pluck('id')->toArray();
+
+                if (count($keepIds) > 0) {
+                    UserBlacklistModel::where('user_id', $userId)
+                        ->whereNotIn('id', $keepIds)
+                        ->delete();
+                }
+            }
+
+            // Update status aktif untuk semua blacklist user ini
+            UserBlacklistModel::where('user_id', $userId)
+                ->get()
+                ->each(function ($blacklist) use ($now) {
+                    // Status aktif = blacklist masih berlaku (belum kadaluarsa)
+                    $shouldBeActive = $blacklist->blacklist_expires_at > $now;
+
+                    // Update hanya jika berbeda dengan status saat ini
+                    if ($blacklist->is_active != $shouldBeActive) {
+                        $blacklist->is_active = $shouldBeActive;
+                        $blacklist->save();
+                    }
+                });
+        }
+    }
+
+    /**
      * Hapus data blacklist
      */
     public function destroyBlacklist($id)
@@ -763,11 +858,13 @@ class LaporanController extends Controller
         try {
             $blacklist = UserBlacklistModel::findOrFail($id);
             $userName = $blacklist->user->nama ?? 'User Tidak Ditemukan';
+            $userId = $blacklist->user_id;
 
-            $blacklist->delete();
+            // Reset counter menggunakan method yang sudah dibuat
+            UserBlacklistModel::resetCancelledBookingsCounter($userId);
 
             return redirect()->route('laporan.blacklist')
-                ->with('success', "Blacklist untuk user {$userName} berhasil dihapus.");
+                ->with('success', "Blacklist untuk user {$userName} berhasil dihapus dan counter pembatalan direset.");
         } catch (\Exception $e) {
             return redirect()->route('laporan.blacklist')
                 ->with('error', 'Gagal menghapus blacklist. ' . $e->getMessage());
